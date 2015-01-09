@@ -5,23 +5,25 @@
 #include <unordered_map>
 #include <functional>
 #include <unordered_set>
-#include <sparsehash/sparse_hash_map>
+//#include <sparsehash/sparse_hash_map>
 #include <chrono>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <thread>
+#include <atomic>
 
 //~ #define unordered_map sparse_hash_map
 #define minimizer uint32_t
 #define rNumber uint32_t
 
 using namespace std;
-using namespace google;
+//using namespace google;
 
-
+//TODO mettre ca dans une classe controlleur
 mutex myMutex;
+atomic<size_t> atomicount;
 
 
 
@@ -33,74 +35,11 @@ mutex myMutex;
 //~ }
 
 
-string bwt(string input,size_t &primaryidx) {
- string bwt_str;
-	vector<string> rotations;
-
-	// 1. generate rotations of input
-	for(uint n=0;n<input.size();n++) {
-		string s;
-
-		s += input[n];
-		for(uint i=n+1;i!=n;i++) {
-			if(i==input.size()) i=0;
-			s += input[i];
-			if(i==input.size()-1) i=-1;
-		}
-		rotations.push_back(s);
-	}
-
-	// 2. sort
-	sort(rotations.begin(),rotations.end());
-
-	bwt_str.clear();
-	for(size_t n=0;n<rotations.size();n++) {
-		bwt_str += rotations[n].substr(rotations[n].size()-1,1);
-		if(rotations[n] == input) {primaryidx = n;}
-	}
-	return bwt_str;
-}
 
 
 
-
-string rbwt(string bwt_str,int primaryidx) {
-
-	vector<string> cur_str;
-
-	for(size_t n=0;n<bwt_str.size();n++) {
-		string s;
-		s = bwt_str.substr(n,1);
-		cur_str.push_back(s);
-	}
-
-	for(;cur_str[0].size() < bwt_str.size();) {
-		vector<string> new_str = cur_str;
-		sort(new_str.begin(),new_str.end());
-
-		for(size_t n=0;n<cur_str.size();n++) {
-			cur_str[n] = cur_str[n] + new_str[n].substr(new_str[n].size()-1,1);
-		}
-	}
-
-	//~ for(size_t n=0;n<cur_str.size();n++) {
-	//~ cout << cur_str[n] << endl;
-	//~ }
-
-	sort(cur_str.begin(),cur_str.end());
-
-
-	return cur_str[primaryidx];
-
-}
-
-
-
-
-string homocompression(const string& seqo){
+string homocompression(const string& seq){
 	string res;
-	size_t ind;
-	string seq=bwt(seqo,ind);
 	res.push_back(seq[0]);
 	char last(seq[0]);
 	for(uint i(1);i<seq.size();++i){
@@ -158,11 +97,7 @@ int myrandom (int i) { return rand()%i;}
 //	return false;
 //}
 
-uint32_t xorshift(uint32_t x,uint32_t y=12,uint32_t z=25,uint32_t w=27){
-	uint32_t t = x ^ (x << 11);
-	x = y; y = z; z = w;
-	return w = w ^ (w >> 19) ^ t ^ (t >> 8);
-}
+
 
 
 
@@ -179,8 +114,8 @@ uint64_t xorshift64(uint64_t x) {
 
 string reversecompletment(const string& str){
 	string res(str);
-	size_t n = str.size();
-	for(size_t i(n-1), j(0); i > -1; i--, j++)
+	int n = (int)str.size();
+	for(int i(n-1), j(0); i > -1; i--, j++)
 	{
 		unsigned char c = str[i];
 		unsigned char d = (c >> 4)&7;
@@ -327,7 +262,7 @@ uint64_t seq2int2(const string& seq){
 
 vector<minimizer> allHash(size_t k,const string& seq){
 	vector<minimizer> sketch;
-	for(uint i(0);i+k<seq.size();++i){
+	for(size_t i(0);i+k<seq.size();++i){
 		sketch.push_back(seq2int(seq.substr(i,k)));
 	}
 	return sketch;
@@ -336,7 +271,7 @@ vector<minimizer> allHash(size_t k,const string& seq){
 
 
 
-vector<string> allHashS(int k,const string& seq){
+vector<string> allHashS(size_t k,const string& seq){
 	vector<string> sketch;
 	for(uint i(0);i+k<seq.size();++i){
 		sketch.push_back(getRepresent(seq.substr(i,k)));
@@ -347,55 +282,24 @@ vector<string> allHashS(int k,const string& seq){
 
 
 
-vector<minimizer> minHash(int H, int k, const string& seq){
+vector<minimizer> minHash(size_t H, size_t k, const string& seq){
 	vector<minimizer> sketchs(H);
-	vector<uint32_t> sketch(H);
-	uint32_t hashValue;
+	vector<uint64_t> sketch(H);
+	uint64_t hashValue;
 	minimizer kmer;
 
 	kmer=seq2int(seq.substr(0,k));
-	hashValue=xorshift(kmer);
-	for(int j(0);j<H;++j){
-		sketch[j]=hashValue;
-		sketchs[j]=kmer;
-		hashValue=xorshift(hashValue);
-	}
-
-	for(unsigned int i(1);i+k<seq.size();++i){
-		kmer=seq2int(seq.substr(i,k));
-		hashValue=xorshift(kmer);
-		for(int j(0);j<H;++j){
-			if(hashValue<sketch[j]){
-				sketch[j]=hashValue;
-				sketchs[j]=kmer;
-			}
-			hashValue=xorshift(hashValue);
-		}
-	}
-	return sketchs;
-}
-
-
-
-
-vector<string> minHashS(int H, int k, const string& seq){
-	vector<string> sketchs(H);
-	vector<uint64_t> sketch(H);
-	uint64_t hashValue;
-	string kmer;
-
-	kmer=getRepresent(seq.substr(0,k));
-	hashValue=xorshift64(seq2int2(kmer));
-	for(int j(0);j<H;++j){
+	hashValue=xorshift64(kmer);
+	for(size_t j(0);j<H;++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
 		hashValue=xorshift64(hashValue);
 	}
 
-	for(unsigned int i(1);i+k<seq.size();++i){
-		kmer=getRepresent(seq.substr(i,k));
-		hashValue=xorshift64(seq2int2(kmer));
-		for(int j(0);j<H;++j){
+	for(size_t i(1);i+k<seq.size();++i){
+		kmer=seq2int(seq.substr(i,k));
+		hashValue=xorshift64(kmer);
+		for(size_t j(0);j<H;++j){
 			if(hashValue<sketch[j]){
 				sketch[j]=hashValue;
 				sketchs[j]=kmer;
@@ -409,7 +313,7 @@ vector<string> minHashS(int H, int k, const string& seq){
 
 
 
-vector<string> minHashSf(int H, int k, const string& seq, const unordered_set<string>& filter){
+vector<string> minHashS(size_t H, size_t k, const string& seq){
 	vector<string> sketchs(H);
 	vector<uint64_t> sketch(H);
 	uint64_t hashValue;
@@ -417,17 +321,48 @@ vector<string> minHashSf(int H, int k, const string& seq, const unordered_set<st
 
 	kmer=getRepresent(seq.substr(0,k));
 	hashValue=xorshift64(seq2int2(kmer));
-	for(int j(0);j<H;++j){
+	for(size_t j(0);j<H;++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
 		hashValue=xorshift64(hashValue);
 	}
 
-	for(unsigned int i(1);i+k<seq.size();++i){
+	for(size_t i(1);i+k<seq.size();++i){
+		kmer=getRepresent(seq.substr(i,k));
+		hashValue=xorshift64(seq2int2(kmer));
+		for(size_t j(0);j<H;++j){
+			if(hashValue<sketch[j]){
+				sketch[j]=hashValue;
+				sketchs[j]=kmer;
+			}
+			hashValue=xorshift64(hashValue);
+		}
+	}
+	return sketchs;
+}
+
+
+
+
+vector<string> minHashSf(size_t H, size_t k, const string& seq, const unordered_set<string>& filter){
+	vector<string> sketchs(H);
+	vector<uint64_t> sketch(H);
+	uint64_t hashValue;
+	string kmer;
+
+	kmer=getRepresent(seq.substr(0,k));
+	hashValue=xorshift64(seq2int2(kmer));
+	for(size_t j(0);j<H;++j){
+		sketch[j]=hashValue;
+		sketchs[j]=kmer;
+		hashValue=xorshift64(hashValue);
+	}
+
+	for(size_t i(1);i+k<seq.size();++i){
 		kmer=getRepresent(seq.substr(i,k));
 		if(filter.count(kmer)!=0){
 			hashValue=xorshift64(seq2int2(kmer));
-			for(int j(0);j<H;++j){
+			for(size_t j(0);j<H;++j){
 				if(hashValue<sketch[j]){
 					sketch[j]=hashValue;
 					sketchs[j]=kmer;
@@ -443,31 +378,31 @@ vector<string> minHashSf(int H, int k, const string& seq, const unordered_set<st
 
 
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
-	vector<uint32_t> sketch(H);
+	vector<uint64_t> sketch(H);
 	vector<minimizer> sketchs(H);
-	uint32_t hashValue;
+	uint64_t hashValue;
 	uint32_t kmer;
 	//~ hash<uint32_t> hash;
 
 	kmer=seq2int(seq.substr(0,k));
 	//~ hashValue=hash(kmer);
-	hashValue=xorshift(kmer);
-	for(int j(0);j<H;++j){
+	hashValue=xorshift64(kmer);
+	for(size_t j(0);j<H;++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
-		hashValue=xorshift(hashValue);
+		hashValue=xorshift64(hashValue);
 	}
 
-	for(unsigned int i(1);i+k<seq.size();++i){
+	for(size_t i(1);i+k<seq.size();++i){
 		kmer=seq2int(seq.substr(i,k));
-		hashValue=xorshift(kmer);
+		hashValue=xorshift64(kmer);
 		//~ hashValue=hash(kmer);
-		for(int j(0);j<H;++j){
+		for(size_t j(0);j<H;++j){
 			if(hashValue<sketch[j]){
 				sketch[j]=hashValue;
 				sketchs[j]=kmer;
 			}
-			hashValue=xorshift(hashValue);
+			hashValue=xorshift64(hashValue);
 		}
 	}
 
@@ -478,32 +413,32 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 
 
 void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous, const unordered_set<minimizer>& filter){
-	vector<uint32_t> sketch(H);
+	vector<uint64_t> sketch(H);
 	vector<minimizer> sketchs(H);
-	uint32_t hashValue;
+	uint64_t hashValue;
 	uint32_t kmer;
 	//~ hash<uint32_t> hash;
 
 	kmer=seq2int(seq.substr(0,k));
-	hashValue=xorshift(kmer);
+	hashValue=xorshift64(kmer);
 	//~ hashValue=hash(kmer);
-	for(int j(0);j<H;++j){
+	for(size_t j(0);j<H;++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
-		hashValue=xorshift(hashValue);
+		hashValue=xorshift64(hashValue);
 	}
 
-	for(unsigned int i(1);i+k<seq.size();++i){
+	for(size_t i(1);i+k<seq.size();++i){
 		kmer=seq2int(seq.substr(i,k));
 		if(filter.count(kmer)!=0){
-			hashValue=xorshift(kmer);
+			hashValue=xorshift64(kmer);
 			//~ hashValue=hash(kmer);
-			for(int j(0);j<H;++j){
+			for(size_t j(0);j<H;++j){
 				if(hashValue<sketch[j]){
 					sketch[j]=hashValue;
 					sketchs[j]=kmer;
 				}
-				hashValue=xorshift(hashValue);
+				hashValue=xorshift64(hashValue);
 			}
 		}
 	}
@@ -516,7 +451,7 @@ void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous,
 vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part){
 	vector<minimizer> result;
 	size_t size(seq.size()/part);
-	for(int i(0);i<part;++i){
+	for(size_t i(0);i<part;++i){
 		minHash2(H/part,k,seq.substr(i*size,size+k),result);
 	}
 	return result;
@@ -694,13 +629,13 @@ unordered_set<minimizer> filterUnitigs(const string& file, int k){
 
 
 void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& reads, unordered_set<minimizer>* set, size_t L, size_t R){
-	for (size_t i(L); i<R; ++i){
+	for(size_t i(L); i<R; ++i){
 		string read(reads[i]);
 		if(read.size()>100){
 			vector<minimizer> sketch=minHashpart(H,k,read,part);
 			myMutex.lock();
-			for(size_t i(0);i<H;++i){
-				set->insert(sketch[i]);
+			for(size_t j(0);j<H;++j){
+				set->insert(sketch[j]);
 			}
 			myMutex.unlock();
 		}
@@ -848,7 +783,7 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 	}
 	random_shuffle (res.begin(),res.end());
 	cout<<"number of unitig : "<<number<<endl;
-	cout<<"Mean size  : "<<size/number<<endl;
+	cout<<"Mean size  : "<<size/(number+1)<<endl;
 	return res;
 }
 
@@ -924,7 +859,7 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo){
 	}
 	random_shuffle (res.begin(),res.end());
 	cout<<"number of reads : "<<n<<endl;
-	cout<<"Mean  size : "<<size/n<<endl;
+	cout<<"Mean  size : "<<size/(n+1)<<endl;
 	return res;
 }
 
@@ -1031,9 +966,9 @@ void readFASTQ(const string& fastqFile, unordered_map<minimizer,unordered_set<ui
 void readUnitigs2(const vector<string>& unitigs, unordered_map<minimizer,unordered_set<rNumber>>& index, size_t k, vector<string>& reads, size_t multi, size_t H, size_t part, size_t k2, double minJacc, const unordered_map<string,vector<uint32_t>>& graph){
 	//~ int none(0),one(0),totalhit(0);
 	//int k3(19);
-	int hit(0),hitone(0),nreads(0),goodread(0),moyenread(0),triplematchread(0),jacc(0),failjacc(0),wrong(0),bigmistake(0),notmapped(0),mapped(0),missjacc(0),win(0),bigunitig(0);
+	size_t hit(0),hitone(0),nreads(0),goodread(0),moyenread(0),triplematchread(0),jacc(0),failjacc(0),wrong(0),bigmistake(0),notmapped(0),mapped(0),missjacc(0),win(0),bigunitig(0);
 	uint u(0);
-	unordered_map <rNumber,int> read2coverage;
+	unordered_map <rNumber,size_t> read2coverage;
 	unordered_map <rNumber,vector<string>> read2unitigs;
 	unordered_set <rNumber> readCovered;
 	unordered_set <rNumber> readHit;
@@ -1044,7 +979,7 @@ void readUnitigs2(const vector<string>& unitigs, unordered_map<minimizer,unorder
 		int localhit(0);
 		bool good(false),moyen(false),triplematch(false);
 		string line,unitig,read;
-		unordered_map<rNumber,int> count;
+		unordered_map<rNumber,size_t> count;
 		unordered_set<minimizer> min;
 		unordered_map<rNumber,unordered_set<minimizer>> read2min;
 
@@ -1055,8 +990,8 @@ void readUnitigs2(const vector<string>& unitigs, unordered_map<minimizer,unorder
 			unordered_set<minimizer> A;
 
 			//~ transform(unitig.begin(), unitig.end(),unitig.begin(), ::tolower);
-			if((int)unitig.size()<=H){
-				for(unsigned int j(0);j+k<unitig.size();++j){
+			if(unitig.size()<=H){
+				for(size_t j(0);j+k<unitig.size();++j){
 					uint32_t seq=seq2int(unitig.substr(j,k));
 					if(min.count(seq)==0){
 						if(index.count(seq)!=0){
@@ -1124,8 +1059,8 @@ void readUnitigs2(const vector<string>& unitigs, unordered_map<minimizer,unorder
 							jacc++;
 							if(A.size()==0){
 								vector<minimizer> sketchUnitig=allHash(k2,unitig);
-								for(unsigned int i(0);i<sketchUnitig.size();++i){
-									A.insert(sketchUnitig[i]);
+								for(size_t j(0);j<sketchUnitig.size();++j){
+									A.insert(sketchUnitig[j]);
 								}
 							}
 							//~ if(region.size()>=read.size()){
@@ -1228,7 +1163,7 @@ void readUnitigs2(const vector<string>& unitigs, unordered_map<minimizer,unorder
 			}
 		}
 	}
-	cout<<"unitigs: "<<nreads<<" "<<unitigs.size()<<" hit: "<<hitone<<" aligns: "<<hit<<" wrong alignement: "<<wrong<<" %wrong alignment :"<<100*wrong/(hit+wrong)<<" match/unitigs: "<<hitone/(nreads)<<" align/unitigs: "<<hit/(nreads)<< " %unitig with an align: "<<100*goodread/nreads<<" %unitig with a match: "<<100*triplematchread/nreads<<" jacc:"<<jacc<<" jacc failed: "<<failjacc<<" %no jacc: "<<100*failjacc/(jacc)<<"%jacc fail: "<<100*missjacc/(failjacc+1)<<" %unitigs with a jacc "<<100*moyenread/nreads<<" read covered: "<<readCovered.size()<<" %read covered: "<<(100*readCovered.size())/reads.size()<<" %bigmistake: "<<(100*bigmistake)/(mapped+bigmistake)<<" "<<bigmistake<<" "<<mapped<<" "<<" %unmapped but hited reads "<<(100*notmapped)/(mapped+bigmistake+notmapped)<<" %read hit: "<<(100*readHit.size())/reads.size()<<" align/reads : "<<hit/reads.size()<<" win : "<<win<<" big unitig case : "<<bigunitig<<endl<<endl;
+	cout<<"unitigs: "<<nreads<<" "<<unitigs.size()<<" hit: "<<hitone<<" aligns: "<<hit<<" wrong alignement: "<<wrong<<" %wrong alignment :"<<100*wrong/(hit+wrong+1)<<" match/unitigs: "<<hitone/(nreads+1)<<" align/unitigs: "<<hit/(nreads+1)<< " %unitig with an align: "<<100*goodread/(nreads+1)<<" %unitig with a match: "<<100*triplematchread/(nreads+1)<<" jacc:"<<jacc<<" jacc failed: "<<failjacc<<" %no jacc: "<<100*failjacc/(jacc+1)<<"%jacc fail: "<<100*missjacc/(failjacc+1)<<" %unitigs with a jacc "<<100*moyenread/(nreads+1)<<" read covered: "<<readCovered.size()<<" %read covered: "<<(100*readCovered.size())/reads.size()<<" %bigmistake: "<<(100*bigmistake)/(mapped+bigmistake+1)<<" "<<bigmistake<<" "<<mapped<<" "<<" %unmapped but hited reads "<<(100*notmapped)/(mapped+bigmistake+notmapped+1)<<" %read hit: "<<(100*readHit.size())/(reads.size()+1)<<" align/reads : "<<hit/(reads.size()+1)<<" win : "<<win<<" big unitig case : "<<bigunitig<<endl<<endl;
 	uint64_t covered(0);
 	uint64_t total(0);
 	//~ for(auto it=read2unitigs.begin();it!=read2unitigs.end();++it){
@@ -1246,7 +1181,7 @@ void readUnitigs2(const vector<string>& unitigs, unordered_map<minimizer,unorder
 		covered+=it->second;
 
 	}
-	cout<<"percent covered read: "<<covered/1000<<" "<<total/1000<<" "<<100*covered/total<<" "<<reads.size()<<endl;
+	cout<<"percent covered read: "<<covered/1000<<" "<<total/1000<<" "<<100*covered/(total+1)<<" "<<reads.size()<<endl;
 	int l(0),n(0);
 	for(uint i(0);i<reads.size();++i){
 		if(readCovered.count(i)==0){
@@ -1258,15 +1193,16 @@ void readUnitigs2(const vector<string>& unitigs, unordered_map<minimizer,unorder
 }
 
 
-void readUnitigsAux(const vector<string>& unitigs, unordered_map<minimizer, unordered_set<rNumber>>* index, size_t k, const vector<string>& reads, size_t multi, size_t H, size_t part, size_t k2, double minJacc, const unordered_map<string,vector<uint32_t>>& graph, size_t L, size_t R){
+void readUnitigsAux(const vector<string>& unitigs, unordered_map<minimizer, unordered_set<rNumber>>* index, size_t k, const vector<string>& reads, size_t multi, size_t H, size_t part, size_t k2, double minJacc, const unordered_map<string, vector<uint32_t>>& graph, size_t L, size_t R){
+
 
 	for (size_t i(L); i<R; ++i){
 		string unitig=unitigs[i];
-		unordered_set<minimizer> min;
-		unordered_map<rNumber,size_t> count;
-		unordered_map<rNumber,unordered_set<minimizer>> read2min;
 
 		if(unitig.size()>100){
+			unordered_set<minimizer> min;
+			unordered_map<rNumber,size_t> count;
+			unordered_map<rNumber,unordered_set<minimizer>> read2min;
 			unordered_set<minimizer> A;
 			if(unitig.size()<=H){
 				for(size_t j(0);j+k<unitig.size();++j){
@@ -1274,7 +1210,7 @@ void readUnitigsAux(const vector<string>& unitigs, unordered_map<minimizer, unor
 					if(min.count(seq)==0){
 						if(index->count(seq)!=0){
 							min.insert(seq);
-							unordered_set<rNumber> myset=index->at(seq);
+							unordered_set<rNumber> myset=(*index)[seq];
 							for(auto it=myset.begin();it!=myset.end();++it){
 								count[*it]++;
 								read2min[*it].insert(seq);
@@ -1292,7 +1228,7 @@ void readUnitigsAux(const vector<string>& unitigs, unordered_map<minimizer, unor
 					if(min.count(seq)==0){
 						min.insert(seq);
 						if(index->count(seq)!=0){
-							unordered_set<rNumber> myset=index->at(seq);
+							unordered_set<rNumber> myset=(*index)[seq];
 							for(auto it=myset.begin();it!=myset.end();++it){
 								++count[*it];
 								read2min[*it].insert(seq);
@@ -1307,24 +1243,24 @@ void readUnitigsAux(const vector<string>& unitigs, unordered_map<minimizer, unor
 				if(it->second>=multi){
 					unordered_set<minimizer> setMin(read2min[readNumber]);
 					string read=reads[readNumber];
-					for(uint i(0);i+k<read.size() and !goodreadb;++i){
-						minimizer seq(seq2int(read.substr(i,k)));
+					for(uint j(0);j+k<read.size() and !goodreadb;++j){
+						minimizer seq(seq2int(read.substr(j,k)));
 						if(setMin.count(seq)!=0){
 							string region;
 
-							if(i>1*unitig.size()){
-								region=read.substr(i-1*unitig.size(),2*unitig.size());
+							if(j>1*unitig.size()){
+								region=read.substr(j-1*unitig.size(),2*unitig.size());
 							}else{
 								region=read.substr(0,2*unitig.size());
 							}
 							if(A.size()==0){
 								vector<minimizer> sketchUnitig=allHash(k2,unitig);
-								for(unsigned int i(0);i<sketchUnitig.size();++i){
-									A.insert(sketchUnitig[i]);
+								for(size_t m(0);m<sketchUnitig.size();++m){
+									A.insert(sketchUnitig[m]);
 								}
 							}
 							if(jaccard3(k2,region,A)>minJacc){
-								//end
+								atomicount++;
 							}
 						}
 					}
@@ -1332,20 +1268,23 @@ void readUnitigsAux(const vector<string>& unitigs, unordered_map<minimizer, unor
 			}
 		}
 	}
-	
 }
 
 
-void readUnitigs(const vector<string>& unitigs, unordered_map<minimizer,unordered_set<rNumber>>& index, size_t k, const vector<string>& reads, size_t multi, size_t H, size_t part, size_t k2, double minJacc, const unordered_map<string,vector<uint32_t>>& graph){
+
+
+void readUnitigs(const vector<string>& unitigs, unordered_map<minimizer, unordered_set<rNumber>>& index, size_t k, const vector<string>& reads, size_t multi, size_t H, size_t part, size_t k2, double minJacc, const unordered_map<string, vector<uint32_t>>& graph){
 	size_t nbThreads(8);
 	vector<thread> threads;
-	vector<size_t> limits = bounds(nbThreads, unitigs.size());
+	vector<size_t> limits=bounds(nbThreads, unitigs.size());
+	atomicount=0;
 
-	for (size_t i(0); i<nbThreads; ++i) {
+	for (size_t i(0); i<nbThreads; ++i){
 		threads.push_back(thread(readUnitigsAux, unitigs, &index, k, reads, multi, H, part, k2, minJacc, graph, limits[i], limits[i+1]));
 	}
 
 	for(auto &t : threads){t.join();}
+	cout<<"Reads mapped : "<<atomicount<<" Percent reads mapped : "<<atomicount/( reads.size()+1 )<<endl;
 }
 
 
@@ -1485,12 +1424,12 @@ void readContigs(const string& fastqFile, unordered_map<minimizer,unordered_set<
 
 
 
-void readFASTQforstat(const string& fastqFile,int H, int k){
+void readFASTQforstat(const string& fastqFile, size_t H, size_t k){
 	ifstream in(fastqFile);
-	int max(0);
-	int nread(0);
-	string maxmin;
-	unordered_map<minimizer,int> count;
+	size_t max(0);
+	size_t nread(0);
+	minimizer maxmin(0);
+	unordered_map<minimizer,size_t> count;
 
 #pragma omp parallel num_threads(8)
 	{
@@ -1709,10 +1648,10 @@ void readContigsforstats(const string& fastaFile,uint k, bool elag, bool compact
 	int n(0);
 	//~ uint64_t length(0);
 	ofstream out("unitig2.dot");
-	for(uint i(0);i<unitigs.size();i++){
-		if(nottake.count(i)==0 and unitigs[i].size()!=0){
-			out<<unitigs[i]<<";"<<endl;
-			length+=unitigs[i].size();
+	for(uint ii(0);ii<unitigs.size();ii++){
+		if(nottake.count(ii)==0 and unitigs[ii].size()!=0){
+			out<<unitigs[ii]<<";"<<endl;
+			length+=unitigs[ii].size();
 			n++;
 		}
 	}
@@ -1943,26 +1882,25 @@ int main(int argc, char ** argv) {
 	bool homo(false);
 	srand((int)time(NULL));
 
-	//~ similarityTotal("mini1.fasta","mini2.fasta",32,1);
-	//~ similarity("mini1.fasta","mini2.fasta",10,32,1);
-	//~
-	//~ exit(0);
-
-	//~ readContigsforstats("sim.contigs.fa",k2,false,false,false);
-
-	//~ readContigsforstats("unitig.dot",k2,true,false,true);
-	//~ for(int i(0);i<10;i++){
-	//~ readContigsforstats("unitig2.dot",k2,true,false,true);
-	//~ readContigsforstats("unitig2.dot",k2,false,true,true);
-	//~ }
+//	 similarityTotal("mini1.fasta","mini2.fasta",32,1);
+//	 similarity("mini1.fasta","mini2.fasta",10,32,1);
+//
+//	 exit(0);
+//
+//	 readContigsforstats("sim.contigs.fa",k2,false,false,false);
+//	 readContigsforstats("unitig.dot",k2,true,false,true);
+//	 for(int i(0);i<10;i++){
+//	 readContigsforstats("unitig2.dot",k2,true,false,true);
+//	 readContigsforstats("unitig2.dot",k2,false,true,true);
+//	 }
 
 	//readContigsforstats("unitig2.dot",k2,false,false,true);
 
 	auto start=chrono::system_clock::now();
 	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PC10x_0001.fastq",homo));
-	//~ auto R(loadFASTQ("PC20CE_0001.fastq",homo));
+	// auto R(loadFASTQ("PC20CE_0001.fastq",homo));
 	auto U(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitig2.dot",homo));
-	//~ auto G(getGraph(U,k2));
+	// auto G(getGraph(U,k2));
 	unordered_map<string,vector<uint32_t>> G;
 
 	auto F(filterUnitigs2(U,k,H1,part));
@@ -1974,7 +1912,7 @@ int main(int argc, char ** argv) {
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	readUnitigs(U,index,k,R,2,H1,part,k3,100*(pow(1-2*0.10,k3)),G);
+	readUnitigs(U,index,k,R,2,H1,part,k3,100*(pow(1-2*0.15,k3)),G);
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 	cout<<"Unitigs mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
