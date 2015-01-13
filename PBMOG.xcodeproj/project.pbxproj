@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C7103C841A6013CF00B2475E /* MappingSupervisor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7103C821A6013CF00B2475E /* MappingSupervisor.cpp */; };
+		C7103C871A6017A600B2475E /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7103C851A6017A600B2475E /* Utils.cpp */; };
 		C749FA931A40812000594542 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C749FA921A40812000594542 /* main.cpp */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +25,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C7103C821A6013CF00B2475E /* MappingSupervisor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MappingSupervisor.cpp; sourceTree = "<group>"; };
+		C7103C831A6013CF00B2475E /* MappingSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MappingSupervisor.h; sourceTree = "<group>"; };
+		C7103C851A6017A600B2475E /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
+		C7103C861A6017A600B2475E /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		C749FA8F1A40812000594542 /* PBMOG */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PBMOG; sourceTree = BUILT_PRODUCTS_DIR; };
 		C749FA921A40812000594542 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -57,6 +63,10 @@
 		C749FA911A40812000594542 /* PBMOG */ = {
 			isa = PBXGroup;
 			children = (
+				C7103C821A6013CF00B2475E /* MappingSupervisor.cpp */,
+				C7103C851A6017A600B2475E /* Utils.cpp */,
+				C7103C861A6017A600B2475E /* Utils.h */,
+				C7103C831A6013CF00B2475E /* MappingSupervisor.h */,
 				C749FA921A40812000594542 /* main.cpp */,
 			);
 			path = PBMOG;
@@ -118,6 +128,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7103C871A6017A600B2475E /* Utils.cpp in Sources */,
+				C7103C841A6013CF00B2475E /* MappingSupervisor.cpp in Sources */,
 				C749FA931A40812000594542 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
