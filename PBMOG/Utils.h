@@ -42,7 +42,7 @@ vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part)
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous);
 uint64_t xorshift64(uint64_t x);
 vector<minimizer> allHash(size_t k,const string& seq);
-double jaccard3(size_t k, const string& seq,const unordered_set<minimizer>& A);
+double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& A);
 vector<size_t> bounds(size_t n,size_t size);
 
 #endif /* defined(__PBMOG__Utils__) */

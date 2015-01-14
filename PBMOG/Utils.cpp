@@ -72,17 +72,17 @@ vector<minimizer> allHash(size_t k,const string& seq){
 }
 
 
-double jaccard3(size_t k, const string& seq,const unordered_set<minimizer>& A){
+double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer;
 	double inter(0);
 
 	for(size_t i(0);i+k<seq.size();++i){
 		kmer=seq2int(seq.substr(i,k));
-		if(A.count(kmer)>0){
+		if(genomicKmers.count(kmer)>0){
 			++inter;
 		}
 	}
-	return double(100*inter/(A.size()));
+	return double(100*inter/(genomicKmers.size()));
 }
 
 
@@ -130,7 +130,6 @@ uint32_t seq2int(const string& seq){
 		res2+=nuc2int(rc[i]);
 		res2<<=2;
 	}
-
 	return min(res,res2);
 }
 

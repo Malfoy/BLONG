@@ -40,7 +40,9 @@ public:
 	}
 
 	void MapPart(size_t L, size_t R);
+	void findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& count, unordered_map<rNumber,unordered_set<minimizer>>& read2min);
 	void MapAll();
+	void isCandidateCorrect(const string& unitig, uint32_t readNumber,unordered_map<rNumber,unordered_set<minimizer>> read2min,unordered_set<minimizer> genomicKmers);
 };
 
 
