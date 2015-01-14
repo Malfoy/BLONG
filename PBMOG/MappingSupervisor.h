@@ -40,6 +40,7 @@ public:
 	}
 
 	void MapPart(size_t L, size_t R);
+	void MapAll();
 };
 
 

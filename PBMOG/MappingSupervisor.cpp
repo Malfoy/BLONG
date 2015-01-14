@@ -7,12 +7,14 @@
 //
 
 #include "MappingSupervisor.h"
+#include "Utils.h"
 
 void MappingSupervisor::MapPart(size_t L, size_t R){
+	size_t minSizeUnitigs(100);
+
 	for (size_t i(L); i<R; ++i){
 		string unitig=unitigs[i];
-
-		if(unitig.size()>100){
+		if(unitig.size()>minSizeUnitigs){
 			unordered_set<minimizer> min;
 			unordered_map<rNumber,size_t> count;
 			unordered_map<rNumber,unordered_set<minimizer>> read2min;
@@ -81,4 +83,21 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 			}
 		}
 	}
+}
+
+
+
+
+void MappingSupervisor::MapAll(){
+	size_t nbThreads(8);
+	vector<thread> threads;
+	vector<size_t> limits = bounds(nbThreads, reads.size());
+
+	for (size_t i(0); i<nbThreads; ++i) {
+		threads.push_back(thread(&MappingSupervisor::MapPart, this, limits[i], limits[i+1]));
+	}
+
+	for(auto &t : threads){t.join();}
+
+	cout<<"Read mapped : "<<atomicount<<" Percent read mapped : "<<atomicount/(reads.size()+1)<<endl;
 }

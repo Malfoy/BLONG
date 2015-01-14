@@ -550,19 +550,6 @@ void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& reads
 
 
 
-vector<size_t> bounds(size_t n,size_t size){
-	vector<size_t> res;
-	res.push_back(0);
-	size_t d(size/n);
-
-	for(size_t i(0); i<n-1;++i){
-		res.push_back(i*d);
-	}
-	res.push_back(size);
-	return res;
-}
-
-
 
 
 unordered_set<minimizer> filterUnitigs2(const vector<string>& V, size_t k, size_t H, size_t part){
@@ -1786,8 +1773,6 @@ int main(int argc, char ** argv) {
 	bool homo(false);
 	srand((int)time(NULL));
 
-
-
 	auto start=chrono::system_clock::now();
 	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PC10x_0001.fastq",homo));
 	// auto R(loadFASTQ("PC20CE_0001.fastq",homo));
@@ -1804,9 +1789,10 @@ int main(int argc, char ** argv) {
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-//	readUnitigs(U,index,k,R,2,H1,part,k2,100*(pow(1-2*0.15,k2)),G);
-//	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
-//	cout<<"Unitigs mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
+	MappingSupervisor MappingSupervisor(U, index, k, R, 2, H1, part, k2, 100*(pow(1-2*0.15,k2)), G);
+	MappingSupervisor.MapAll();
+	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
+	cout<<"Reads Mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
 	return 0;
 }

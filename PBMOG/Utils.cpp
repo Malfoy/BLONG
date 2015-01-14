@@ -38,6 +38,7 @@ string reversecompletment(const string& str){
 	return res;
 }
 
+
 char nuc2int(char c){
 	switch(c){
 		case 'a': return 0;
@@ -53,12 +54,14 @@ char nuc2int(char c){
 	return 0;
 }
 
+
 uint64_t xorshift64(uint64_t x) {
 	x ^= x >> 12; // a
 	x ^= x << 25; // b
 	x ^= x >> 27; // c
 	return x * UINT64_C(2685821657736338717);
 }
+
 
 vector<minimizer> allHash(size_t k,const string& seq){
 	vector<minimizer> sketch;
@@ -67,6 +70,7 @@ vector<minimizer> allHash(size_t k,const string& seq){
 	}
 	return sketch;
 }
+
 
 double jaccard3(size_t k, const string& seq,const unordered_set<minimizer>& A){
 	minimizer kmer;
@@ -80,6 +84,7 @@ double jaccard3(size_t k, const string& seq,const unordered_set<minimizer>& A){
 	}
 	return double(100*inter/(A.size()));
 }
+
 
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
 	vector<uint64_t> sketch(H);
@@ -129,6 +134,7 @@ uint32_t seq2int(const string& seq){
 	return min(res,res2);
 }
 
+
 vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part){
 	vector<minimizer> result;
 	size_t size(seq.size()/part);
@@ -136,4 +142,17 @@ vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part)
 		minHash2(H/part,k,seq.substr(i*size,size+k),result);
 	}
 	return result;
+}
+
+
+vector<size_t> bounds(size_t n,size_t size){
+	vector<size_t> res;
+	res.push_back(0);
+	size_t d(size/n);
+
+	for(size_t i(0); i<n-1;++i){
+		res.push_back(i*d);
+	}
+	res.push_back(size);
+	return res;
 }
