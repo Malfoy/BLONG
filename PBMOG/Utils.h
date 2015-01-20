@@ -10,7 +10,6 @@
 #define __PBMOG__Utils__
 
 #include <stdio.h>
-#include <stdio.h>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -36,7 +35,7 @@
 using namespace std;
 
 uint32_t seq2int(const string& seq);
-string reversecompletment(const string& str);
+string reversecomplement(const string& str);
 char nuc2int(char c);
 vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part);
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous);
@@ -44,5 +43,19 @@ uint64_t xorshift64(uint64_t x);
 vector<minimizer> allHash(size_t k,const string& seq);
 double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& A);
 vector<size_t> bounds(size_t n,size_t size);
+string getRepresent(const string& str);
+string compaction(string& seq1, string& seq2, size_t k);
+void readContigsforstats(const string& File, size_t k, bool elag, bool compact,bool unitigb);
+unordered_map<string,vector<uint32_t>> getGraph(const vector<string>& unitigs, size_t k);
+vector<string> loadFASTQ(const string& unitigFile,bool homo);
+string homocompression(const string& seq);
+vector<string> loadUnitigs(const string& unitigFile,bool homo);
+void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous, const unordered_set<minimizer>& filter);
+uint64_t xorshift(uint64_t x);
+vector<minimizer> minHashpart2(size_t H, size_t k,const string& seq, size_t part, const unordered_set<minimizer>& filter);
+unordered_set <minimizer> allKmerSet(size_t k,const string& seq);
+
+
+
 
 #endif /* defined(__PBMOG__Utils__) */
