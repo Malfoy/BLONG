@@ -18,7 +18,7 @@ using namespace std;
 class MappingSupervisor{
 public:
 	vector<string> unitigs,reads;
-	unordered_map<minimizer, unordered_set<rNumber>> index;
+	unordered_map<minimizer, unordered_set<rNumber>> min2Reads;
 	size_t k,multi,H,part,k2,kgraph;
 	double minJacc;
 	unordered_map<string, vector<uint32_t>> graph;
@@ -28,7 +28,7 @@ public:
 
 	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, unordered_set<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc, const unordered_map<string, vector<uint32_t>>& Igraph, size_t Ikgraph){
 		unitigs=Iunitigs;
-		index=Iindex;
+		min2Reads=Iindex;
 		k=Ik;
 		reads=Ireads;
 		multi=Imulti;

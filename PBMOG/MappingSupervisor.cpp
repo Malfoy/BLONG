@@ -40,17 +40,19 @@ vector<string> MappingSupervisor::listPath(size_t lengthRequired, uint32_t ind, 
 
 
 
-void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& count, unordered_map<rNumber,unordered_set<minimizer>>& read2min){
+void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min){
 	if(unitigs.size()<100){
 		for(size_t j(0);j+k<unitig.size();++j){
 			uint32_t seq=seq2int(unitig.substr(j,k));
 			if(min.count(seq)==0){
-				if(index.count(seq)!=0){
+				if(min2Reads.count(seq)!=0){
 					min.insert(seq);
-					unordered_set<rNumber> myset=index[seq];
+					unordered_set<rNumber> myset=min2Reads[seq];
 					for(auto it=myset.begin();it!=myset.end();++it){
-						count[*it]++;
-						read2min[*it].insert(seq);
+						if(!reads[*it].empty()){
+							Candidate[*it]++;
+							read2Min[*it].insert(seq);
+						}
 					}
 				}
 			}
@@ -62,11 +64,13 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimi
 			minimizer seq=sketch[j];
 			if(min.count(seq)==0){
 				min.insert(seq);
-				if(index.count(seq)!=0){
-					unordered_set<rNumber> myset=index[seq];
+				if(min2Reads.count(seq)!=0){
+					unordered_set<rNumber> myset=min2Reads[seq];
 					for(auto it=myset.begin();it!=myset.end();++it){
-						++count[*it];
-						read2min[*it].insert(seq);
+						if(!reads[*it].empty()){
+							++Candidate[*it];
+							read2Min[*it].insert(seq);
+						}
 					}
 				}
 			}
@@ -81,6 +85,7 @@ int MappingSupervisor::isCandidateCorrect(const string& unitig, uint32_t readNum
 	bool goodreadb=false;
 	unordered_set<minimizer> setMin(read2min[readNumber]);
 	string read=reads[readNumber];
+	if(read.empty()){return -1;}
 	for(size_t j(0);j+k<read.size() and !goodreadb;++j){
 		minimizer seq(seq2int(read.substr(j,k)));
 		if(setMin.count(seq)!=0){
@@ -107,7 +112,9 @@ int MappingSupervisor::isCandidateCorrect(const string& unitig, uint32_t readNum
 bool MappingSupervisor::alignOnPath(const string& path, const string& read, int position){
 	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path);
 //	cout<<position<<" "<<
+	if(read.empty()){return false;}
 	string region(read.substr(position,2*path.size()));
+
 	if(jaccard(k2,region,genomicKmers)>minJacc){
 		aligneOnPathSucess++;
 		return true;
@@ -123,7 +130,6 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 
 	for (size_t i(L); i<R; ++i){
 		string unitig=unitigs[i];
-//		cout<<"ready : "<<unitig<<endl;
 		unordered_set<uint32_t> usedUnitigs;
 		vector<string> list(listPath(1000, (uint32_t)i, usedUnitigs));
 //		for (const auto& str : list){
@@ -152,6 +158,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 							string path(list[ii]);
 							if(alignOnPath(path, reads[it->first], position)){
 								mappedOnGraph=true;
+								reads[it->first]="";
 							}
 						}
 					}
