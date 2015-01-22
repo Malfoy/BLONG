@@ -37,6 +37,8 @@ string reversecompletment2(const string& str){
 	}
 	return res;
 }
+
+
 char revcomp (char s) {
 	if (s == 'A') return 'T';
 	else if (s == 'C') return 'G';
@@ -49,11 +51,13 @@ char revcomp (char s) {
 	return 'X';
 }
 
+
 string revcomp (const string &s) {
 	string rc;
 	for (int i = (int)s.length() - 1; i >= 0; i--) rc += revcomp(s[i]);
 	return rc;
 }
+
 
 string getRepresent2(const string &s){
 	string rc;
@@ -68,12 +72,14 @@ string getRepresent2(const string &s){
 	return revcomp(s);
 }
 
+
 string reversecomplement (const string &s){
 	string rc;
 	for (int i = (int)s.length() - 1; i >= 0; i--) rc += revcomp(s[i]);
 	return rc;
 
 }
+
 
 string getRepresent (const string& str){
 	return(min(str,reversecomplement(str)));
@@ -194,7 +200,7 @@ vector<size_t> bounds(size_t n,size_t size){
 	res.push_back(0);
 	size_t d(size/n);
 
-	for(size_t i(0); i<n-1;++i){
+	for(size_t i(0); i<n;++i){
 		res.push_back(i*d);
 	}
 	res.push_back(size);
