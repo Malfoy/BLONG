@@ -115,7 +115,6 @@ int main(int argc, char ** argv) {
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
 
-
 	auto U(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
 	auto G(getGraph(U,kgraph));
 	auto F(filterUnitigs(U,k,H1,part));

@@ -22,6 +22,7 @@ struct path {
 
 class MappingSupervisor{
 public:
+	size_t offset,minSizeUnitigs;
 	vector<string> unitigs,reads;
 	unordered_map<minimizer, unordered_set<rNumber>> min2Reads;
 	size_t k,multi,H,part,k2,kgraph;
@@ -35,7 +36,6 @@ public:
 	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, unordered_set<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc, const unordered_map<string, vector<uNumber>>& Igraph, size_t Ikgraph){
 		unitigs=Iunitigs;
 		min2Reads=Iindex;
-//		min2Reads.set_empty_key(-1);
 		k=Ik;
 		reads=Ireads;
 		multi=Imulti;
@@ -45,10 +45,11 @@ public:
 		kgraph=Ikgraph;
 		minJacc=IminJacc;
 		graph=Igraph;
-//		graph.set_empty_key("0");
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsMapped=0;
+		offset=100;
+		minSizeUnitigs=100;
 	}
 
 
