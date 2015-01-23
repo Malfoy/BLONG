@@ -106,11 +106,16 @@ int main(int argc, char ** argv) {
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
+	size_t nCycle(10);
 
 	auto start=chrono::system_clock::now();
 	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PC10x_0001.fastq",homo));
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigEcoliK20NKS2.fa", kgraph, true, true, false);
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, false, true, false);
+	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigEcoliK20NKS2.fa", kgraph, false, true, false);
+	for(size_t i(0);i<nCycle;++i){
+		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
+	}
+
+
 	auto U(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
 	auto G(getGraph(U,kgraph));
 	auto F(filterUnitigs(U,k,H1,part));

@@ -138,7 +138,21 @@ double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genom
 			++inter;
 		}
 	}
-	return double(100*inter/(genomicKmers.size()));
+	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
+}
+
+
+double jaccardAlt(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
+	minimizer kmer;
+	double inter(0);
+
+	for(size_t i(0);i+k<seq.size();++i){
+		kmer=seq2int(seq.substr(i,k));
+		if(genomicKmers.count(kmer)>0){
+			++inter;
+		}
+	}
+	return double(100*inter/(seq.size()-k));
 }
 
 
@@ -200,7 +214,7 @@ vector<size_t> bounds(size_t n,size_t size){
 	res.push_back(0);
 	size_t d(size/n);
 
-	for(size_t i(0); i<n;++i){
+	for(size_t i(1); i<n;++i){
 		res.push_back(i*d);
 	}
 	res.push_back(size);
@@ -473,7 +487,7 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 		if(homo){
 			line=homocompression(read);
 		}
-		if(read.size()>100){
+		if(read.size()>2){
 			res.push_back(read);
 			++number;
 			size+=read.size();
@@ -481,7 +495,7 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 	}
 	random_shuffle (res.begin(),res.end());
 	cout<<"number of unitig : "<<number<<endl;
-	cout<<"Mean size  : "<<size/(number+1)<<endl;
+	cout<<"Mean size of unitigs : "<<size/(number+1)<<endl;
 	return res;
 }
 
