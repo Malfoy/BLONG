@@ -17,7 +17,8 @@
 #include <unordered_map>
 #include <functional>
 #include <unordered_set>
-//#include <sparsehash/sparse_hash_map>
+#include <sparsehash/dense_hash_map>
+#include <sparsehash/dense_hash_set>
 #include <chrono>
 #include <iostream>
 #include <fstream>
@@ -29,12 +30,15 @@
 
 
 //~ #define unordered_map sparse_hash_map
+#define unordered_map dense_hash_map
 #define minimizer uint32_t
 #define rNumber uint32_t
+#define uNumber uint32_t
 
 using namespace std;
+using namespace google;
 
-uint32_t seq2int(const string& seq);
+minimizer seq2int(const string& seq);
 string reversecomplement(const string& str);
 char nuc2int(char c);
 vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part);
@@ -47,7 +51,7 @@ vector<size_t> bounds(size_t n,size_t size);
 string getRepresent(const string& str);
 string compaction(string& seq1, string& seq2, size_t k);
 void readContigsforstats(const string& File, size_t k, bool elag, bool compact,bool unitigb);
-unordered_map<string,vector<uint32_t>> getGraph(const vector<string>& unitigs, size_t k);
+unordered_map<string,vector<minimizer>> getGraph(const vector<string>& unitigs, size_t k);
 vector<string> loadFASTQ(const string& unitigFile,bool homo);
 string homocompression(const string& seq);
 vector<string> loadUnitigs(const string& unitigFile,bool homo);

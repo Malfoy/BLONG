@@ -23,7 +23,6 @@
 using namespace std;
 //using namespace google;
 
-//TODO mettre ca dans une classe controlleur
 mutex myMutex;
 atomic<size_t> atomicount;
 
@@ -54,7 +53,7 @@ unordered_set<minimizer> filterUnitigs(const vector<string>& V, size_t k, size_t
 
 	vector<size_t> limits = bounds(nbThreads, V.size());
 
-	for (size_t i = 0; i < nbThreads; ++i) {
+	for (size_t i(0); i<nbThreads; ++i){
 		threads.push_back(thread(computeMinHash,H,k,part,V,&res,limits[i],limits[i+1]));
 	}
 
@@ -64,7 +63,7 @@ unordered_set<minimizer> filterUnitigs(const vector<string>& V, size_t k, size_t
 
 
 
-void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  const unordered_set<minimizer>& filter, unordered_map<minimizer,unordered_set<uint32_t>>* index, uint32_t L, size_t R){
+void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  const unordered_set<minimizer>& filter, unordered_map<minimizer,unordered_set<rNumber>>* index, uint32_t L, size_t R){
 
 	for (uint32_t i(L); i<R; ++i){
 		string seq=seqs[i];
@@ -76,7 +75,7 @@ void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  c
 			//~ sketch=minHash(H,k,unitig);
 		}
 		myMutex.lock();
-		for(size_t j(0);j<sketch.size();++j){
+		for(uint32_t j(0);j<sketch.size();++j){
 			(*index)[sketch[j]].insert(i);
 		}
 		myMutex.unlock();
@@ -85,10 +84,11 @@ void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  c
 
 
 
-unordered_map<minimizer,unordered_set<uint32_t>> indexSeq(const vector<string>& seqs, size_t H, size_t k, size_t part, const unordered_set<minimizer>& filter){
+unordered_map<minimizer,unordered_set<rNumber>> indexSeq(const vector<string>& seqs, size_t H, size_t k, size_t part, const unordered_set<minimizer>& filter){
 	size_t nbThreads(8);
 	vector<thread> threads;
-	unordered_map<minimizer,unordered_set<uint32_t>> index;
+	unordered_map<minimizer,unordered_set<rNumber>> index;
+	index.set_empty_key(-1);
 	vector<size_t> limits = bounds(nbThreads, seqs.size());
 
 	for (size_t i(0); i<nbThreads; ++i) {

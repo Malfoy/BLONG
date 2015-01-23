@@ -65,9 +65,9 @@
 			isa = PBXGroup;
 			children = (
 				C7103C821A6013CF00B2475E /* MappingSupervisor.cpp */,
+				C7103C831A6013CF00B2475E /* MappingSupervisor.h */,
 				C7103C851A6017A600B2475E /* Utils.cpp */,
 				C7103C861A6017A600B2475E /* Utils.h */,
-				C7103C831A6013CF00B2475E /* MappingSupervisor.h */,
 				C749FA921A40812000594542 /* main.cpp */,
 				C722EFAA1A66859700B7347E /* Old */,
 			);

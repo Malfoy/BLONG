@@ -13,11 +13,11 @@
 
 
 
-vector<path> MappingSupervisor::listPath(size_t lengthRequired, uint32_t ind, unordered_set<uint32_t>& usedUnitigs){
+vector<path> MappingSupervisor::listPath(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs){
 	string unitig(unitigs[ind]);
 	vector<path> paths;
-	vector<uint32_t> indiceNeigboor(graph[getRepresent(unitig.substr(0,kgraph))]);
-	vector<uint32_t> indiceNeigboor2(graph[getRepresent(unitig.substr(unitig.size()-kgraph,kgraph))]);
+	vector<uNumber> indiceNeigboor(graph[getRepresent(unitig.substr(0,kgraph))]);
+	vector<uNumber> indiceNeigboor2(graph[getRepresent(unitig.substr(unitig.size()-kgraph,kgraph))]);
 	indiceNeigboor.insert(indiceNeigboor.end(), indiceNeigboor2.begin(), indiceNeigboor2.end());
 	usedUnitigs.insert(ind);
 	for (size_t i(0); i<indiceNeigboor.size(); ++i){
@@ -43,7 +43,7 @@ vector<path> MappingSupervisor::listPath(size_t lengthRequired, uint32_t ind, un
 void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min){
 	if(unitigs.size()<100){
 		for(size_t j(0);j+k<unitig.size();++j){
-			uint32_t seq=seq2int(unitig.substr(j,k));
+			minimizer seq=seq2int(unitig.substr(j,k));
 			if(min.count(seq)==0){
 				if(min2Reads.count(seq)!=0){
 					min.insert(seq);
@@ -81,7 +81,7 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimi
 
 
 
-int MappingSupervisor::isCandidateCorrect(const string& unitig, uint32_t readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers, uint32_t ind){
+int MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers){
 	bool goodreadb=false;
 	unordered_set<minimizer> setMin(read2min[readNumber]);
 	string read=reads[readNumber];
@@ -109,9 +109,10 @@ int MappingSupervisor::isCandidateCorrect(const string& unitig, uint32_t readNum
 }
 
 
-bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t position, unordered_set<uint32_t>& usedUnitigs){
+bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t position, unordered_set<uNumber>& usedUnitigs){
 
-	if(read.size()<position){return false;}
+	if(read.empty()){return false;}
+	if(read.size()<position){return true;}
 
 	string region(read.substr(position,path.str.size()));
 	if(region.size()<100){return true;}
@@ -147,38 +148,42 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 		string unitig=unitigs[i];
 		if(unitig.size()>minSizeUnitigs){
 			bigUnitig++;
-			unordered_set<uint32_t> usedUnitigs;
-			vector<path> list(listPath(1*100, (uint32_t)i, usedUnitigs));
+			unordered_set<uNumber> usedUnitigs;
+			vector<path> list(listPath(1*100, (uNumber)i, usedUnitigs));
 			if(unitig.size()>minSizeUnitigs){
 				bool done(false);
 				unordered_set<minimizer> min;
 				unordered_map<rNumber,size_t> Candidate;
+				Candidate.set_empty_key(-1);
 				unordered_map<rNumber,unordered_set<minimizer>> read2min;
+				read2min.set_empty_key(-1);
 				unordered_set<minimizer> genomicKmers;
 				findCandidate(unitig,min,Candidate,read2min);
 				for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
 					if(it->second>=multi){
-						int position(isCandidateCorrect(unitig,it->first,read2min,genomicKmers,(uint32_t)i));
+						int position(isCandidateCorrect(unitig,it->first,read2min,genomicKmers));
 						if(position!=-1){
 							if(!done){
 								done=true;
 								unitigsMapped++;
-							}
-							bool mappedOnGraph(false);
-							for(size_t ii(0);ii<list.size() and !mappedOnGraph;++ii){
-								path path(list[ii]);
-								if(alignOnPath(path, reads[it->first], position,usedUnitigs)){
-									aligneOnPathSucess++;
-									mappedOnGraph=true;
-									mutexEraseReads.lock();
-									reads[it->first]="";
-									mutexEraseReads.unlock();
+								bool mappedOnGraph(false);
+								for(size_t ii(0);ii<list.size() and !mappedOnGraph;++ii){
+									path path(list[ii]);
+									if(alignOnPath(path, reads[it->first].substr(0,position),0,usedUnitigs)){
+										if(alignOnPath(path, reads[it->first].substr(position), 0,usedUnitigs)){
+											aligneOnPathSucess++;
+											mappedOnGraph=true;
+											mutexEraseReads.lock();
+											reads[it->first].clear();
+											mutexEraseReads.unlock();
+										}
+									}
 								}
 							}
 						}
 					}
 				}
-				
+
 			}
 		}
 	}

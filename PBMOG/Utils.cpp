@@ -160,7 +160,7 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 	vector<uint64_t> sketch(H);
 	vector<minimizer> sketchs(H);
 	uint64_t hashValue;
-	uint32_t kmer;
+	minimizer kmer;
 	//~ hash<uint32_t> hash;
 
 	kmer=seq2int(seq.substr(0,k));
@@ -187,9 +187,9 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 }
 
 
-uint32_t seq2int(const string& seq){
+minimizer seq2int(const string& seq){
 	string str(getRepresent(seq));
-	uint32_t res(0);
+	minimizer res(0);
 	for(uint i(0);i<seq.size();++i){
 		res+=nuc2int(str[i]);
 		res<<=2;
@@ -271,6 +271,7 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 	ifstream in(File);
 	uint minSize(100);
 	unordered_map<string,vector<size_t>> kmer2reads;
+	kmer2reads.set_empty_key("0");
 	int i(0);
 	vector<string> unitigs;
 	unordered_set<size_t> nottake;
@@ -396,7 +397,7 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 	}
 	cout<<i<<" starting unitigs"<<endl;
 	cout<<n<<" unitigs left"<<endl;
-	cout<<length/n<<" mean length of unitigs"<<endl;
+	cout<<length/(n+1)<<" mean length of unitigs"<<endl;
 	cout<<i-n<<" unitigs removed"<<endl;
 	cout<<island/2<<" island"<<endl;
 	cout<<deadend<<" "<<two<<" "<<three<<" "<<four<<" "<<five<<" "<<six<<" "<<seven<<" "<<eight<<" "<<wtf<<" "<<multiple<<endl;
@@ -405,8 +406,9 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 
 
 
-unordered_map<string,vector<uint32_t>> getGraph(const vector<string>& unitigs, size_t k){
-	unordered_map<string,vector<uint32_t>> graph;
+unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, size_t k){
+	unordered_map<string,vector<uNumber>> graph;
+	graph.set_empty_key("0");
 	string unitig,seq1,seq2;
 
 	for(uint32_t i(0);i<unitigs.size();++i){
@@ -506,7 +508,7 @@ void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous,
 	vector<uint64_t> sketch(H);
 	vector<minimizer> sketchs(H);
 	uint64_t hashValue;
-	uint32_t kmer;
+	minimizer kmer;
 	//~ hash<uint32_t> hash;
 
 	kmer=seq2int(seq.substr(0,k));
