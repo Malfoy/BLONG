@@ -102,7 +102,7 @@ unordered_map<minimizer,unordered_set<rNumber>> indexSeq(const vector<string>& s
 
 
 int main(int argc, char ** argv) {
-	size_t H1(100),k(15),part(1),kgraph(19);
+	size_t H1(1000),k(15),part(1),kgraph(19);
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));

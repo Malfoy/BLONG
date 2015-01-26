@@ -29,7 +29,7 @@ public:
 	double minJacc;
 	unordered_map<string, vector<uNumber>> graph;
 	mutex myMutex,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsMapped,bigUnitig;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig;
 
 
 
@@ -47,7 +47,7 @@ public:
 		graph=Igraph;
 		readMapped=0;
 		aligneOnPathSucess=0;
-		unitigsMapped=0;
+		unitigsPreMapped=0;
 		offset=100;
 		minSizeUnitigs=100;
 	}
@@ -59,7 +59,10 @@ public:
 	void MapAll();
 	int isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers);
 	vector<path> listPath(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
+		vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
+		vector<path> listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
 	bool alignOnPath(const path& path, const string& read, size_t position,unordered_set<uNumber>& usedUnitigs);
+
 };
 
 

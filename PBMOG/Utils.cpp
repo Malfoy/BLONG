@@ -378,7 +378,7 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 		}
 		if(it->second.size()>8){
 			wtf++;
-			cout<<"wu"<<endl;
+			cout<<"wut"<<endl;
 		}
 		if(it->second.size()>1){
 			multiple++;
