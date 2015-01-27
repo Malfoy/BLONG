@@ -85,6 +85,10 @@ unsigned char int2char(unsigned char c){
 		case 2:
 			return 'G';
 	}
+	if(c!=3){
+		cout<<"wtf : ";
+		printUC(c);
+	}
 	return 'T';
 }
 
@@ -149,7 +153,7 @@ string binSeq::str(){
 			case 2:
 				res.push_back(int2char(c/(1<<4)));
 				c<<=2;
-				res.push_back(int2char(c/(1<<4)));
+				res.push_back(int2char( (c/(1<<4))%4 ));
 				break;
 
 			case 3:
@@ -197,9 +201,28 @@ binSeq binSeq::sub(size_t begin){
 uint64_t binSeq::getBegin(size_t size){
 	uint64_t res(0);
 	size_t i(0);
-	for(size_t c(0); c<size; ++c){
-		res+=vect[i]%(1<<6);
-		i+=vect[i]/(1<<6);
+	for(size_t c(0); c<size;){
+		unsigned char ch(vect[i]);
+		unsigned char mod(ch/(1<<6));
+		int n(c+mod-size);
+		if(n<=0){
+			res<<=(2*mod);
+			res+=ch%(1<<6);
+			i++;
+			c+=mod;
+		}else{
+			if(n==2){
+				res<<=2;
+				ch<<=2;
+				res+=ch/(1<<6);
+				c++;
+			}else{
+				res<<=4;
+				ch<<=2;
+				res+=ch/(1<<4);
+				c+=2;
+			}
+		}
 	}
 	return res;
 }
@@ -234,13 +257,30 @@ void binSeq::reverse(){
 
 void testBinSeq(){
 	cout<<"test start"<<endl;
-	string str("ACGTTTAC");
+	string str("TACGTTTACGCAACG");
 	binSeq bs(str);
 	cout<<str<<endl;
-	cout<<bs.str()<<endl;
+	string str2(bs.str());
+	cout<<str2<<endl;
 	if(str==bs.str()){
-		cout<<"YES"<<endl;
+		cout<<"string constructor work and string export work"<<endl;
 	}
+
+	binSeq bs2(bs);
+	if(str==bs2.str()){
+		cout<<"binseq constructor work"<<endl;
+	}
+
+	bs.add(bs2);
+	if(str+str==bs.str()){
+//		cout<<bs.str()<<endl;
+		cout<<"add work"<<endl;
+	}
+
+	printUC((unsigned char)(bs.getBegin(4)));
+
+
+
 }
 
 
