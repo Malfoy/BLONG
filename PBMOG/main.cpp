@@ -15,6 +15,7 @@
 #include <atomic>
 #include "MappingSupervisor.h"
 #include "Utils.h"
+#include "binSeq.h"
 
 //~ #define unordered_map sparse_hash_map
 #define minimizer uint32_t
@@ -102,6 +103,11 @@ unordered_map<minimizer,unordered_set<rNumber>> indexSeq(const vector<string>& s
 
 
 int main(int argc, char ** argv) {
+
+	testBinSeq();
+	exit(0);
+
+
 	size_t H1(100),k(15),part(1),kgraph(19);
 	size_t k2(11);
 	bool homo(false);

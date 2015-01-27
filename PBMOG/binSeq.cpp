@@ -8,10 +8,12 @@
 
 #include "binSeq.h"
 #include <string>
+#include <iostream>
 
 
 
 const unsigned char binSeq::rc[]={
+
 	0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,
 	0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,
 	0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,
@@ -50,9 +52,17 @@ const unsigned char binSeq::rc[]={
 
 };
 
+void printUC(unsigned char a){
+	for (int i = 0; i < 8; i++) {
+		printf("%d", !!((a << i) & 0x80));
+	}
+	printf("\n");
+
+}
 
 
-char char2int(char c){
+
+ unsigned char char2int( unsigned char c){
 	switch (c) {
 		case 'A':
 			return 0;
@@ -66,7 +76,7 @@ char char2int(char c){
 
 
 
-char int2char(char c){
+unsigned char int2char(unsigned char c){
 	switch (c) {
 		case 0:
 			return 'A';
@@ -82,8 +92,8 @@ char int2char(char c){
 
 
 binSeq::binSeq(const string& str){
-	char mod(str.size()%3);
-	char c;
+	unsigned char mod(str.size()%3);
+	unsigned char c;
 	for (size_t i(0); i<str.size()-mod; i+=3){
 		c=12;
 		c+=char2int(str[i]);
@@ -92,6 +102,7 @@ binSeq::binSeq(const string& str){
 		c<<=2;
 		c+=char2int(str[i+2]);
 		vect.push_back(c);
+//		printUC(c);
 	}
 
 	switch (mod) {
@@ -103,7 +114,7 @@ binSeq::binSeq(const string& str){
 			vect.push_back(c);
 			break;
 		case 2:
-			c=2<<6;
+			c=1<<5;
 			c+=char2int(str[str.size()-2]);
 			c<<=2;
 			c+=char2int(str[str.size()-1]);
@@ -122,25 +133,31 @@ binSeq::binSeq(const binSeq& bs){
 
 string binSeq::str(){
 	string res;
+//	cout<<vect.size()<<endl;
 	for(size_t i(0);i<vect.size();++i){
-		char c(vect[i]);
-		char mod(c%(1<<6));
+		unsigned char c(vect[i]);
+		unsigned char mod(c/(1<<6));
+//		printUC(c);
+		c<<=2;
+//		cout<<"mod : ";
+//		printUC(mod);
+
 		switch (mod) {
 			case 1:
-				res.push_back(int2char(c/4));
+				res.push_back(int2char(c/(1<<2)));
 				break;
 			case 2:
-				res.push_back(int2char(c/4));
-				c>>=2;
-				res.push_back(int2char(c/4));
+				res.push_back(int2char(c/(1<<4)));
+				c<<=2;
+				res.push_back(int2char(c/(1<<4)));
 				break;
 
 			case 3:
-				res.push_back(int2char(c/4));
-				c>>=2;
-				res.push_back(int2char(c/4));
-				c>>=2;
-				res.push_back(int2char(c/4));
+				res.push_back(int2char(c/(1<<6)));
+				c<<=2;
+				res.push_back(int2char(c/(1<<6)));
+				c<<=2;
+				res.push_back(int2char(c/(1<<6)));
 				break;
 		}
 	}
@@ -214,6 +231,17 @@ void binSeq::reverse(){
 	vect=V;
 }
 
+
+void testBinSeq(){
+	cout<<"test start"<<endl;
+	string str("ACGTTTAC");
+	binSeq bs(str);
+	cout<<str<<endl;
+	cout<<bs.str()<<endl;
+	if(str==bs.str()){
+		cout<<"YES"<<endl;
+	}
+}
 
 
 

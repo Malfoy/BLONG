@@ -20,7 +20,7 @@ public:
 	static const unsigned char rc[];
 	vector<unsigned char> vect;
 
-	string str();//
+	string str();
 	binSeq sub(size_t begin);
 	uint64_t getBegin(size_t size);
 	uint64_t getEnd(size_t size);
@@ -36,8 +36,10 @@ public:
 
 
 
-char char2int(char c);
-char int2char(char c);
+unsigned char char2int(unsigned char c);
+unsigned char int2char(unsigned char c);
+
+void testBinSeq();
 
 
 #endif /* defined(__PBMOG__binSeq__) */
