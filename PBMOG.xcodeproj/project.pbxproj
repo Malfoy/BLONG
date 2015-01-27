@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C70F23771A777F5A00A131F1 /* binSeq.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C70F23751A777F5A00A131F1 /* binSeq.cpp */; };
 		C7103C841A6013CF00B2475E /* MappingSupervisor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7103C821A6013CF00B2475E /* MappingSupervisor.cpp */; };
 		C7103C871A6017A600B2475E /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7103C851A6017A600B2475E /* Utils.cpp */; };
 		C749FA931A40812000594542 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C749FA921A40812000594542 /* main.cpp */; };
@@ -25,6 +26,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C70F23751A777F5A00A131F1 /* binSeq.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = binSeq.cpp; sourceTree = "<group>"; };
+		C70F23761A777F5A00A131F1 /* binSeq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binSeq.h; sourceTree = "<group>"; };
 		C7103C821A6013CF00B2475E /* MappingSupervisor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MappingSupervisor.cpp; sourceTree = "<group>"; };
 		C7103C831A6013CF00B2475E /* MappingSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MappingSupervisor.h; sourceTree = "<group>"; };
 		C7103C851A6017A600B2475E /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
@@ -69,6 +72,8 @@
 				C7103C851A6017A600B2475E /* Utils.cpp */,
 				C7103C861A6017A600B2475E /* Utils.h */,
 				C749FA921A40812000594542 /* main.cpp */,
+				C70F23751A777F5A00A131F1 /* binSeq.cpp */,
+				C70F23761A777F5A00A131F1 /* binSeq.h */,
 				C722EFAA1A66859700B7347E /* Old */,
 			);
 			path = PBMOG;
@@ -131,6 +136,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C7103C871A6017A600B2475E /* Utils.cpp in Sources */,
+				C70F23771A777F5A00A131F1 /* binSeq.cpp in Sources */,
 				C7103C841A6013CF00B2475E /* MappingSupervisor.cpp in Sources */,
 				C749FA931A40812000594542 /* main.cpp in Sources */,
 			);
@@ -237,9 +243,16 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/usr/local/include/,
 				);
-				LIBRARY_SEARCH_PATHS = "/usr/local/include/**";
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/lib/**",
+					"/usr/local/include/**",
+					"/usr/lib/**",
+				);
 				LLVM_LTO = YES;
-				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-lgmp",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				VALIDATE_PRODUCT = YES;
@@ -270,9 +283,16 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/usr/local/include/,
 				);
-				LIBRARY_SEARCH_PATHS = "/usr/local/include/**";
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/lib/**",
+					"/usr/local/include/**",
+					"/usr/lib/**",
+				);
 				LLVM_LTO = YES;
-				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-lgmp",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				VALIDATE_PRODUCT = YES;

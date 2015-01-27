@@ -105,7 +105,6 @@ vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, uNumber i
 
 
 
-
 void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min){
 	if(unitigs.size()<100){
 		for(size_t j(0);j+k<unitig.size();++j){
@@ -146,7 +145,6 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimi
 
 
 
-
 int MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers){
 	bool goodreadb=false;
 	unordered_set<minimizer> setMin(read2min[readNumber]);
@@ -178,7 +176,7 @@ int MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNumb
 
 bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t position, unordered_set<uNumber>& usedUnitigsInitial){
 
-	if(read.empty()){cout<<1<<endl;return false;}
+	if(read.empty()){return false;}
 	if(read.size()<=position+offset){return true;}
 	int start ((int)position-(int)path.str.size()*1);
 
@@ -189,20 +187,13 @@ bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t
 
 	if(jaccard(k2,region,genomicKmers)>minJacc){
 		auto list(listPath(offset, path.lastUnitig, usedUnitigsInitial));
-//		cout<<"size : "<<list.size()<<endl;
 		for(size_t i(0);i<list.size();++i){
-//			cout<<list[i].str.size()<<endl;
 			auto usedUnitigs(usedUnitigsInitial);
 			if(alignOnPath(list[i], read, position+path.str.size(), usedUnitigs)){
-//				cout<<"sucess"<<endl;
-//				cin.get();
 				return true;
 			}
 		}
-//		cout<<"fail"<<endl;
-//		cin.get();
 	}
-//	cout<<2<<endl;
 	return false;
 }
 
@@ -223,6 +214,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 			unordered_set<uNumber> usedUnitigsShared;
 			vector<path> list(listPath(offset, (uNumber)i, usedUnitigsShared));
 			unordered_set<minimizer> min;
+			bool done(false);
 			unordered_map<rNumber,size_t> Candidate;Candidate.set_empty_key(-1);
 			unordered_map<rNumber,unordered_set<minimizer>> read2min;read2min.set_empty_key(-1);
 			unordered_set<minimizer> genomicKmers;
@@ -233,10 +225,13 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 					int position(isCandidateCorrect(unitig,it->first,read2min,genomicKmers));
 					if(position!=-1){
 						//the read is mapped on the unitig (pre-mapped)
-						unitigsPreMapped++;
+						if(!done){
+							unitigsPreMapped++;
+							done=true;
+						}
 						bool mappedOnGraph(false);
 						//For each possible path
-						for(size_t ii(0);ii<list.size() and !mappedOnGraph;++ii){
+						for(size_t ii(0); ii<list.size() and !mappedOnGraph; ++ii){
 							unordered_set<uNumber> usedUnitigs(usedUnitigsShared);
 							path path(list[ii]);
 							string read(reads[it->first]);

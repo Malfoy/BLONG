@@ -102,11 +102,12 @@ unordered_map<minimizer,unordered_set<rNumber>> indexSeq(const vector<string>& s
 
 
 int main(int argc, char ** argv) {
-	size_t H1(1000),k(15),part(1),kgraph(19);
+	size_t H1(100),k(15),part(1),kgraph(19);
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(10);
+	double errorRate(0.15);
 
 	auto start=chrono::system_clock::now();
 	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PC10x_0001.fastq",homo));
@@ -125,7 +126,7 @@ int main(int argc, char ** argv) {
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, 100*(pow(1-2*0.15,k2)), G, kgraph);
+	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, 100*(pow(1-2*errorRate,k2)), G, kgraph);
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 	cout<<"Reads Mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
