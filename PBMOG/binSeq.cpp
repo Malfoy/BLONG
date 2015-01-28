@@ -9,6 +9,7 @@
 #include "binSeq.h"
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 
 
@@ -216,30 +217,45 @@ uint64_t binSeq::getBegin(size_t size){
 				ch<<=2;
 				res+=ch/(1<<6);
 				c++;
+				i++;
 			}else{
 				res<<=4;
 				ch<<=2;
 				res+=ch/(1<<4);
 				c+=2;
+				i++;
 			}
 		}
 	}
 	return res;
 }
 
-
-
+//bug
 uint64_t binSeq::getEnd(size_t size){
 	uint64_t res(0);
 	size_t i(vect.size()-1);
-	for(size_t c(0); c<size; ++c){
-		res+=vect[i]%(1<<6);
-		i-=vect[i]/(1<<6);
+	for(size_t c(0); c<size;){
+		unsigned char ch(vect[i]);
+		unsigned char mod(ch/(1<<6));
+		int n(c+mod-size);
+		if(n<=0){
+			res+=(ch%(1<<6)<<(2*c));
+			i--;
+			c+=mod;
+		}else{
+			if(n==2){
+				res+=(ch%(1<<2)<<(2*c));
+				c++;
+				i--;
+			}else{
+				res+=(ch%(1<<4)<<(2*c));
+				c+=2;
+				i--;
+			}
+		}
 	}
 	return res;
 }
-
-
 
 void binSeq::add(binSeq bs){
 	vect.insert(vect.begin(), bs.vect.begin(), bs.vect.end());
@@ -257,7 +273,7 @@ void binSeq::reverse(){
 
 void testBinSeq(){
 	cout<<"test start"<<endl;
-	string str("TACGTTTACGCAACG");
+	string str("TACGTTTACGCTCCG");
 	binSeq bs(str);
 	cout<<str<<endl;
 	string str2(bs.str());
@@ -278,6 +294,7 @@ void testBinSeq(){
 	}
 
 	printUC((unsigned char)(bs.getBegin(4)));
+	printUC((unsigned char)(bs.getEnd(4)));
 
 
 
