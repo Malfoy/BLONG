@@ -22,6 +22,7 @@ public:
 
 	string str();
 	binSeq sub(size_t begin);
+	binSeq sub(size_t begin,size_t size);
 	uint64_t getBegin(size_t size);
 	uint64_t getEnd(size_t size);
 	void reverse();

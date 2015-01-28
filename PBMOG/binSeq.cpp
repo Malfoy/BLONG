@@ -221,11 +221,56 @@ binSeq binSeq::sub(size_t begin){
 			}else{
 				go=false;
 				unsigned char toGet((unsigned char)(count+n-begin));
-				res.vect.push_back((toGet<<6)+c%(1<<(6-2*(3-toGet))));
+				res.vect.push_back((unsigned char)(toGet<<6)+c%(1<<(6-2*(3-toGet))));
 			}
 		}
 	}
 	res.vect.insert(res.vect.end(), vect.begin()+i, vect.end());
+
+	return res;
+}
+
+
+binSeq binSeq::sub(size_t begin, size_t size){
+	binSeq res;
+	size_t i(0);
+	size_t countBegin(0);
+	bool go(false);
+	for (size_t count(0); count<size;) {
+		unsigned char ch(vect[i]);
+		unsigned char mod(ch/(1<<6));
+
+		if(!go){
+			if(countBegin+mod<begin){
+				countBegin+=mod;
+			}else{
+				if(countBegin+mod==begin){
+					go=true;
+				}else{
+					go=true;
+					unsigned char toGet((unsigned char)(countBegin+mod-begin));
+					res.vect.push_back((unsigned char)(toGet<<6)+ch%(1<<(6-2*(3-toGet))));
+					count+=toGet;
+				}
+			}
+		}else{
+			if(count+mod<=size){
+				res.vect.push_back(ch);
+				count+=mod;
+//				cout<<1<<endl;
+			}else{
+//				cout<<2<<endl;
+				unsigned char toGet((unsigned char)(size-count));
+				printUC(toGet);
+				ch<<=2;
+				res.vect.push_back((unsigned char)(toGet<<6)+ch/(1<<(8-2*(toGet))));
+				printUC((unsigned char)(toGet<<6)+ch%(1<<(6-2*(3-toGet))));
+				count+=toGet;
+			}
+		}
+		
+		++i;
+	}
 
 	return res;
 }
@@ -238,7 +283,7 @@ uint64_t binSeq::getBegin(size_t size){
 	for(size_t c(0); c<size;){
 		unsigned char ch(vect[i]);
 		unsigned char mod(ch/(1<<6));
-		int n(c+mod-size);
+		int64_t n(c+mod-size);
 		if(n<=0){
 			res<<=(2*mod);
 			res+=ch%(1<<6);
@@ -270,7 +315,7 @@ uint64_t binSeq::getEnd(size_t size){
 	for(size_t c(0); c<size;){
 		unsigned char ch(vect[i]);
 		unsigned char mod(ch/(1<<6));
-		int n(c+mod-size);
+		int64_t n(c+mod-size);
 		if(n<=0){
 			res+=(ch%(1<<6)<<(2*c));
 			i--;
@@ -356,6 +401,18 @@ void testBinSeq(){
 	}else{
 		cout<<bs2.str()<<endl;
 		cout<<reversecomplementnadine(str)<<endl;
+	}
+	bs2.reverse();
+
+	if(bs2.str()==str){
+		cout<<"double reverse work"<<endl;
+	}
+	int a(6),b(120);
+	if(bs2.sub(a,b).str()==str.substr(a,b)){
+		cout<<"substr work with 2 arg"<<endl;
+	}else{
+		cout<<str.substr(a,b)<<endl;
+		cout<<bs2.sub(a,b).str()<<endl;
 	}
 
 
