@@ -34,7 +34,7 @@ const unsigned char binSeq::rc[]={
 	0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,
 
 	0b10001111,0b10001011,0b10000111,0b10000011,0b10001110,0b10001010,0b10000110,0b10000010,
-	0b00001101,0b00001001,0b00000101,0b00000001,0b00001100,0b00001000,0b00000100,0b00000000,
+	0b10001101,0b10001001,0b10000101,0b10000001,0b10001100,0b10001000,0b10000100,0b10000000,
 	0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,
 	0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,
 	0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,
@@ -52,6 +52,41 @@ const unsigned char binSeq::rc[]={
 	0b11110100,0b11100100,0b11010100,0b11000100,0b11110000,0b11100000,0b11010000,0b11000000,
 
 };
+
+
+
+
+char revcompnadine (char s) {
+	if (s == 'A') return 'T';
+	else if (s == 'C') return 'G';
+	else if (s == 'G') return 'C';
+	else if (s == 'T') return 'A';
+	else if (s == 'a') return 't';
+	else if (s == 'c') return 'g';
+	else if (s == 'g') return 'c';
+	else if (s == 't') return 'a';
+	return 'X';
+}
+
+
+//string revcomp (const string &s) {
+//	string rc;
+//	for (int i = (int)s.length() - 1; i >= 0; i--) rc += revcomp(s[i]);
+//	return rc;
+//}
+
+
+string reversecomplementnadine (const string &s){
+	string rc;
+	for (int i = (int)s.length() - 1; i >= 0; i--) rc += revcompnadine(s[i]);
+	return rc;
+
+}
+
+
+
+
+
 
 void printUC(unsigned char a){
 	for (int i = 0; i < 8; i++) {
@@ -183,13 +218,9 @@ binSeq binSeq::sub(size_t begin){
 		}else{
 			if(count+n==begin){
 				go=false;
-				cout<<1<<endl;
 			}else{
 				go=false;
-				cout<<2<<endl;
 				unsigned char toGet((unsigned char)(count+n-begin));
-				printUC(toGet);
-//				c<<=2;
 				res.vect.push_back((toGet<<6)+c%(1<<(6-2*(3-toGet))));
 			}
 		}
@@ -269,7 +300,9 @@ void binSeq::add(binSeq bs){
 void binSeq::reverse(){
 	vector<unsigned char> V;
 	for(int i((int)vect.size()-1); i>-1; --i){
+		printUC(vect[i]);
 		V.push_back(rc[vect[i]]);
+		printUC(rc[vect[i]]);
 	}
 	vect=V;
 }
@@ -282,11 +315,11 @@ binSeq::binSeq(){
 
 void testBinSeq(){
 	cout<<"test start"<<endl;
-	string str("TACGTTTACGCTCCG");
+	string str("TACCCATGCTAGCTGCATGACTGCTGACTGCATGTCGACTGATCGTACGTCGTAGCTGACTATATATAGCGCGCTATAAATATATACACACAGAGAGATTGTGTGTGTGTGTCGCGCGCGACACATATATAGTGTGTGCCAACACATTATATACG");
 	binSeq bs(str);
-	cout<<str<<endl;
+//	cout<<str<<endl;
 	string str2(bs.str());
-	cout<<str2<<endl;
+//	cout<<str2/<<endl;
 	if(str==bs.str()){
 		cout<<"string constructor work and string export work"<<endl;
 	}
@@ -307,13 +340,24 @@ void testBinSeq(){
 	for(int i(0);i<str.size();++i)
 	{
 		if(bs2.sub(i).str()==str.substr(i)){
-			cout<<"sub work"<<endl;
+//			cout<<"sub work"<<endl;
 		}else{
 			cout<<bs2.sub(i).str()<<endl;
-			cout<<"BUG !!!!!!!"<<endl;
+			cout<<"BUG SUB !!!!!!!"<<endl;
 			cin.get();
 		}
+
 	}
+	cout<<"sub work"<<endl;
+	bs2.reverse();
+	if(bs2.str()==reversecomplementnadine(str)){
+		cout<<"reverse work"<<endl;
+		cout<<reversecomplementnadine(str)<<endl;
+	}else{
+		cout<<bs2.str()<<endl;
+		cout<<reversecomplementnadine(str)<<endl;
+	}
+
 
 
 }
