@@ -154,7 +154,7 @@ string binSeq::str(){
 			case 2:
 				res.push_back(int2char(c/(1<<4)));
 				c<<=2;
-				res.push_back(int2char( (c/(1<<4))%4 ));
+				res.push_back(int2char((c/(1<<4))%4));
 				break;
 
 			case 3:
@@ -176,19 +176,21 @@ binSeq binSeq::sub(size_t begin){
 	bool go(true);
 	size_t i(0);
 	for(; i<vect.size() and go; ++i){
-		char c(vect[i]);
-		char n(c%(1<<6));
+		unsigned char c(vect[i]);
+		unsigned char n(c/(1<<6));
 		if(count+n<begin){
 			count+=n;
 		}else{
 			if(count+n==begin){
 				go=false;
+				cout<<1<<endl;
 			}else{
 				go=false;
-				char toGet((char)(count+n-begin)	);
-				char nc((char)(toGet<<6));
-				nc+=c%(1<<(2*toGet));
-				res.vect.push_back(nc);
+				cout<<2<<endl;
+				unsigned char toGet((unsigned char)(count+n-begin));
+				printUC(toGet);
+//				c<<=2;
+				res.vect.push_back((toGet<<6)+c%(1<<(6-2*(3-toGet))));
 			}
 		}
 	}
@@ -230,7 +232,7 @@ uint64_t binSeq::getBegin(size_t size){
 	return res;
 }
 
-//bug
+
 uint64_t binSeq::getEnd(size_t size){
 	uint64_t res(0);
 	size_t i(vect.size()-1);
@@ -257,6 +259,8 @@ uint64_t binSeq::getEnd(size_t size){
 	return res;
 }
 
+
+
 void binSeq::add(binSeq bs){
 	vect.insert(vect.begin(), bs.vect.begin(), bs.vect.end());
 }
@@ -268,6 +272,11 @@ void binSeq::reverse(){
 		V.push_back(rc[vect[i]]);
 	}
 	vect=V;
+}
+
+
+binSeq::binSeq(){
+
 }
 
 
@@ -293,9 +302,18 @@ void testBinSeq(){
 		cout<<"add work"<<endl;
 	}
 
-	printUC((unsigned char)(bs.getBegin(4)));
-	printUC((unsigned char)(bs.getEnd(4)));
-
+//	printUC((unsigned char)(bs.getBegin(4)));
+//	printUC((unsigned char)(bs.getEnd(4)));
+	for(int i(0);i<str.size();++i)
+	{
+		if(bs2.sub(i).str()==str.substr(i)){
+			cout<<"sub work"<<endl;
+		}else{
+			cout<<bs2.sub(i).str()<<endl;
+			cout<<"BUG !!!!!!!"<<endl;
+			cin.get();
+		}
+	}
 
 
 }
