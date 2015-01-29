@@ -357,6 +357,29 @@ binSeq::binSeq(){
 
 }
 
+size_t binSeq::size(){
+	return vect.size();
+}
+
+binSeq::binSeq(uint32_t n){
+	isNumber=true;
+	while(n!=0){
+		vect.push_back((unsigned char)n%(1<<8));
+		n>>=8;
+	}
+}
+
+
+uint32_t binSeq::getInt(){
+	uint32_t res(0);
+	for(size_t i(0); i<vect.size(); ++i){
+		res<<=8;
+		res+=vect[i];
+	}
+	return res;
+}
+
+
 
 void testBinSeq(){
 	cout<<"test start"<<endl;
@@ -415,8 +438,13 @@ void testBinSeq(){
 		cout<<bs2.sub(a,b).str()<<endl;
 	}
 
-
-
+	int n(2);
+	binSeq bs3(n);
+	if(n==bs3.getInt()){
+		cout<<"getInt and int constroctor work"<<endl;
+	}else{
+		cout<<bs3.getInt()<<endl;
+	}
 }
 
 

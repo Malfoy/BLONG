@@ -19,6 +19,7 @@ class binSeq {
 public:
 	static const unsigned char rc[];
 	vector<unsigned char> vect;
+	bool isNumber;
 
 	string str();
 	binSeq sub(size_t begin);
@@ -28,10 +29,14 @@ public:
 	void reverse();
 	void add(binSeq);
 	void resize();
+	size_t size();
+	uint32_t getInt();
+
 
 	binSeq(const string& str);
 	binSeq();
 	binSeq(const binSeq& bs);
+	binSeq(uint32_t);
 
 };
 

@@ -138,6 +138,8 @@ double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genom
 			++inter;
 		}
 	}
+//	return double(100*inter/(genomicKmers.size()));
+//	return double(100*inter/(seq.size()-k));
 	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
