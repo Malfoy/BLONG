@@ -32,6 +32,13 @@ public:
 	size_t size();
 	uint32_t getInt();
 
+	binSeq& operator+=(const binSeq& rhs){
+		this->add(rhs);
+		return *this;
+	}
+
+
+	
 
 	binSeq(const string& str);
 	binSeq();
@@ -39,6 +46,11 @@ public:
 	binSeq(uint32_t);
 
 };
+
+inline binSeq operator+(binSeq lhs, const binSeq& rhs){
+	lhs += rhs;
+	return lhs;
+}
 
 
 

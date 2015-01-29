@@ -381,6 +381,8 @@ uint32_t binSeq::getInt(){
 
 
 
+
+
 void testBinSeq(){
 	cout<<"test start"<<endl;
 	string str("TACCCATGCTAGCTGCATGACTGCTGACTGCATGTCGACTGATCGTACGTCGTAGCTGACTATATATAGCGCGCTATAAATATATACACACAGAGAGATTGTGTGTGTGTGTCGCGCGCGACACATATATAGTGTGTGCCAACACATTATATACG");
@@ -444,6 +446,13 @@ void testBinSeq(){
 		cout<<"getInt and int constroctor work"<<endl;
 	}else{
 		cout<<bs3.getInt()<<endl;
+	}
+
+	binSeq bs4(str);
+	binSeq bs5(str);
+
+	if((bs4+bs5).str()==str+str){
+		cout<<"overload + work"<<endl;
 	}
 }
 
