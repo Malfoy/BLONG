@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -24,18 +25,27 @@ public:
 	string str();
 	binSeq sub(size_t begin);
 	binSeq sub(size_t begin,size_t size);
-	uint64_t getBegin(size_t size);
-	uint64_t getEnd(size_t size);
+	binSeq getBegin(size_t size);
+	binSeq getEnd(size_t size);
+//	uint64_t getBegin(size_t size);
+//	uint64_t getEnd(size_t size);
+//	uint64_t getBeginRc(size_t size);
+//	uint64_t getEndRc(size_t size);
 	void reverse();
+	binSeq getReverse();
 	void add(binSeq);
 	void resize();
+	void clear();
 	size_t size();
-	uint32_t getInt();
+	uint32_t getNumber();
+	uint64_t getInt();
 
 	binSeq& operator+=(const binSeq& rhs){
 		this->add(rhs);
 		return *this;
 	}
+
+
 
 
 	
@@ -45,8 +55,12 @@ public:
 	binSeq(const binSeq& bs);
 	binSeq(uint32_t);
 
+
 };
 
+
+inline bool operator==(const binSeq& lhs, const binSeq& rhs){return lhs.vect==rhs.vect;}
+inline bool operator!=(const binSeq& lhs, const binSeq& rhs){return !operator==(lhs,rhs);}
 inline binSeq operator+(binSeq lhs, const binSeq& rhs){
 	lhs += rhs;
 	return lhs;

@@ -261,10 +261,10 @@ binSeq binSeq::sub(size_t begin, size_t size){
 			}else{
 //				cout<<2<<endl;
 				unsigned char toGet((unsigned char)(size-count));
-				printUC(toGet);
+//				printUC(toGet);
 				ch<<=2;
 				res.vect.push_back((unsigned char)(toGet<<6)+ch/(1<<(8-2*(toGet))));
-				printUC((unsigned char)(toGet<<6)+ch%(1<<(6-2*(3-toGet))));
+//				printUC((unsigned char)(toGet<<6)+ch%(1<<(6-2*(3-toGet))));
 				count+=toGet;
 			}
 		}
@@ -276,7 +276,7 @@ binSeq binSeq::sub(size_t begin, size_t size){
 }
 
 
-
+/*
 uint64_t binSeq::getBegin(size_t size){
 	uint64_t res(0);
 	size_t i(0);
@@ -307,7 +307,45 @@ uint64_t binSeq::getBegin(size_t size){
 	}
 	return res;
 }
+*/
 
+
+binSeq binSeq::getBegin(size_t size){
+	binSeq res;
+	size_t i(0);
+	for(size_t c(0); c<size;){
+		unsigned char ch(vect[i]);
+		unsigned char mod(ch/(1<<6));
+		int64_t n(c+mod-size);
+		if(n<=0){
+//			res<<=(2*mod);
+//			res+=ch%(1<<6);
+			res.vect.push_back(ch);
+			i++;
+			c+=mod;
+		}else{
+			if(n==2){
+//				res<<=2;
+				ch<<=2;
+//				res+=ch/(1<<6);
+				res.vect.push_back((1<<6)+ch/(1<<6));
+				c++;
+				i++;
+			}else{
+//				res<<=4;
+				ch<<=2;
+//				res+=ch/(1<<4);
+				res.vect.push_back((2<<6)+ch/(1<<4));
+				c+=2;
+				i++;
+			}
+		}
+	}
+	return res;
+}
+
+
+/*
 
 uint64_t binSeq::getEnd(size_t size){
 	uint64_t res(0);
@@ -334,20 +372,49 @@ uint64_t binSeq::getEnd(size_t size){
 	}
 	return res;
 }
+*/
+
+binSeq binSeq::getEnd(size_t size){
+	binSeq res;
+	size_t i(vect.size()-1);
+	for(size_t c(0); c<size;){
+		unsigned char ch(vect[i]);
+		unsigned char mod(ch/(1<<6));
+		int64_t n(c+mod-size);
+		if(n<=0){
+//			res+=(ch%(1<<6)<<(2*c));
+			res.vect.push_back(ch);
+			i--;
+			c+=mod;
+		}else{
+			if(n==2){
+//				res+=(ch%(1<<2)<<(2*c));
+				res.vect.push_back((1<<6)+ch%(1<<2));
+				c++;
+				i--;
+			}else{
+//				res+=(ch%(1<<4)<<(2*c));
+				res.vect.push_back((2<<6)+ch%(1<<4));
+				c+=2;
+				i--;
+			}
+		}
+	}
+	::reverse(res.vect.begin(),res.vect.end());
+	return res;
+}
 
 
 
 void binSeq::add(binSeq bs){
-	vect.insert(vect.begin(), bs.vect.begin(), bs.vect.end());
+	vect.insert(vect.end(), bs.vect.begin(), bs.vect.end());
 }
 
 
 void binSeq::reverse(){
 	vector<unsigned char> V;
 	for(int i((int)vect.size()-1); i>-1; --i){
-		printUC(vect[i]);
 		V.push_back(rc[vect[i]]);
-		printUC(rc[vect[i]]);
 	}
 	vect=V;
 }
@@ -357,9 +424,11 @@ binSeq::binSeq(){
 
 }
 
+
 size_t binSeq::size(){
 	return vect.size();
 }
+
 
 binSeq::binSeq(uint32_t n){
 	isNumber=true;
@@ -370,11 +439,37 @@ binSeq::binSeq(uint32_t n){
 }
 
 
-uint32_t binSeq::getInt(){
+uint32_t binSeq::getNumber(){
 	uint32_t res(0);
 	for(size_t i(0); i<vect.size(); ++i){
 		res<<=8;
 		res+=vect[i];
+	}
+	return res;
+}
+
+
+uint64_t binSeq::getInt(){
+	uint64_t res(0);
+	for(size_t i(0); i<vect.size(); ++i){
+		unsigned char c(vect[i]);
+		unsigned char mod(c/(1<<6));
+		res<<=(2*mod);
+		res+=c%(1<<6);
+	}
+	return res;
+}
+
+
+void binSeq::clear(){
+	vect.clear();
+}
+
+
+binSeq binSeq::getReverse(){
+	binSeq res;
+	for(int i((int)vect.size()-1); i>-1; --i){
+		res.vect.push_back(rc[vect[i]]);
 	}
 	return res;
 }
@@ -407,6 +502,7 @@ void testBinSeq(){
 
 //	printUC((unsigned char)(bs.getBegin(4)));
 //	printUC((unsigned char)(bs.getEnd(4)));
+//	cout<<bs.getBegin(bs.getBegin(5));
 	for(int i(0);i<str.size();++i)
 	{
 		if(bs2.sub(i).str()==str.substr(i)){
@@ -442,10 +538,10 @@ void testBinSeq(){
 
 	int n(2);
 	binSeq bs3(n);
-	if(n==bs3.getInt()){
+	if(n==bs3.getNumber()){
 		cout<<"getInt and int constroctor work"<<endl;
 	}else{
-		cout<<bs3.getInt()<<endl;
+		cout<<bs3.getNumber()<<endl;
 	}
 
 	binSeq bs4(str);
