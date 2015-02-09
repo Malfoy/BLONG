@@ -27,16 +27,17 @@ vector<path> MappingSupervisor::listPath(size_t lengthRequired, uNumber ind, uno
 			if (neigboor.size()>lengthRequired){
 				paths.push_back(path{neigboor,indiceNeigboor[i]});
 			}else{
-				vector<path> paths2(listPath(lengthRequired-neigboor.size()+kgraph, indiceNeigboor[i],usedUnitigs));
+				vector<path> paths2add;
+				vector<path> paths2(listPath(lengthRequired-neigboor.size()+kgraph+1, indiceNeigboor[i],usedUnitigs));
 				for (size_t j(0);j<paths2.size();++j){
 					string str (compaction(paths2[j].str,unitig,kgraph));
 					if(!str.empty()){
-						paths2[j].str=str;
+						paths2add.push_back({str,paths2[j].lastUnitig});
 					}else{
 
 					}
 				}
-				paths.insert(paths.end(), paths2.begin(), paths2.end());
+				paths.insert(paths.end(), paths2add.begin(), paths2add.end());
 			}
 		}
 	}
@@ -178,18 +179,19 @@ bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t
 
 	if(read.empty()){return false;}
 	if(read.size()<=position+offset){return true;}
-	int start ((int)position-(int)path.str.size()*1);
-
-	string region(read.substr(max(0,start),path.str.size()*2));
-	if(region.size()<offset){return true;}
+//	int start ((int)position-(int)path.str.size()*1);
+//
+//	string region(read.substr(max(0,start),path.str.size()*2));
+//	if(region.size()<offset){cout<<path.str.size()<<endl; return true;}
 
 	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
 
-	if(jaccard(k2,region,genomicKmers)>minJacc){
+	if(jaccard(k2,read,genomicKmers)>minJacc){
 		auto list(listPath(offset, path.lastUnitig, usedUnitigsInitial));
 		for(size_t i(0);i<list.size();++i){
 			auto usedUnitigs(usedUnitigsInitial);
 			if(alignOnPath(list[i], read, position+path.str.size(), usedUnitigs)){
+				outFile<<"read : "<<read<<" path:  "<<path.str<<endl;
 				return true;
 			}
 		}
@@ -203,9 +205,9 @@ bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t
 void MappingSupervisor::MapPart(size_t L, size_t R){
 	//foreach unitig (sort of)
 	for (size_t i(L); i<R; ++i){
-
 		if(unitigsPreMapped%100==0){
-			cout<<unitigsPreMapped++<<endl;
+			cout<<unitigsPreMapped<<endl;
+//			cout<<aligneOnPathSucess<<endl;
 		}
 
 		string unitig=unitigs[i];

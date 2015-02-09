@@ -132,6 +132,7 @@ unsigned char int2char(unsigned char c){
 
 
 binSeq::binSeq(const string& str){
+	isNumber=false;
 	unsigned char mod(str.size()%3);
 	unsigned char c;
 	for (size_t i(0); i<str.size()-mod; i+=3){
@@ -441,9 +442,10 @@ binSeq::binSeq(uint32_t n){
 
 uint32_t binSeq::getNumber(){
 	uint32_t res(0);
-	for(size_t i(0); i<vect.size(); ++i){
+	for(int i((int)vect.size()-1); i>-1; --i){
+		unsigned char c(vect[i]);
 		res<<=8;
-		res+=vect[i];
+		res+=c;
 	}
 	return res;
 }
@@ -503,7 +505,7 @@ void testBinSeq(){
 //	printUC((unsigned char)(bs.getBegin(4)));
 //	printUC((unsigned char)(bs.getEnd(4)));
 //	cout<<bs.getBegin(bs.getBegin(5));
-	for(int i(0);i<str.size();++i)
+	for(int i(0);i<(int)str.size();++i)
 	{
 		if(bs2.sub(i).str()==str.substr(i)){
 //			cout<<"sub work"<<endl;
@@ -536,7 +538,7 @@ void testBinSeq(){
 		cout<<bs2.sub(a,b).str()<<endl;
 	}
 
-	int n(2);
+	uint n(2);
 	binSeq bs3(n);
 	if(n==bs3.getNumber()){
 		cout<<"getInt and int constroctor work"<<endl;

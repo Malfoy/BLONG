@@ -22,6 +22,7 @@ struct path {
 
 class MappingSupervisor{
 public:
+	ofstream outFile;
 	size_t offset,minSizeUnitigs;
 	vector<string> unitigs,reads;
 	unordered_map<minimizer, unordered_set<rNumber>> min2Reads;
@@ -50,6 +51,7 @@ public:
 		unitigsPreMapped=0;
 		offset=100;
 		minSizeUnitigs=100;
+		outFile.open("zout.txt",ofstream::trunc);
 	}
 
 
