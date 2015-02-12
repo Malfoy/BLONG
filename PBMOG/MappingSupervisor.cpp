@@ -107,7 +107,7 @@ vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, uNumber i
 
 
 void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min){
-	if(unitigs.size()<100){
+	if(unitigs.size()<minSizeUnitigs){
 		for(size_t j(0);j+k<unitig.size();++j){
 			minimizer seq=seq2int(unitig.substr(j,k));
 			if(min.count(seq)==0){
@@ -179,19 +179,22 @@ bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t
 
 	if(read.empty()){return false;}
 	if(read.size()<=position+offset){return true;}
-//	int start ((int)position-(int)path.str.size()*1);
-//
-//	string region(read.substr(max(0,start),path.str.size()*2));
-//	if(region.size()<offset){cout<<path.str.size()<<endl; return true;}
+	int start ((int)position-(int)path.str.size()*1);
 
-	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
+	string region(read.substr(max(0,start),path.str.size()*2));
+	if(region.size()<offset){cout<<path.str.size()<<endl; return true;}
 
-	if(jaccard(k2,read,genomicKmers)>minJacc){
+	unordered_set<minimizer> genomicKmers=allKmerSet(k2,homocompression(path.str));
+//	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
+
+	if(jaccard(k2,homocompression(region),genomicKmers)>minJacc){
+//	if(jaccard(k2,region,genomicKmers)>minJacc){
+
 		auto list(listPath(offset, path.lastUnitig, usedUnitigsInitial));
 		for(size_t i(0);i<list.size();++i){
 			auto usedUnitigs(usedUnitigsInitial);
 			if(alignOnPath(list[i], read, position+path.str.size(), usedUnitigs)){
-				outFile<<"read : "<<read<<" path:  "<<path.str<<endl;
+//				outFile<<"read : "<<read<<" path:  "<<path.str<<endl;
 				return true;
 			}
 		}
@@ -206,7 +209,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 	//foreach unitig (sort of)
 	for (size_t i(L); i<R; ++i){
 		if(unitigsPreMapped%100==0){
-			cout<<unitigsPreMapped<<endl;
+			cout<<unitigsPreMapped++<<endl;
 //			cout<<aligneOnPathSucess<<endl;
 		}
 
@@ -266,7 +269,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 
 
 void MappingSupervisor::MapAll(){
-	size_t nbThreads(4);
+	size_t nbThreads(3);
 	vector<thread> threads;
 	vector<size_t> limits = bounds(nbThreads, unitigs.size());
 

@@ -106,10 +106,10 @@ int main(int argc, char ** argv) {
 //	testBinSeq();
 //	exit(0);
 	size_t H1(1000),k(15),part(1),kgraph(19);
-	size_t k2(9);
+	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(10);
+	size_t nCycle(1);
 	double errorRate(0.15);
 
 	auto start=chrono::system_clock::now();
@@ -130,6 +130,7 @@ int main(int argc, char ** argv) {
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
 	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, 100*(pow(1-2*errorRate,k2)), G, kgraph);
+	cout<<100*(pow(1-2*errorRate,k2))<<endl;
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 	cout<<"Reads Mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
