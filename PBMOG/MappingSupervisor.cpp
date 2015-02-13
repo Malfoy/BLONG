@@ -16,8 +16,15 @@
 vector<path> MappingSupervisor::listPath(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs){
 	string unitig(unitigs[ind]);
 	vector<path> paths;
-	vector<uNumber> indiceNeigboor(graph[getRepresent(unitig.substr(0,kgraph))]);
-	vector<uNumber> indiceNeigboor2(graph[getRepresent(unitig.substr(unitig.size()-kgraph,kgraph))]);
+	vector<uNumber> indiceNeigboor(G.getRight(unitig.substr(0,kgraph)));
+	vector<uNumber> indiceNeigboor2(G.getLeft(unitig.substr(unitig.size()-kgraph,kgraph)));
+//	cout<<indiceNeigboor.size()<<" "<<indiceNeigboor2.size()<<endl;
+//	cout<<getRepresent(unitig.substr(0,kgraph))<<endl;
+//	for(size_t i(0);i<indiceNeigboor.size();++i){
+//		cout<<unitigs[indiceNeigboor[i]]<<endl;
+//
+//	}
+//	cin.get();
 	indiceNeigboor.insert(indiceNeigboor.end(), indiceNeigboor2.begin(), indiceNeigboor2.end());
 	usedUnitigs.insert(ind);
 	//foreach unvisited neighbor
@@ -45,64 +52,64 @@ vector<path> MappingSupervisor::listPath(size_t lengthRequired, uNumber ind, uno
 }
 
 
-vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs){
-	string unitig(unitigs[ind]);
-	vector<path> paths;
-	vector<uNumber> indiceNeigboor(graph[getRepresent(unitig.substr(unitig.size()-kgraph,kgraph))]);
-	usedUnitigs.insert(ind);
-	//foreach unvisited neighbor
-	for (size_t i(0); i<indiceNeigboor.size(); ++i){
-		if(usedUnitigs.count(indiceNeigboor[i])==0){
-			string neigboor(unitigs[indiceNeigboor[i]]);
-			if (neigboor.size()>lengthRequired){
-				paths.push_back(path{neigboor,indiceNeigboor[i]});
-			}else{
-				vector<path> paths2(listPathSons(lengthRequired-neigboor.size()+kgraph, indiceNeigboor[i],usedUnitigs));
-				for (size_t j(0);j<paths2.size();++j){
-					string str (compaction(paths2[j].str,unitig,kgraph));
-					if(!str.empty()){
-						paths2[j].str=str;
-					}else{
+//vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs){
+//	string unitig(unitigs[ind]);
+//	vector<path> paths;
+//	vector<uNumber> indiceNeigboor(graph[getRepresent(unitig.substr(unitig.size()-kgraph,kgraph))]);
+//	usedUnitigs.insert(ind);
+//	//foreach unvisited neighbor
+//	for (size_t i(0); i<indiceNeigboor.size(); ++i){
+//		if(usedUnitigs.count(indiceNeigboor[i])==0){
+//			string neigboor(unitigs[indiceNeigboor[i]]);
+//			if (neigboor.size()>lengthRequired){
+//				paths.push_back(path{neigboor,indiceNeigboor[i]});
+//			}else{
+//				vector<path> paths2(listPathSons(lengthRequired-neigboor.size()+kgraph, indiceNeigboor[i],usedUnitigs));
+//				for (size_t j(0);j<paths2.size();++j){
+//					string str (compaction(paths2[j].str,unitig,kgraph));
+//					if(!str.empty()){
+//						paths2[j].str=str;
+//					}else{
+//
+//					}
+//				}
+//				paths.insert(paths.end(), paths2.begin(), paths2.end());
+//			}
+//		}
+//	}
+//	return paths;
+//}
 
-					}
-				}
-				paths.insert(paths.end(), paths2.begin(), paths2.end());
-			}
-		}
-	}
-	return paths;
-}
-
-
-vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs){
-	string unitig(unitigs[ind]);
-	vector<path> paths;
-	vector<uNumber> indiceNeigboor(graph[getRepresent(unitig.substr(0,kgraph))]);
-	vector<uNumber> indiceNeigboor2(graph[getRepresent(unitig.substr(unitig.size()-kgraph,kgraph))]);
-	indiceNeigboor.insert(indiceNeigboor.end(), indiceNeigboor2.begin(), indiceNeigboor2.end());
-	usedUnitigs.insert(ind);
-	//foreach unvisited neighbor
-	for (size_t i(0); i<indiceNeigboor.size(); ++i){
-		if(usedUnitigs.count(indiceNeigboor[i])==0){
-			string neigboor(unitigs[indiceNeigboor[i]]);
-			if (neigboor.size()>lengthRequired){
-				paths.push_back(path{neigboor,indiceNeigboor[i]});
-			}else{
-				vector<path> paths2(listPathFathers(lengthRequired-neigboor.size()+kgraph, indiceNeigboor[i],usedUnitigs));
-				for (size_t j(0);j<paths2.size();++j){
-					string str (compaction(paths2[j].str,unitig,kgraph));
-					if(!str.empty()){
-						paths2[j].str=str;
-					}else{
-
-					}
-				}
-				paths.insert(paths.end(), paths2.begin(), paths2.end());
-			}
-		}
-	}
-	return paths;
-}
+//
+//vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs){
+//	string unitig(unitigs[ind]);
+//	vector<path> paths;
+//	vector<uNumber> indiceNeigboor(graph[getRepresent(unitig.substr(0,kgraph))]);
+//	vector<uNumber> indiceNeigboor2(graph[getRepresent(unitig.substr(unitig.size()-kgraph,kgraph))]);
+//	indiceNeigboor.insert(indiceNeigboor.end(), indiceNeigboor2.begin(), indiceNeigboor2.end());
+//	usedUnitigs.insert(ind);
+//	//foreach unvisited neighbor
+//	for (size_t i(0); i<indiceNeigboor.size(); ++i){
+//		if(usedUnitigs.count(indiceNeigboor[i])==0){
+//			string neigboor(unitigs[indiceNeigboor[i]]);
+//			if (neigboor.size()>lengthRequired){
+//				paths.push_back(path{neigboor,indiceNeigboor[i]});
+//			}else{
+//				vector<path> paths2(listPathFathers(lengthRequired-neigboor.size()+kgraph, indiceNeigboor[i],usedUnitigs));
+//				for (size_t j(0);j<paths2.size();++j){
+//					string str (compaction(paths2[j].str,unitig,kgraph));
+//					if(!str.empty()){
+//						paths2[j].str=str;
+//					}else{
+//
+//					}
+//				}
+//				paths.insert(paths.end(), paths2.begin(), paths2.end());
+//			}
+//		}
+//	}
+//	return paths;
+//}
 
 
 
@@ -162,9 +169,9 @@ int MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNumb
 				region=read.substr(0,2*unitig.size());
 			}
 			if(genomicKmers.size()==0){
-				genomicKmers=allKmerSet(k2,unitig);
+				genomicKmers=allKmerSet(k2,homocompression( unitig));
 			}
-			if(jaccard(k2,region,genomicKmers)>minJacc){
+			if(jaccard(k2,homocompression(region),genomicKmers)>minJacc){
 				readMapped++;
 				return ((int)j);
 			}
@@ -269,7 +276,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 
 
 void MappingSupervisor::MapAll(){
-	size_t nbThreads(3);
+	size_t nbThreads(4);
 	vector<thread> threads;
 	vector<size_t> limits = bounds(nbThreads, unitigs.size());
 

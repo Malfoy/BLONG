@@ -16,6 +16,7 @@
 #include "MappingSupervisor.h"
 #include "Utils.h"
 #include "binSeq.h"
+#include "graph.h"
 
 //~ #define unordered_map sparse_hash_map
 #define minimizer uint32_t
@@ -102,14 +103,62 @@ unordered_map<minimizer,unordered_set<rNumber>> indexSeq(const vector<string>& s
 
 
 
+void testSimilarity(const string& refFaFile, const string& pbFileFq){
+	size_t k(11);
+	bool homo(false);
+	ifstream refFile(refFaFile),pbFile(pbFileFq);
+	string read,ref,line;
+	getline(refFile,line);
+	getline(refFile,ref);
+
+	vector<string> pbReads;
+
+	while (!pbFile.eof()) {
+		getline(pbFile,line);
+		getline(pbFile,read);
+		getline(pbFile,line);
+		getline(pbFile,line);
+		pbReads.push_back(read);
+	}
+	unordered_set<minimizer> genomicKmers;
+	if(homo){
+		genomicKmers=allKmerSet(k,homocompression(ref));
+	}else{
+		genomicKmers=allKmerSet(k,ref);
+	}
+	//	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
+
+
+	double acc(0);
+	for (size_t i(0); i<pbReads.size(); ++i) {
+		read=pbReads[i];
+		if(homo){
+			double jacc(jaccard(k,homocompression(read),genomicKmers));
+			acc+=jacc;
+			cout<<jacc<<endl;
+		}else{
+			double jacc(jaccard(k,read,genomicKmers));
+			cout<<jacc<<endl;
+			acc+=jacc;
+		}
+	}
+	cout<<"read number : "<<pbReads.size()<<endl;
+	cout<<"mean : "<<acc/pbReads.size()<<endl;
+}
+
+
+
 int main(int argc, char ** argv) {
 //	testBinSeq();
 //	exit(0);
+//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
+//	exit(0);
+
 	size_t H1(1000),k(15),part(1),kgraph(19);
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(1);
+	size_t nCycle(10ll);
 	double errorRate(0.15);
 
 	auto start=chrono::system_clock::now();
@@ -120,7 +169,7 @@ int main(int argc, char ** argv) {
 	}
 
 	auto U(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
-	auto G(getGraph(U,kgraph));
+	graph G(U,kgraph);
 	auto F(filterUnitigs(U,k,H1,part));
 	auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
 	cout<<"Reads loaded "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
@@ -129,7 +178,7 @@ int main(int argc, char ** argv) {
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, 100*(pow(1-2*errorRate,k2)), G, kgraph);
+	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, /*100*(pow(1-2*errorRate,k2))*/ 20, G, kgraph);
 	cout<<100*(pow(1-2*errorRate,k2))<<endl;
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;

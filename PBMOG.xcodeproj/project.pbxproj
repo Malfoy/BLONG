@@ -33,6 +33,7 @@
 		C7103C851A6017A600B2475E /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
 		C7103C861A6017A600B2475E /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		C722EFAA1A66859700B7347E /* Old */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Old; sourceTree = "<group>"; };
+		C731961C1A8E0C85006C0A33 /* graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = graph.h; sourceTree = "<group>"; };
 		C749FA8F1A40812000594542 /* PBMOG */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PBMOG; sourceTree = BUILT_PRODUCTS_DIR; };
 		C749FA921A40812000594542 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -74,6 +75,7 @@
 				C70F23751A777F5A00A131F1 /* binSeq.cpp */,
 				C70F23761A777F5A00A131F1 /* binSeq.h */,
 				C749FA921A40812000594542 /* main.cpp */,
+				C731961C1A8E0C85006C0A33 /* graph.h */,
 				C722EFAA1A66859700B7347E /* Old */,
 			);
 			path = PBMOG;

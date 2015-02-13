@@ -11,6 +11,7 @@
 
 
 #include "Utils.h"
+#include "graph.h"
 
 
 using namespace std;
@@ -28,13 +29,13 @@ public:
 	unordered_map<minimizer, unordered_set<rNumber>> min2Reads;
 	size_t k,multi,H,part,k2,kgraph;
 	double minJacc;
-	unordered_map<string, vector<uNumber>> graph;
+	graph G;
 	mutex myMutex,mutexEraseReads;
 	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig;
 
 
 
-	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, unordered_set<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc, const unordered_map<string, vector<uNumber>>& Igraph, size_t Ikgraph){
+	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, unordered_set<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph){
 		unitigs=Iunitigs;
 		min2Reads=Iindex;
 		k=Ik;
@@ -43,9 +44,9 @@ public:
 		H=IH;
 		part=Ipart;
 		k2=Ik2;
-		kgraph=Ikgraph;
 		minJacc=IminJacc;
-		graph=Igraph;
+		kgraph=Ikgraph;
+		G=graphe;
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
