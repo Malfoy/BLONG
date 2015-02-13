@@ -60,7 +60,6 @@ string revcomp (const string &s) {
 
 
 string getRepresent2(const string &s){
-	string rc;
 	for (int i = 0; i < (int)s.length(); i++) {
 		char c = revcomp(s[s.length() - 1 - i]);
 		if (s[i] < c) {
@@ -75,14 +74,22 @@ string getRepresent2(const string &s){
 
 string reversecomplement (const string &s){
 	string rc;
-	for (int i = (int)s.length() - 1; i >= 0; i--) rc += revcomp(s[i]);
+	for (int i = (int)s.length() - 1; i >= 0; i--){
+		rc += revcomp(s[i]);
+	}
 	return rc;
 
 }
 
 
 string getRepresent (const string& str){
-	return(min(str,reversecomplement(str)));
+	string rc(reversecomplement(str));
+	if(rc<str){
+		return rc;
+	}else{
+		return str;
+	}
+
 }
 
 
@@ -224,46 +231,36 @@ vector<size_t> bounds(size_t n,size_t size){
 }
 
 
-string compaction(string& seq1, string& seq2, size_t k){
+string compaction(const string& seq1,const string& seq2, size_t k){
 	size_t s1(seq1.size()),s2(seq2.size());
-	if(s1==0){return seq2;}
-	if(s2==0){return seq1;}
+//	if(s1==0){return "";}
+//	if(s2==0){return "";}
 
 	string rc2(reversecomplement(seq2));
-	string rc1(reversecomplement(seq1));
+//	string rc1(reversecomplement(seq1));
 
-
-	if(seq1.substr(0,k)==seq2.substr(s2-k,k)){
-		return seq2+seq1.substr(k);
-	}else{
-		if(rc2.substr(s2-k,k)==seq1.substr(0,k)){
-			return rc2+seq1.substr(k);
-		}
+	string end1(seq1.substr(s1-k,k));
+	string beg2(seq2.substr(0,k));
+	if(end1==beg2){
+		return seq1+(seq2.substr(k));
 	}
 
-	if(seq2.substr(0,k)==seq1.substr(s1-k,k)){
-		return seq1+seq2.substr(k);
-	}else{
-		if(rc1.substr(s1-k,k)==seq2.substr(0,k)){
-			return rc1+seq2.substr(k);
-		}
+	string begrc2(rc2.substr(0,k));
+	if(end1==begrc2){
+		return seq1+(rc2.substr(k));
 	}
 
-	if(rc1.substr(0,k)==seq2.substr(s2-k,k)){
-		return seq2+rc1.substr(k);
-	}else{
-		if(rc2.substr(s2-k,k)==rc1.substr(0,k)){
-			return rc2+rc1.substr(k);
-		}
+	string beg1(seq1.substr(0,k));
+	string end2(seq2.substr(s2-k,k));
+	if(beg1==end2){
+		return seq2+(seq1.substr(k));
 	}
 
-	if(rc2.substr(0,k)==seq1.substr(s1-k,k)){
-		return seq1+rc2.substr(k);
-	}else{
-		if(rc1.substr(s1-k,k)==rc2.substr(0,k)){
-			return rc1+rc2.substr(k);
-		}
+	string endrc2(rc2.substr(s2-k,k));
+	if(beg1==endrc2){
+		return rc2+(seq1.substr(k));
 	}
+//	cout<<"failt"<<endl;
 	return "";
 }
 

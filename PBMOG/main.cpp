@@ -158,7 +158,7 @@ int main(int argc, char ** argv) {
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(10ll);
+	size_t nCycle(10);
 	double errorRate(0.15);
 
 	auto start=chrono::system_clock::now();

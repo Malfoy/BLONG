@@ -16,8 +16,8 @@
 vector<path> MappingSupervisor::listPath(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs){
 	string unitig(unitigs[ind]);
 	vector<path> paths;
-	vector<uNumber> indiceNeigboor(G.getRight(unitig.substr(0,kgraph)));
-	vector<uNumber> indiceNeigboor2(G.getLeft(unitig.substr(unitig.size()-kgraph,kgraph)));
+	vector<uNumber> indiceNeigboor(G.getEnd(unitig.substr(0,kgraph)));
+	vector<uNumber> indiceNeigboor2(G.getBegin(unitig.substr(unitig.size()-kgraph,kgraph)));
 //	cout<<indiceNeigboor.size()<<" "<<indiceNeigboor2.size()<<endl;
 //	cout<<getRepresent(unitig.substr(0,kgraph))<<endl;
 //	for(size_t i(0);i<indiceNeigboor.size();++i){
@@ -32,16 +32,23 @@ vector<path> MappingSupervisor::listPath(size_t lengthRequired, uNumber ind, uno
 		if(usedUnitigs.count(indiceNeigboor[i])==0){
 			string neigboor(unitigs[indiceNeigboor[i]]);
 			if (neigboor.size()>lengthRequired){
-				paths.push_back(path{neigboor,indiceNeigboor[i]});
+				string str(compaction(unitig,neigboor,kgraph));
+				if(str!=""){
+					paths.push_back(path{str,indiceNeigboor[i]});
+				}else{
+					cout<<"nadine"<<endl;
+					cin.get();
+				}
 			}else{
 				vector<path> paths2add;
 				vector<path> paths2(listPath(lengthRequired-neigboor.size()+kgraph+1, indiceNeigboor[i],usedUnitigs));
 				for (size_t j(0);j<paths2.size();++j){
-					string str (compaction(paths2[j].str,unitig,kgraph));
+					string str (compaction(paths2[j].str,neigboor,kgraph));
 					if(!str.empty()){
 						paths2add.push_back({str,paths2[j].lastUnitig});
+//						cout<<"it works"<<endl;
 					}else{
-
+//						cout<<""wut"<<endl;
 					}
 				}
 				paths.insert(paths.end(), paths2add.begin(), paths2add.end());
@@ -191,11 +198,11 @@ bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t
 	string region(read.substr(max(0,start),path.str.size()*2));
 	if(region.size()<offset){cout<<path.str.size()<<endl; return true;}
 
-	unordered_set<minimizer> genomicKmers=allKmerSet(k2,homocompression(path.str));
-//	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
+//	unordered_set<minimizer> genomicKmers=allKmerSet(k2,homocompression(path.str));
+	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
 
-	if(jaccard(k2,homocompression(region),genomicKmers)>minJacc){
-//	if(jaccard(k2,region,genomicKmers)>minJacc){
+//	if(jaccard(k2,homocompression(region),genomicKmers)>minJacc){
+	if(jaccard(k2,region,genomicKmers)>minJacc){
 
 		auto list(listPath(offset, path.lastUnitig, usedUnitigsInitial));
 		for(size_t i(0);i<list.size();++i){
@@ -215,9 +222,12 @@ bool MappingSupervisor::alignOnPath(const path& path, const string& read, size_t
 void MappingSupervisor::MapPart(size_t L, size_t R){
 	//foreach unitig (sort of)
 	for (size_t i(L); i<R; ++i){
-		if(unitigsPreMapped%100==0){
-			cout<<unitigsPreMapped++<<endl;
-//			cout<<aligneOnPathSucess<<endl;
+		if(bigUnitig%10==0){
+			cout<<bigUnitig<<endl;
+			cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig+1)<<endl;
+			cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size()+1)<<endl;
+			cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size()+1)<<endl;
+			cout<<island<<" islands..."<<endl;
 		}
 
 		string unitig=unitigs[i];
@@ -225,6 +235,10 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 			bigUnitig++;
 			unordered_set<uNumber> usedUnitigsShared;
 			vector<path> list(listPath(offset, (uNumber)i, usedUnitigsShared));
+			if(list.size()==0){
+				island++;
+				continue;
+			}
 			unordered_set<minimizer> min;
 			bool done(false);
 			unordered_map<rNumber,size_t> Candidate;Candidate.set_empty_key(-1);
@@ -288,6 +302,7 @@ void MappingSupervisor::MapAll(){
 	cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig)<<endl;
 	cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size()+1)<<endl;
 	cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size()+1)<<endl;
+	cout<<island<<" islands..."<<endl;
 }
 
 
