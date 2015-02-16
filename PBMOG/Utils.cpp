@@ -233,8 +233,8 @@ vector<size_t> bounds(size_t n,size_t size){
 
 string compaction(const string& seq1,const string& seq2, size_t k){
 	size_t s1(seq1.size()),s2(seq2.size());
-//	if(s1==0){return "";}
-//	if(s2==0){return "";}
+	if(s1==0){return "";}
+	if(s2==0){return "";}
 
 	string rc2(reversecomplement(seq2));
 //	string rc1(reversecomplement(seq1));
@@ -332,9 +332,9 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 				}
 				if(v.size()==1){
 					island++;
-					if(unitig.size()<=minSize and elag){
+//					if(unitig.size()<=minSize and elag){
 						nottake.insert(it->second[0]);
-					}
+//					}
 				}
 			}
 		}

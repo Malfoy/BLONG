@@ -158,8 +158,11 @@ int main(int argc, char ** argv) {
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(10);
-	double errorRate(0.15);
+	size_t nCycle(1);
+	double errorRate(0.20);
+	double minjacc(100*(pow(1-errorRate,k2)));
+//	double minjacc(20);
+	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
 	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PC10x_0001.fastq",homo));
@@ -178,8 +181,8 @@ int main(int argc, char ** argv) {
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, /*100*(pow(1-2*errorRate,k2))*/ 20, G, kgraph);
-	cout<<100*(pow(1-2*errorRate,k2))<<endl;
+	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, minjacc, G, kgraph);
+
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 	cout<<"Reads Mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;

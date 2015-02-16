@@ -30,7 +30,7 @@ public:
 
 	void addEnd(const string& str, uNumber i){
 		string rc(reversecomplement(str));
-		if(str<reversecomplement(str)){
+		if(str<rc){
 			right[str].push_back(i);
 		}else{
 			left[rc].push_back(i);
@@ -38,7 +38,7 @@ public:
 	}
 
 
-	vector<uNumber> getBegin(string str){
+	vector<uNumber> getBegin(const string& str){
 		string rc(reversecomplement(str));
 		if(str<rc){
 			if(left.count(str)!=0){
@@ -56,7 +56,7 @@ public:
 	}
 
 
-	vector<uNumber> getEnd(string str){
+	vector<uNumber> getEnd(const string& str){
 		string rc(reversecomplement(str));
 		if(str<rc){
 			if(right.count(str)!=0){

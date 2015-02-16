@@ -27,7 +27,7 @@ public:
 	size_t offset,minSizeUnitigs;
 	vector<string> unitigs,reads;
 	unordered_map<minimizer, unordered_set<rNumber>> min2Reads;
-	size_t k,multi,H,part,k2,kgraph;
+	size_t k,multi,H,part,k2,kgraph,depthMax;
 	double minJacc;
 	graph G;
 	mutex myMutex,mutexEraseReads;
@@ -53,6 +53,7 @@ public:
 		unitigsPreMapped=0;
 		offset=100;
 		minSizeUnitigs=100;
+		depthMax=6;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
@@ -63,11 +64,18 @@ public:
 	void MapAll();
 	int isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers);
 	
-	vector<path> listPath(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
+	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
 		vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
 		vector<path> listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
-	bool alignOnPath(const path& path, const string& read, size_t position,unordered_set<uNumber>& usedUnitigs);
+	bool alignOnPath(const path& path, const string& read, size_t position,set<uNumber>& usedUnitigs);
+
+	vector<path> listPathSons(size_t lengthRequired, uNumber ind,char);
+	vector<path> listPathFathers(size_t lengthRequired, uNumber ind, char depth);
+
+	bool alignOnPathSons(const path& path, const string& read, size_t position);
+		bool alignOnPathFathers(const path& path, const string& read, size_t position);
+
 
 };
 
