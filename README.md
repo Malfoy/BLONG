@@ -1,1 +1,3 @@
 # PBMOG
+TODO
+Output paths
