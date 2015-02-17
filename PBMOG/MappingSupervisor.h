@@ -27,7 +27,8 @@ public:
 	size_t offset,minSizeUnitigs;
 	vector<string> unitigs,reads;
 	unordered_map<minimizer, unordered_set<rNumber>> min2Reads;
-	size_t k,multi,H,part,k2,kgraph,depthMax;
+	size_t k,multi,H,part,k2,kgraph;
+	char depthMax;
 	double minJacc;
 	graph G;
 	mutex myMutex,mutexEraseReads;
@@ -52,7 +53,7 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=100;
-		minSizeUnitigs=100;
+		minSizeUnitigs=50;
 		depthMax=6;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
