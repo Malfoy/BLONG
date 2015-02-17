@@ -363,7 +363,6 @@ bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read,
 void MappingSupervisor::MapPart(size_t L, size_t R){
 	//foreach unitig (sort of)
 	for (size_t i(L); i<R; ++i){
-
 		string unitig=unitigs[i];
 		if(unitig.size()>minSizeUnitigs){
 			if(bigUnitig++%100==0){
@@ -388,42 +387,59 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 			unordered_map<rNumber,unordered_set<minimizer>> read2min;read2min.set_empty_key(-1);
 			unordered_set<minimizer> genomicKmers;
 			findCandidate(unitig,min,Candidate,read2min);
-			//foreach reads that could map on the unitig (prepremapped)
-			for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
-				if(it->second>=multi){
-					//					if(unitigs[it->first].size()<offset){
-					//
-					//					}else{
-					int position(isCandidateCorrect(unitig,it->first,read2min,genomicKmers));
-					if(position!=-1){
-						//the read is mapped on the unitig (pre-mapped)
-						if(!done){
-							unitigsPreMapped++;
-							done=true;
-						}
+			if(unitig.size()<offset){
+				for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
+					if(it->second>=multi){
 						bool mappedOnGraph(false);
-						//For each possible path
 						for(size_t ii(0); ii<list.size() and !mappedOnGraph; ++ii){
 							path path(list[ii]);
+							path.str=compaction(path.str, unitig, kgraph);
 							string read(reads[it->first]);
-							if(alignOnPathSons(path, read.substr(0,position), 0) or alignOnPathFathers(path, read.substr(0,position), 0) ){
-								if(read.size()<position+unitig.size()){
-									mappedOnGraph=true;
-								}else{
-									if(alignOnPathSons(path, read.substr(position), 0) or alignOnPathFathers(path, read.substr(position), 0)){
-										mappedOnGraph=true;
-									}
-								}
-								if(mappedOnGraph){
-									++aligneOnPathSucess;
-									mutexEraseReads.lock();
-									reads[it->first].clear();
-									mutexEraseReads.unlock();
-								}
-
+							if(alignOnPathSons(path, read, 0) or alignOnPathFathers(path, read, 0)){
+								mappedOnGraph=true;
+							}
+							if(mappedOnGraph){
+								++aligneOnPathSucess;
+								mutexEraseReads.lock();
+								reads[it->first].clear();
+								mutexEraseReads.unlock();
 							}
 						}
-						//						}
+					}
+				}
+			}else{
+				//foreach reads that could map on the unitig (prepremapped)
+				for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
+					if(it->second>=multi){
+						int position(isCandidateCorrect(unitig,it->first,read2min,genomicKmers));
+						if(position!=-1){
+							//the read is mapped on the unitig (pre-mapped)
+							if(!done){
+								unitigsPreMapped++;
+								done=true;
+							}
+							bool mappedOnGraph(false);
+							//For each possible path
+							for(size_t ii(0); ii<list.size() and !mappedOnGraph; ++ii){
+								path path(list[ii]);
+								string read(reads[it->first]);
+								if(alignOnPathSons(path, read.substr(0,position), 0) or alignOnPathFathers(path, read.substr(0,position), 0) ){
+									if(read.size()<position+unitig.size()){
+										mappedOnGraph=true;
+									}else{
+										if(alignOnPathSons(path, read.substr(position), 0) or alignOnPathFathers(path, read.substr(position), 0)){
+											mappedOnGraph=true;
+										}
+									}
+									if(mappedOnGraph){
+										++aligneOnPathSucess;
+										mutexEraseReads.lock();
+										reads[it->first].clear();
+										mutexEraseReads.unlock();
+									}
+								}
+							}
+						}
 					}
 				}
 			}

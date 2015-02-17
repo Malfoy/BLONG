@@ -53,8 +53,9 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=100;
-		minSizeUnitigs=50;
-		depthMax=6;
+		minSizeUnitigs=30;
+		depthMax=5;
+		bigUnitig=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
