@@ -251,6 +251,10 @@
 					"/usr/local/lib/**",
 					"/usr/local/include/**",
 					"/usr/lib/**",
+					"~/Downloads/seq-align-master/src/**",
+					"/Users/alimasse/Downloads/seq-align-master/libs/bit_array",
+					"/Users/alimasse/Downloads/seq-align-master/libs/string_buffer",
+					"/Users/alimasse/Downloads/seq-align-master/src",
 				);
 				LLVM_LTO = YES;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -293,6 +297,10 @@
 					"/usr/local/lib/**",
 					"/usr/local/include/**",
 					"/usr/lib/**",
+					"~/Downloads/seq-align-master/src/**",
+					"/Users/alimasse/Downloads/seq-align-master/libs/bit_array",
+					"/Users/alimasse/Downloads/seq-align-master/libs/string_buffer",
+					"/Users/alimasse/Downloads/seq-align-master/src",
 				);
 				LLVM_LTO = YES;
 				OTHER_CPLUSPLUSFLAGS = (

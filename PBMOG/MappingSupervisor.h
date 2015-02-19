@@ -19,6 +19,7 @@ using namespace std;
 struct path {
 	string str;
 	uNumber lastUnitig;
+	vector<uNumber> numbers;
 };
 
 class MappingSupervisor{
@@ -53,8 +54,8 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=100;
-		minSizeUnitigs=30;
-		depthMax=5;
+		minSizeUnitigs=100;
+		depthMax=6;
 		bigUnitig=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
@@ -72,11 +73,11 @@ public:
 		vector<path> listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
 	bool alignOnPath(const path& path, const string& read, size_t position,set<uNumber>& usedUnitigs);
 
-	vector<path> listPathSons(size_t lengthRequired, uNumber ind,char);
-	vector<path> listPathFathers(size_t lengthRequired, uNumber ind, char depth);
+	vector<path> listPathSons(size_t lengthRequired, const string& substr,char);
+	vector<path> listPathFathers(size_t lengthRequired, const string& substr, char depth);
 
-	bool alignOnPathSons(const path& path, const string& read, size_t position);
-		bool alignOnPathFathers(const path& path, const string& read, size_t position);
+	bool alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>&);
+		bool alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>&);
 
 
 };

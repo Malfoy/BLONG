@@ -148,18 +148,18 @@ void testSimilarity(const string& refFaFile, const string& pbFileFq){
 
 
 
-int main(int argc, char ** argv) {
+int main(){
 //	testBinSeq();
 //	exit(0);
 //	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 //	exit(0);
 
-	size_t H1(1000),k(15),part(1),kgraph(30);
+	size_t H1(100),k(15),part(1),kgraph(30);
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(0);
-	double errorRate(0.20);
+	double errorRate(0.15);
 	double minjacc(100*(pow(1-errorRate,k2)));
 //	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;

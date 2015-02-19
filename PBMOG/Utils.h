@@ -51,6 +51,8 @@ double jaccardAlt(size_t k, const string& seq,const unordered_set<minimizer>& A)
 vector<size_t> bounds(size_t n,size_t size);
 string getRepresent(const string& str);
 string compaction(const string& seq1,const  string& seq2, size_t k);
+string compactionEnd(const string& seq1,const  string& seq2, size_t k);
+string compactionBegin(const string& seq1,const  string& seq2, size_t k);
 void readContigsforstats(const string& File, size_t k, bool elag, bool compact,bool unitigb);
 unordered_map<string,vector<minimizer>> getGraph(const vector<string>& unitigs, size_t k);
 vector<string> loadFASTQ(const string& unitigFile,bool homo);

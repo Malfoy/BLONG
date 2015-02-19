@@ -264,6 +264,47 @@ string compaction(const string& seq1,const string& seq2, size_t k){
 	return "";
 }
 
+string compactionEnd(const string& seq1,const string& seq2, size_t k){
+	size_t s1(seq1.size()),s2(seq2.size());
+	if(s1==0 or s2==0){return "";}
+
+	string rc2(reversecomplement(seq2));
+//		string rc1(reversecomplement(seq1));
+
+	string end1(seq1.substr(s1-k,k));
+	string beg2(seq2.substr(0,k));
+	if(end1==beg2){
+		return seq1+(seq2.substr(k));
+	}
+
+	string begrc2(rc2.substr(0,k));
+	if(end1==begrc2){
+		return seq1+(rc2.substr(k));
+	}
+	return "";
+}
+
+string compactionBegin(const string& seq1,const string& seq2, size_t k){
+	size_t s1(seq1.size()),s2(seq2.size());
+	if(s1==0 or s2==0){return "";}
+
+	string rc2(reversecomplement(seq2));
+//	string rc1(reversecomplement(seq1));
+
+	string beg1(seq1.substr(0,k));
+	string end2(seq2.substr(s2-k,k));
+	if(beg1==end2){
+		return seq2+(seq1.substr(k));
+	}
+
+	string endrc2(rc2.substr(s2-k,k));
+	if(beg1==endrc2){
+		return rc2+(seq1.substr(k));
+	}
+	//	cout<<"failt"<<endl;
+	return "";
+}
+
 
 
 void readContigsforstats(const string& File, size_t k, bool elag, bool compact,bool unitigb){
