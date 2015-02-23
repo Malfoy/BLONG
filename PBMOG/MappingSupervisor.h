@@ -18,7 +18,6 @@ using namespace std;
 
 struct path {
 	string str;
-	uNumber lastUnitig;
 	vector<uNumber> numbers;
 };
 
@@ -27,17 +26,17 @@ public:
 	ofstream outFile;
 	size_t offset,minSizeUnitigs;
 	vector<string> unitigs,reads;
-	unordered_map<minimizer, unordered_set<rNumber>> min2Reads;
+	unordered_map<minimizer, vector<rNumber>> min2Reads;
 	size_t k,multi,H,part,k2,kgraph;
 	char depthMax;
 	double minJacc;
 	graph G;
 	mutex myMutex,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped;
 
 
 
-	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, unordered_set<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph){
+	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph){
 		unitigs=Iunitigs;
 		min2Reads=Iindex;
 		k=Ik;
@@ -54,9 +53,10 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=100;
-		minSizeUnitigs=100;
-		depthMax=6;
+		minSizeUnitigs=30;
+		depthMax=10;
 		bigUnitig=0;
+		regionmapped=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 

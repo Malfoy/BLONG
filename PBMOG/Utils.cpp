@@ -170,21 +170,21 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 	vector<minimizer> sketchs(H);
 	uint64_t hashValue;
 	minimizer kmer;
-	//~ hash<uint32_t> hash;
+//	hash<uint32_t> hash;
 
 	kmer=seq2int(seq.substr(0,k));
-	//~ hashValue=hash(kmer);
+//	hashValue=hash(kmer);
 	hashValue=xorshift64(kmer);
-	for(size_t j(0);j<H;++j){
+	for(size_t j(0); j<H; ++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
 		hashValue=xorshift64(hashValue);
 	}
-	for(size_t i(1);i+k<seq.size();++i){
+	for(size_t i(1); i+k<seq.size(); ++i){
 		kmer=seq2int(seq.substr(i,k));
 		hashValue=xorshift64(kmer);
-		//~ hashValue=hash(kmer);
-		for(size_t j(0);j<H;++j){
+//		hashValue=hash(kmer);
+		for(size_t j(0); j<H; ++j){
 			if(hashValue<sketch[j]){
 				sketch[j]=hashValue;
 				sketchs[j]=kmer;

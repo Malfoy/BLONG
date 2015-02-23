@@ -30,13 +30,18 @@ atomic<size_t> atomicount;
 
 
 
-void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& reads, unordered_set<minimizer>* set, size_t L, size_t R){
+void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& sequences, unordered_set<minimizer>* set, size_t L, size_t R){
 	for(size_t i(L); i<R; ++i){
-		string read(reads[i]);
-		if(read.size()>100){
-			vector<minimizer> sketch=minHashpart(H,k,read,part);
+		string sequence(sequences[i]);
+		if(sequence.size()>5){
+			vector<minimizer> sketch;
+			if(sequence.size()<H){
+				sketch=allHash(k, sequence);
+			}else{
+				sketch=minHashpart(H,k,sequence,part);
+			}
 			myMutex.lock();
-			for(size_t j(0);j<H;++j){
+			for(size_t j(0);j<sketch.size();++j){
 				set->insert(sketch[j]);
 			}
 			myMutex.unlock();
@@ -47,16 +52,16 @@ void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& reads
 
 
 
-unordered_set<minimizer> filterUnitigs(const vector<string>& V, size_t k, size_t H, size_t part){
+unordered_set<minimizer> filterUnitigs(const vector<string>& unitigs, size_t k, size_t H, size_t part){
 	size_t nbThreads(8);
 	unordered_set<minimizer> res;
 	string line;
 	vector<thread> threads;
 
-	vector<size_t> limits = bounds(nbThreads, V.size());
+	vector<size_t> limits = bounds(nbThreads, unitigs.size());
 
 	for (size_t i(0); i<nbThreads; ++i){
-		threads.push_back(thread(computeMinHash,H,k,part,V,&res,limits[i],limits[i+1]));
+		threads.push_back(thread(computeMinHash,H,k,part,unitigs,&res,limits[i],limits[i+1]));
 	}
 
 	for(auto &t : threads){t.join();}
@@ -65,7 +70,7 @@ unordered_set<minimizer> filterUnitigs(const vector<string>& V, size_t k, size_t
 
 
 
-void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  const unordered_set<minimizer>& filter, unordered_map<minimizer,unordered_set<rNumber>>* index, uint32_t L, size_t R){
+void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  const unordered_set<minimizer>& filter, unordered_map<minimizer,vector<rNumber>>* index, uint32_t L, size_t R){
 
 	for (uint32_t i(L); i<R; ++i){
 		string seq=seqs[i];
@@ -78,7 +83,7 @@ void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  c
 		}
 		myMutex.lock();
 		for(uint32_t j(0);j<sketch.size();++j){
-			(*index)[sketch[j]].insert(i);
+			(*index)[sketch[j]].push_back(i);
 		}
 		myMutex.unlock();
 	}
@@ -86,10 +91,10 @@ void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  c
 
 
 
-unordered_map<minimizer,unordered_set<rNumber>> indexSeq(const vector<string>& seqs, size_t H, size_t k, size_t part, const unordered_set<minimizer>& filter){
+unordered_map<minimizer,vector<rNumber>> indexSeq(const vector<string>& seqs, size_t H, size_t k, size_t part, const unordered_set<minimizer>& filter){
 	size_t nbThreads(8);
 	vector<thread> threads;
-	unordered_map<minimizer,unordered_set<rNumber>> index;
+	unordered_map<minimizer,vector<rNumber>> index;
 	index.set_empty_key(-1);
 	vector<size_t> limits = bounds(nbThreads, seqs.size());
 
@@ -154,34 +159,36 @@ int main(){
 //	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 //	exit(0);
 
-	size_t H1(100),k(15),part(1),kgraph(30);
+	size_t H(100),k(15),part(1),kgraph(30);
 	size_t k2(11);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(0);
-	double errorRate(0.15);
+	size_t nCycle(1);
+	double errorRate(0.1);
 	double minjacc(100*(pow(1-errorRate,k2)));
 //	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PC10x_0001.fastq",homo));
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq",homo));
+//	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo));
 	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/out.fa", kgraph, false, true, false);
+//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
 
-	auto U(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
-	graph G(U,kgraph);
-	auto F(filterUnitigs(U,k,H1,part));
+	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
+	graph Graph(Unitigs,kgraph);
+	auto Filter(filterUnitigs(Unitigs,k,H,part));
 	auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
 	cout<<"Reads loaded "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	auto index(indexSeq(R,H1,k,1*part,F));
+	auto index(indexSeq(Reads,H,k,1*part,Filter));
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	MappingSupervisor supervisor(U, index, k, R, 2, H1, part, k2, minjacc, G, kgraph);
+	MappingSupervisor supervisor(Unitigs, index, k, Reads, 1, H, part, k2, minjacc, Graph, kgraph);
 
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
