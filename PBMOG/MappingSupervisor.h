@@ -32,7 +32,7 @@ public:
 	double minJacc;
 	graph G;
 	mutex myMutex,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap;
 
 
 
@@ -53,10 +53,11 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=100;
-		minSizeUnitigs=30;
-		depthMax=10;
+		minSizeUnitigs=100;
+		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
+		leftmap=rightmap=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
@@ -66,7 +67,8 @@ public:
 	void findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& count, unordered_map<rNumber,unordered_set<minimizer>>& read2min);
 	void MapAll();
 	int isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers);
-	
+	int isCandidateCorrectReverse(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers);
+
 	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
 		vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);

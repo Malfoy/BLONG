@@ -134,6 +134,14 @@ unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
 	return sketch;
 }
 
+unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
+	unordered_set<minimizer> sketch;
+	for(size_t i(0);i+k<seq.size();++i){
+		sketch.insert(seq2intStranded(seq.substr(i,k)));
+	}
+	return sketch;
+}
+
 
 double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer;
@@ -141,12 +149,27 @@ double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genom
 
 	for(size_t i(0);i+k<seq.size();++i){
 		kmer=seq2int(seq.substr(i,k));
-		if(genomicKmers.count(kmer)>0){
+		if(genomicKmers.unordered_set::count(kmer)>0){
 			++inter;
 		}
 	}
 //	return double(100*inter/(genomicKmers.size()));
 //	return double(100*inter/(seq.size()-k));
+	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
+}
+
+double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
+	minimizer kmer;
+	double inter(0);
+
+	for(size_t i(0);i+k<seq.size();++i){
+		kmer=seq2intStranded(seq.substr(i,k));
+		if(genomicKmers.unordered_set::count(kmer)>0){
+			++inter;
+		}
+	}
+	//	return double(100*inter/(genomicKmers.size()));
+	//	return double(100*inter/(seq.size()-k));
 	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
@@ -156,8 +179,8 @@ double jaccardAlt(size_t k, const string& seq,const unordered_set<minimizer>& ge
 	double inter(0);
 
 	for(size_t i(0);i+k<seq.size();++i){
-		kmer=seq2int(seq.substr(i,k));
-		if(genomicKmers.count(kmer)>0){
+		kmer=seq2intStranded(seq.substr(i,k));
+		if(genomicKmers.unordered_set::count(kmer)>0){
 			++inter;
 		}
 	}
@@ -203,7 +226,16 @@ minimizer seq2int(const string& seq){
 		res+=nuc2int(str[i]);
 		res<<=2;
 	}
+	return res;
+}
 
+
+minimizer seq2intStranded(const string& seq){
+	minimizer res(0);
+	for(uint i(0);i<seq.size();++i){
+		res+=nuc2int(seq[i]);
+		res<<=2;
+	}
 	return res;
 }
 
@@ -428,7 +460,7 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 	//~ uint64_t length(0);
 	ofstream out("unitigClean.fa");
 	for(uint ii(0);ii<unitigs.size();ii++){
-		if(nottake.count(ii)==0 and unitigs[ii].size()!=0){
+		if(nottake.unordered_set::count(ii)==0 and unitigs[ii].size()!=0){
 			out<<">"<<ii<<endl;
 			out<<unitigs[ii]<<endl;
 			length+=unitigs[ii].size();
@@ -530,6 +562,7 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 			line=homocompression(read);
 		}
 		if(read.size()>2){
+//			cout<<read<<endl;
 			res.push_back(read);
 			++number;
 			size+=read.size();
@@ -562,7 +595,7 @@ void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous,
 
 	for(size_t i(1);i+k<seq.size();++i){
 		kmer=seq2int(seq.substr(i,k));
-		if(filter.count(kmer)!=0){
+		if(filter.unordered_set::count(kmer)!=0){
 			hashValue=xorshift64(kmer);
 			//~ hashValue=hash(kmer);
 			for(size_t j(0);j<H;++j){

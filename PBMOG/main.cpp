@@ -170,8 +170,8 @@ int main(){
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq",homo));
-//	auto R(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo));
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/perfect10x_0001.fastq",homo));
+//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo));
 	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/out.fa", kgraph, false, true, false);
 //	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){

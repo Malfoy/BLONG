@@ -40,6 +40,7 @@ using namespace std;
 using namespace google;
 
 minimizer seq2int(const string& seq);
+minimizer seq2intStranded(const string& seq);
 string reversecomplement(const string& str);
 char nuc2int(char c);
 vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part);
@@ -47,6 +48,7 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 uint64_t xorshift64(uint64_t x);
 vector<minimizer> allHash(size_t k,const string& seq);
 double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& A);
+double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer>& A);
 double jaccardAlt(size_t k, const string& seq,const unordered_set<minimizer>& A);
 vector<size_t> bounds(size_t n,size_t size);
 string getRepresent(const string& str);
@@ -62,6 +64,8 @@ void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous,
 uint64_t xorshift(uint64_t x);
 vector<minimizer> minHashpart2(size_t H, size_t k,const string& seq, size_t part, const unordered_set<minimizer>& filter);
 unordered_set <minimizer> allKmerSet(size_t k,const string& seq);
+unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq);
+
 
 
 
