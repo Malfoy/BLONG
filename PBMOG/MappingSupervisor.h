@@ -32,7 +32,7 @@ public:
 	double minJacc;
 	graph G;
 	mutex myMutex,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail;
 
 
 
@@ -66,10 +66,9 @@ public:
 	void MapPart(size_t L, size_t R);
 	void findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& count, unordered_map<rNumber,unordered_set<minimizer>>& read2min);
 	void MapAll();
-	int isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers);
-	int isCandidateCorrectReverse(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers);
-
-	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
+	bool isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position);
+bool isCandidateCorrectReverse(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position);
+		vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
 		vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
 		vector<path> listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);

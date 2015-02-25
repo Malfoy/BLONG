@@ -36,6 +36,7 @@
 #define rNumber uint32_t
 #define uNumber uint32_t
 
+
 using namespace std;
 using namespace google;
 
@@ -65,6 +66,7 @@ uint64_t xorshift(uint64_t x);
 vector<minimizer> minHashpart2(size_t H, size_t k,const string& seq, size_t part, const unordered_set<minimizer>& filter);
 unordered_set <minimizer> allKmerSet(size_t k,const string& seq);
 unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq);
+size_t positionInSeq(const string& seq, minimizer min, size_t k);
 
 
 

@@ -146,15 +146,19 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer;
 	double inter(0);
+//	cout<<"jacc "<<seq<<k<<endl;
 
-	for(size_t i(0);i+k<seq.size();++i){
+	for(size_t i(0);i+k<=seq.size();++i){
 		kmer=seq2int(seq.substr(i,k));
+//		cout<<seq.substr(i,k)<<endl;;
 		if(genomicKmers.unordered_set::count(kmer)>0){
+//			cout<<"hit"<<endl;
 			++inter;
 		}
 	}
 //	return double(100*inter/(genomicKmers.size()));
 //	return double(100*inter/(seq.size()-k));
+//	cout<<max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)))<<endl;
 	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
@@ -495,6 +499,15 @@ unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, si
 	}
 
 	return graph;
+}
+
+size_t positionInSeq(const string& seq, minimizer min, size_t k){
+	for(size_t i(0); i<seq.size(); ++i){
+		if(min==seq2int(seq.substr(0,k))){
+			return i;
+		}
+	}
+	return seq.size()+1;
 }
 
 

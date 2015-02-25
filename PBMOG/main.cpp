@@ -188,7 +188,7 @@ int main(){
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	MappingSupervisor supervisor(Unitigs, index, k, Reads, 1, H, part, k2, minjacc, Graph, kgraph);
+	MappingSupervisor supervisor(Unitigs, index, k, Reads, 2, H, part, k2, minjacc, Graph, kgraph);
 
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
