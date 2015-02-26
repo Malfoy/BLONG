@@ -502,8 +502,8 @@ unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, si
 }
 
 size_t positionInSeq(const string& seq, minimizer min, size_t k){
-	for(size_t i(0); i<seq.size(); ++i){
-		if(min==seq2int(seq.substr(0,k))){
+	for(size_t i(0); i+k<=seq.size(); ++i){
+		if(min==seq2int(seq.substr(i,k))){
 			return i;
 		}
 	}
@@ -512,7 +512,7 @@ size_t positionInSeq(const string& seq, minimizer min, size_t k){
 
 
 
-vector<string> loadFASTQ(const string& unitigFile,bool homo){
+vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 	ifstream in(unitigFile);
 	vector<string> res;
 	uint64_t n(0);
@@ -524,7 +524,7 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo){
 		getline(in,line);
 		getline(in,lol);
 		getline(in,lol);
-		if(line.size()>1000){
+		if(line.size()>sizeMin){
 			if(homo){
 				res.push_back(homocompression(line));
 			}else{

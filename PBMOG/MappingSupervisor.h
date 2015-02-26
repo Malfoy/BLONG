@@ -67,18 +67,24 @@ public:
 	void findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& count, unordered_map<rNumber,unordered_set<minimizer>>& read2min);
 	void MapAll();
 	bool isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position);
-bool isCandidateCorrectReverse(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position);
-		vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
+	bool isCandidateCorrectReverse(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position);
+	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
-		vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
-		vector<path> listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
+	vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
+	vector<path> listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
 	bool alignOnPath(const path& path, const string& read, size_t position,set<uNumber>& usedUnitigs);
 
 	vector<path> listPathSons(size_t lengthRequired, const string& substr,char);
 	vector<path> listPathFathers(size_t lengthRequired, const string& substr, char depth);
 
 	bool alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>&);
-		bool alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>&);
+	bool alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>&);
+
+	bool alignOnPathSons2(const path& path, const string& read, size_t position,vector<uNumber>&);
+	bool alignOnPathFathers2(const path& path, const string& read, size_t position,vector<uNumber>&);
+
+	string getPathEnd(vector<uNumber>& numbers);
+	string getPathBegin(vector<uNumber>& numbers);
 
 
 };

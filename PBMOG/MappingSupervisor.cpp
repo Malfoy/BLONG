@@ -32,7 +32,7 @@ vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, const string
 			cin.get();
 		}
 		if (son.size()>=lengthRequired){
-//			cout<<newson<<"newson"<<endl;
+			//			cout<<newson<<"newson"<<endl;
 			paths.push_back(path{newson,{Sons[i]}});
 		}else{
 			vector<path> recurPaths(listPathSons(lengthRequired-son.size()+kgraph, newson.substr(newson.size()-kgraph), depth+1));
@@ -62,7 +62,7 @@ vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, const string
 
 
 vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, const string& substr, char depth){
-//	cout<<"listPathFathers"<<endl;
+	//	cout<<"listPathFathers"<<endl;
 	if(depth>depthMax){return {};}
 	vector<path> paths;
 	vector<uNumber> Fathers(G.getEnd(substr));
@@ -72,7 +72,7 @@ vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, const str
 	for (size_t i(0); i<Fathers.size(); ++i){
 		string father(unitigs[Fathers[i]]);
 		string newfather(compactionBegin(substr, father, kgraph));
-//		cout<<newfather<<endl;
+		//		cout<<newfather<<endl;
 		if(newfather.empty()){
 			cout<<"wtfnewfather"<<endl;
 			cin.get();
@@ -140,13 +140,14 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimi
 }
 
 
+
 bool MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position){
 	unordered_set<minimizer> setMin(read2min[readNumber]);
 	string read=reads[readNumber];
-//	cout<<unitig<<" "<<read<<endl;
+	//	cout<<unitig<<" "<<read<<endl;
 	if(read.empty()){return false;}
 	for(size_t j(0);j+k<=read.size();++j){
-//		cout<<read.substr(j,k)<<endl;
+		//		cout<<read.substr(j,k)<<endl;
 		minimizer seq(seq2int(read.substr(j,k)));
 		int pos((int)j-(int)positionInSeq(unitig, seq, k));
 		if(setMin.unordered_set::count(seq)!=0){
@@ -161,18 +162,18 @@ bool MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNum
 				genomicKmers=allKmerSetStranded(k2,unitig);
 			}
 			//if(jaccard(k2,homocompression(region),genomicKmers)>minJacc){
-//			cout<<region<<" "<<unitig<<endl;
+			//			cout<<region<<" "<<unitig<<endl;
 			if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
-//				cout<<region<<" "<<unitig<<endl;
+				//				cout<<region<<" "<<unitig<<endl;
 				readMapped++;
 				position=(pos);
-//				cout<<"true"<<endl;
+				//				cout<<"true"<<endl;
 				return true;
 
 			}
 		}
 	}
-//	cout<<"false"<<endl;
+	//	cout<<"false"<<endl;
 	return false;
 }
 
@@ -181,13 +182,13 @@ bool MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNum
 bool MappingSupervisor::isCandidateCorrectReverse(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position){
 	unordered_set<minimizer> setMin(read2min[readNumber]);
 	string read=reversecomplement(reads[readNumber]);
-//	cout<<unitig<<" "<<read<<endl;
-	if(read.empty()){return -1;}
+	//	cout<<unitig<<" "<<read<<endl;
+	if(read.empty()){return false;}
 	for(size_t j(0);j+k<=read.size();++j){
 		minimizer seq(seq2int(read.substr(j,k)));
 
 		if(setMin.unordered_set::count(seq)!=0){
-//			cout<<j<<" "<<positionInSeq(unitig, seq, k)<<endl;
+			//			cout<<j<<" "<<positionInSeq(unitig, seq, k)<<endl;
 			int pos((int)j-(int)positionInSeq(unitig, seq, k));
 			string region;
 
@@ -200,9 +201,9 @@ bool MappingSupervisor::isCandidateCorrectReverse(const string& unitig, rNumber 
 				genomicKmers=allKmerSetStranded(k2,unitig);
 			}
 			//if(jaccard(k2,homocompression(region),genomicKmers)>minJacc){
-//			cout<<region<<" "<<unitig<<endl;
+			//			cout<<region<<" "<<unitig<<endl;
 			if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
-//				cout<<region<<" "<<unitig<<endl;
+				//				cout<<region<<" "<<unitig<<endl;
 				readMapped++;
 				position=(pos);
 				return true;
@@ -216,29 +217,29 @@ bool MappingSupervisor::isCandidateCorrectReverse(const string& unitig, rNumber 
 
 
 
-bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>& numbers){
-	if(read.size()<=position+offset){return true;}
+bool MappingSupervisor::alignOnPathSons2(const path& path, const string& read, size_t position,vector<uNumber>& numbers){
+	//	if(read.size()<=position+offset){return true;}
 	int start ((int)position-(int)path.str.size()*1);
 
 	string region(read.substr(max(0,start),path.str.size()*2));
-	if(region.size()<offset){return true;}
+	//	if(region.size()<offset){return true;}
 
 
 	//		unordered_set<minimizer> genomicKmers=allKmerSet(k2,homocompression(path.str));
 	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
-//	cout<<region<<" "<<path.str<<endl;
+	//	cout<<region<<" "<<path.str<<endl;
 	//		if(jaccard(k2,homocompression(region),genomicKmers)>=minJacc){
 	if(jaccard(k2,region,genomicKmers)>=minJacc){
-//		cout<<"good"<<endl;
+		//		cout<<"good"<<endl;
 		regionmapped++;
-		if(read.size()<=position+path.str.size()+offset){
+		if(read.size()<position+path.str.size()-kgraph+offset){
 			return true;
 		}else{
 			size_t size(numbers.size());
 			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
 			auto list(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0));
 			for(size_t i(0);i<list.size();++i){
-				if(alignOnPathSons(list[i], read, position+path.str.size(),numbers)){
+				if(alignOnPathSons(list[i], read, position+path.str.size()-kgraph,numbers)){
 					return true;
 				}
 			}
@@ -249,33 +250,112 @@ bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, si
 }
 
 
-bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>& numbers ){
-//		cout<<"father : "<<path.str<<endl;
-	if(read.size()<=position+offset){return true;}
+bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>& numbers){
+//	cout<<"go"<<endl;
+	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
+	minimizer kmer;
+	int start(0);
+	bool found(false);
+	for(uint i(0); i<path.str.size(); ++i){
+		if(read.size()>position+i+k2){
+			kmer=seq2int(read.substr(position+i,k2));
+			if(genomicKmers.unordered_set::count(kmer)!=0){
+				start=i+(int)position-(int)positionInSeq(path.str, kmer, k2);
+				found=true;
+				break;
+			}
+		}
+	}
+//	cout<<"found"<<endl;
+	if(found){
+		string region(read.substr(max(0,start),path.str.size()));
+		if(jaccard(k2,region,genomicKmers)>=minJacc){
+			regionmapped++;
+			if(read.size()<position+path.str.size()-kgraph+offset){
+				return true;
+			}else{
+				size_t size(numbers.size());
+				numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
+				auto list(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0));
+				for(size_t i(0);i<list.size();++i){
+					if(alignOnPathSons(list[i], read, start+path.str.size()-kgraph,numbers)){
+						return true;
+					}
+				}
+				numbers.resize(size);
+			}
+		}
+	}
+	return false;
+}
+
+
+bool MappingSupervisor::alignOnPathFathers2(const path& path, const string& read, size_t position, vector<uNumber>& numbers ){
+	//		cout<<"father : "<<path.str<<endl;
+	//	if(read.size()<=position+offset){return true;}
 	int start ((int)read.size()-(int)position-(int)path.str.size()*1);
 
 	string region(read.substr(max(0,start),path.str.size()*2));
-	if(region.size()<offset){return true;}
+	//	if(region.size()<offset){return true;}
 
 	//		unordered_set<minimizer> genomicKmers=allKmerSet(k2,homocompression(path.str));
 	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
-//	cout<<region<<" "<<path.str<<endl;
+	//	cout<<region<<" "<<path.str<<endl;
 	//		if(jaccard(k2,homocompression(region),genomicKmers)>=minJacc){
 	if(jaccard(k2,region,genomicKmers)>=minJacc){
-//		cout<<"good"<<endl;
+		//		cout<<"good"<<endl;
 		regionmapped++;
-		if(read.size()<=position+path.str.size()){
+		if(read.size()<=position+path.str.size()-kgraph+offset){
 			return true;
 		}else{
 			size_t size(numbers.size());
 			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
 			auto list(listPathFathers(offset, path.str.substr(0,kgraph),0));
 			for(size_t i(0);i<list.size();++i){
-				if(alignOnPathFathers(list[i], read, position+path.str.size(),numbers)){
+				if(alignOnPathFathers(list[i], read, position+path.str.size()-kgraph,numbers)){
 					return true;
 				}
 			}
 			numbers.resize(size);
+		}
+	}
+	return false;
+}
+
+bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read, size_t position, vector<uNumber>& numbers ){
+	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
+	minimizer kmer;
+	int start(0);
+	bool found(false);
+	for(uint i(0); i<path.str.size(); ++i){
+		if(read.size()>k2+position+i){
+			kmer=seq2int(read.substr(read.size()-k2-position-i,k2));
+			if(genomicKmers.unordered_set::count(kmer)!=0){
+				start=(int)read.size()-(int)k2-(int)position-i;
+				found=true;
+				break;
+			}
+		}
+	}
+
+	if(found){
+		string region(read.substr(max(0,start),path.str.size()));
+		if(jaccard(k2,region,genomicKmers)>=minJacc){
+			//		cout<<"good"<<endl;
+			regionmapped++;
+			if(read.size()<=position+path.str.size()-kgraph+offset){
+				return true;
+			}else{
+				size_t size(numbers.size());
+				numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
+				auto list(listPathFathers(offset, path.str.substr(0,kgraph),0));
+				for(size_t i(0);i<list.size();++i){
+					if(alignOnPathFathers(list[i], read, start+path.str.size()-kgraph,numbers)){
+						return true;
+					}
+				}
+				numbers.resize(size);
+			}
 		}
 	}
 	return false;
@@ -288,8 +368,8 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 	//foreach unitig (sort of)
 	for (size_t i(L); i<R; ++i){
 		string unitig=unitigs[i];
-//				cout<<"unitig :"<<unitig<<endl;
-//		cin.get();
+		//		cout<<"unitig :"<<unitig<<endl;
+		//		cin.get();
 		if(unitig.size()>=minSizeUnitigs){
 			if(bigUnitig++%100==0){
 				cout<<bigUnitig++<<endl;
@@ -297,7 +377,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 				cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size()+1)<<endl;
 				cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size()+1)<<endl;
 				cout<<island<<" islands..."<<endl;
-				cout<<regionmapped<<" region mapped"<<endl;
+				cout<<regionmapped*offset/(1000*1000)<<" Mnuc mapped"<<endl;
 				cout<<leftmap<<" "<< rightmap<<endl;
 				cout<<leftmapFail<<" "<<rightmapFail<<endl;
 				cout<<endl;
@@ -305,7 +385,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 			vector<path> ListSons(listPathSons(offset, unitigs[i].substr(unitigs[i].size()-kgraph,kgraph),0));
 			vector<path> ListFathers(listPathFathers(offset, unitigs[i].substr(0,kgraph),0));
 			if( ListFathers.size()==0 and ListSons.size()==0){
-//								cin.get();
+				//								cin.get();
 				island++;
 				continue;
 			}
@@ -336,7 +416,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 
 								if(mappedOnGraph){
 									++aligneOnPathSucess;
-//									cout<<unitig<<endl;
+									//									cout<<unitig<<endl;
 									//									cout<<"go1"<<endl;
 									//									for_each(ref.begin(), ref.end(), [](uNumber u){cout<<u<<" ";});
 									//									cout<<" end"<<endl;cin.get();
@@ -353,7 +433,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 				//foreach reads that could map on the unitig (prepremapped)
 				for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
 					if(it->second>=multi){
-//						cout<<"try candidate correct"<<endl;
+						//						cout<<"try candidate correct"<<endl;
 						int position,position1,position2;
 						bool correct1(isCandidateCorrect(unitig,it->first,read2min,genomicKmers,position1));
 						bool correct2(isCandidateCorrectReverse(unitig,it->first,read2min,genomicKmersRC,position2));
@@ -361,17 +441,21 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 						if(correct1){
 							position=max(0,position1);
 							read=(reads[it->first]);
+							if(read.empty())
+								continue;
 						}else{
 							if(correct2) {
 								position=max(position2,0);
 								read=reversecomplement(reads[it->first]);
+								if(read.empty())
+									continue;
 							}else{
 								continue;
 							}
 						}
-//						cout<<position<<endl;
-//						cout<<read.substr(0,position+kgraph)<<endl;
-//						cout<<read.substr(position+unitig.size())<<endl;
+						//						cout<<position<<endl;
+						//						cout<<read.substr(0,position+kgraph)<<endl;
+						//						cout<<read.substr(position+unitig.size()-kgraph)<<endl;
 						//the read is mapped on the unitig (pre-mapped)
 						if(!done){
 							unitigsPreMapped++;
@@ -379,15 +463,15 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 						}
 						bool mappedLeft(false),mappedRight(false);
 
-						vector<uNumber> ref;
+						vector<uNumber> ref,ref2;
 						//For each possible path
-						if(position<(int)offset){
+						if(position+kgraph<offset){
 							mappedLeft=true;
-//							leftmap++;
+							//							leftmap++;
 						}else{
 							for(size_t j(0); j<ListFathers.size(); ++j){
 								path pathFather(ListFathers[j]);
-//								cout<<pathFather.str<<endl;
+								//								cout<<pathFather.str<<endl;
 								if(alignOnPathFathers(pathFather, read.substr(0,position+kgraph), 0,ref)){
 									mappedLeft=true;
 									leftmap++;
@@ -396,15 +480,15 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 							}
 							leftmapFail++;
 						}
-						if(read.size()<position+unitig.size()+offset){
+						if(read.size()<position+unitig.size()-kgraph+offset){
 							mappedRight=true;
-//							cout<<"rightmap"<<endl;
-//							rightmap++;
+							//							cout<<"rightmap"<<endl;
+							//							rightmap++;
 						}else{
-//							cout<<ListSons.size()<<endl;
+							//							cout<<ListSons.size()<<endl;
 							for(size_t j(0); j<ListSons.size(); ++j){
 								path pathSon(ListSons[j]);
-								if(alignOnPathSons(pathSon, read.substr(position+unitig.size()-kgraph), 0,ref)){
+								if(alignOnPathSons(pathSon, read.substr(position+unitig.size()-kgraph), 0,ref2)){
 									mappedRight=true;
 									rightmap++;
 									break;
@@ -415,11 +499,12 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 
 						if(mappedRight and mappedLeft){
 							++aligneOnPathSucess;
-//							cout<<"success"<<endl;
-//							cin.get();
-//							cout<<"go2"<<endl;
-//							for_each(ref.begin(), ref.end(), [this](uNumber u){cout<<unitigs[u]<<" ";});
-//							cout<<" end"<<endl;cin.get();
+							//							cout<<"success"<<endl;
+							//							cin.get();
+							//							cout<<"go2"<<endl;
+							//							cout<<getPathBegin(ref)<<endl;
+							//							cout<<getPathEnd(ref2)<<endl;
+							//							cout<<" end"<<endl;cin.get();
 
 							mutexEraseReads.lock();
 							reads[it->first].clear();
@@ -434,7 +519,45 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 
 
 
+string MappingSupervisor::getPathEnd(vector<uNumber>& numbers){
+	if(numbers.empty()){
+		return "";
+	}
+	string path(unitigs[numbers[0]]);
 
+	for(size_t i(1); i<numbers.size(); ++i){
+		//		cout<<path<<endl;
+		string unitig(unitigs[numbers[i]]);
+
+		string inter=compactionEnd(path, unitig, kgraph);
+		if(inter.empty()){
+			path=compactionEnd(reversecomplement(path), unitig, kgraph);
+		}else{
+			path=inter;
+		}
+	}
+	return path;
+}
+
+string MappingSupervisor::getPathBegin(vector<uNumber>& numbers){
+	if(numbers.empty()){
+		return "";
+	}
+	string path(unitigs[numbers[0]]);
+
+	for(size_t i(1); i<numbers.size(); ++i){
+		//		cout<<path<<endl;
+		string unitig(unitigs[numbers[i]]);
+
+		string inter=compactionBegin(path, unitig, kgraph);
+		if(inter.empty()){
+			path=compactionBegin(reversecomplement(path), unitig, kgraph);
+		}else{
+			path=inter;
+		}
+	}
+	return path;
+}
 
 
 
@@ -444,7 +567,6 @@ void MappingSupervisor::MapAll(){
 	size_t nbThreads(4);
 	vector<thread> threads;
 	vector<size_t> limits = bounds(nbThreads, unitigs.size());
-//	cout<<unitigs.size()<<endl;
 
 	for(size_t i(0); i<nbThreads; ++i) {
 		threads.push_back(thread(&MappingSupervisor::MapPart, this, limits[i], limits[i+1]));

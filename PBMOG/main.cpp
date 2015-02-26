@@ -160,7 +160,9 @@ int main(){
 //	exit(0);
 
 	size_t H(100),k(15),part(1),kgraph(30);
-	size_t k2(11);
+	size_t k2(11),minsize(1000);
+//	size_t H(100),k(5),part(1),kgraph(5);
+//	size_t k2(5),minsize(1);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(1);
@@ -170,9 +172,9 @@ int main(){
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/perfect10x_0001.fastq",homo));
-//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo));
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/perfect10x_0001.fastq",homo,minsize));
 	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/out.fa", kgraph, false, true, false);
+//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
 //	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
@@ -188,7 +190,7 @@ int main(){
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	MappingSupervisor supervisor(Unitigs, index, k, Reads, 2, H, part, k2, minjacc, Graph, kgraph);
+	MappingSupervisor supervisor(Unitigs, index, k, Reads, 1, H, part, k2, minjacc, Graph, kgraph);
 
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
