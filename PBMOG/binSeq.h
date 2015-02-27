@@ -27,10 +27,10 @@ public:
 	binSeq sub(size_t begin,size_t size);
 	binSeq getBegin(size_t size);
 	binSeq getEnd(size_t size);
-//	uint64_t getBegin(size_t size);
-//	uint64_t getEnd(size_t size);
-//	uint64_t getBeginRc(size_t size);
-//	uint64_t getEndRc(size_t size);
+	//	uint64_t getBegin(size_t size);
+	//	uint64_t getEnd(size_t size);
+	//	uint64_t getBeginRc(size_t size);
+	//	uint64_t getEndRc(size_t size);
 	void reverse();
 	binSeq getReverse();
 	void add(binSeq);
@@ -48,7 +48,7 @@ public:
 
 
 
-	
+
 
 	binSeq(const string& str);
 	binSeq();

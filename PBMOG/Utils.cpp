@@ -146,19 +146,19 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer;
 	double inter(0);
-//	cout<<"jacc "<<seq<<k<<endl;
+	//	cout<<"jacc "<<seq<<k<<endl;
 
 	for(size_t i(0);i+k<=seq.size();++i){
 		kmer=seq2int(seq.substr(i,k));
-//		cout<<seq.substr(i,k)<<endl;;
+		//		cout<<seq.substr(i,k)<<endl;;
 		if(genomicKmers.unordered_set::count(kmer)>0){
-//			cout<<"hit"<<endl;
+			//			cout<<"hit"<<endl;
 			++inter;
 		}
 	}
-//	return double(100*inter/(genomicKmers.size()));
-//	return double(100*inter/(seq.size()-k));
-//	cout<<max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)))<<endl;
+	//	return double(100*inter/(genomicKmers.size()));
+	//	return double(100*inter/(seq.size()-k));
+	//	cout<<max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)))<<endl;
 	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
@@ -197,10 +197,10 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 	vector<minimizer> sketchs(H);
 	uint64_t hashValue;
 	minimizer kmer;
-//	hash<uint32_t> hash;
+	//	hash<uint32_t> hash;
 
 	kmer=seq2int(seq.substr(0,k));
-//	hashValue=hash(kmer);
+	//	hashValue=hash(kmer);
 	hashValue=xorshift64(kmer);
 	for(size_t j(0); j<H; ++j){
 		sketch[j]=hashValue;
@@ -210,7 +210,7 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 	for(size_t i(1); i+k<seq.size(); ++i){
 		kmer=seq2int(seq.substr(i,k));
 		hashValue=xorshift64(kmer);
-//		hashValue=hash(kmer);
+		//		hashValue=hash(kmer);
 		for(size_t j(0); j<H; ++j){
 			if(hashValue<sketch[j]){
 				sketch[j]=hashValue;
@@ -273,7 +273,7 @@ string compaction(const string& seq1,const string& seq2, size_t k){
 	if(s2==0){return "";}
 
 	string rc2(reversecomplement(seq2));
-//	string rc1(reversecomplement(seq1));
+	//	string rc1(reversecomplement(seq1));
 
 	string end1(seq1.substr(s1-k,k));
 	string beg2(seq2.substr(0,k));
@@ -296,7 +296,7 @@ string compaction(const string& seq1,const string& seq2, size_t k){
 	if(beg1==endrc2){
 		return rc2+(seq1.substr(k));
 	}
-//	cout<<"failt"<<endl;
+	//	cout<<"failt"<<endl;
 	return "";
 }
 
@@ -305,7 +305,7 @@ string compactionEnd(const string& seq1,const string& seq2, size_t k){
 	if(s1==0 or s2==0){return "";}
 
 	string rc2(reversecomplement(seq2));
-//		string rc1(reversecomplement(seq1));
+	//		string rc1(reversecomplement(seq1));
 
 	string end1(seq1.substr(s1-k,k));
 	string beg2(seq2.substr(0,k));
@@ -325,7 +325,7 @@ string compactionBegin(const string& seq1,const string& seq2, size_t k){
 	if(s1==0 or s2==0){return "";}
 
 	string rc2(reversecomplement(seq2));
-//	string rc1(reversecomplement(seq1));
+	//	string rc1(reversecomplement(seq1));
 
 	string beg1(seq1.substr(0,k));
 	string end2(seq2.substr(s2-k,k));
@@ -409,9 +409,9 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 				}
 				if(v.size()==1){
 					island++;
-//					if(unitig.size()<=minSize and elag){
-						nottake.insert(it->second[0]);
-//					}
+					//					if(unitig.size()<=minSize and elag){
+					nottake.insert(it->second[0]);
+					//					}
 				}
 			}
 		}
@@ -424,12 +424,12 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 					unitigs[it->second[0]]=c;
 					unitigs[it->second[1]]="";
 				}else{
-//					if((unitigs[it->second[0]]).size()<=minSize){
-//						unitigs[it->second[0]]="";
-//					}
-//					if((unitigs[it->second[1]]).size()<=minSize){
-//						unitigs[it->second[1]]="";
-//					}
+					//					if((unitigs[it->second[0]]).size()<=minSize){
+					//						unitigs[it->second[0]]="";
+					//					}
+					//					if((unitigs[it->second[1]]).size()<=minSize){
+					//						unitigs[it->second[1]]="";
+					//					}
 				}
 			}
 		}
@@ -503,7 +503,7 @@ unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, si
 
 size_t positionInSeq(const string& seq, minimizer min, size_t k){
 	for(size_t i(0); i+k<=seq.size(); ++i){
-		if(min==seq2int(seq.substr(i,k))){
+		if(min==seq2intStranded(seq.substr(i,k))){
 			return i;
 		}
 	}
@@ -575,7 +575,7 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 			line=homocompression(read);
 		}
 		if(read.size()>2){
-//			cout<<read<<endl;
+			//			cout<<read<<endl;
 			res.push_back(read);
 			++number;
 			size+=read.size();

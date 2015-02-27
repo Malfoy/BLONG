@@ -52,7 +52,7 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=100;
+		offset=200;
 		minSizeUnitigs=100;
 		depthMax=5;
 		bigUnitig=0;

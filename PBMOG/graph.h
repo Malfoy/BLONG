@@ -73,13 +73,13 @@ public:
 		}
 	}
 
-//	vector<uNumber> getLeft(string str){
-//		str=getRepresent(str);
-//		if(gotLeft.count(str)!=0){
-//			return gotLeft[str];
-//		}
-//		return {};
-//	}
+	//	vector<uNumber> getLeft(string str){
+	//		str=getRepresent(str);
+	//		if(gotLeft.count(str)!=0){
+	//			return gotLeft[str];
+	//		}
+	//		return {};
+	//	}
 
 	graph(size_t kgraph){
 		right.set_empty_key("0");
@@ -104,8 +104,8 @@ public:
 		}
 	};
 
-	}
+}
 
-	;
+;
 
 #endif /* defined(__PBMOG__graph__) */
