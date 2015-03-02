@@ -35,7 +35,7 @@ void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& seque
 		string sequence(sequences[i]);
 		if(sequence.size()>5){
 			vector<minimizer> sketch;
-			if(sequence.size()<H){
+			if(sequence.size()<=H){
 				sketch=allHash(k, sequence);
 			}else{
 				sketch=minHashpart(H,k,sequence,part);
@@ -79,7 +79,6 @@ void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  c
 			sketch=allHash(k,seq);
 		}else{
 			sketch=minHashpart2(H,k,seq,part,filter);
-			//~ sketch=minHash(H,k,unitig);
 		}
 		myMutex.lock();
 		for(uint32_t j(0);j<sketch.size();++j){
@@ -159,10 +158,8 @@ int main(){
 	//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 	//	exit(0);
 
-	size_t H(100),k(15),part(1),kgraph(30);
-	size_t k2(11),minsize(1000);
-	//	size_t H(100),k(5),part(1),kgraph(5);
-	//	size_t k2(5),minsize(1);
+	size_t H(1000),k(15),part(1),kgraph(30),k2(11),minsize(1000),threshold(1);
+	//	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(1);
@@ -172,15 +169,17 @@ int main(){
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
+//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/positive_0001.fastq",homo,minsize));
 	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/1Xnormal_0001.fastq",homo,minsize));
 	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/out.fa", kgraph, false, true, false);
 	//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
-	//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
+//		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
 
 	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
+//	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/randomref1.fa",homo));
 	graph Graph(Unitigs,kgraph);
 	auto Filter(filterUnitigs(Unitigs,k,H,part));
 	auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
@@ -190,11 +189,11 @@ int main(){
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	MappingSupervisor supervisor(Unitigs, index, k, Reads, 3, H, part, k2, minjacc, Graph, kgraph);
+	MappingSupervisor supervisor(Unitigs, index, k, Reads, threshold, H, part, k2, minjacc, Graph, kgraph);
 
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 	cout<<"Reads Mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
-	
+
 	return 0;
 }

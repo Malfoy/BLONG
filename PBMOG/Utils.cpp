@@ -11,6 +11,12 @@
 using namespace std;
 
 
+size_t random(size_t max){
+	default_random_engine generator;
+	uniform_int_distribution<size_t> distribution(1,max);
+	return(distribution(generator));
+}
+
 string reversecompletment2(const string& str){
 	string res(str);
 	int n = (int)str.size();
@@ -105,9 +111,30 @@ char nuc2int(char c){
 		case 'T': return 3;
 	}
 	cout<<"fuck"<<endl;
+	cout<<c<<endl;
+	cin.get();
 	return 0;
 }
 
+char int2nuc(char i){
+	switch (i){
+		case 0:
+			return 'A';
+			break;
+		case 1:
+			return 'C';
+			break;
+		case 2:
+			return 'G';
+			break;
+		case 3:
+			return 'T';
+			break;
+		default:
+			return 'X';
+			break;
+	}
+}
 
 uint64_t xorshift64(uint64_t x) {
 	x ^= x >> 12; // a
@@ -119,8 +146,18 @@ uint64_t xorshift64(uint64_t x) {
 
 vector<minimizer> allHash(size_t k,const string& seq){
 	vector<minimizer> sketch;
-	for(size_t i(0);i+k<seq.size();++i){
-		sketch.push_back(seq2int(seq.substr(i,k)));
+	minimizer kmerS(seq2intStranded((seq.substr(0,k))));
+	minimizer kmerRC(seq2intStranded((reversecomplement(seq.substr(0,k)))));
+	minimizer kmer(min(kmerRC,kmerS));
+	for(size_t i(0);;++i){
+		sketch.push_back(kmer);
+		if(i+k<seq.size()){
+			updateMinimizer(kmerS, seq[i+k], k);
+			updateMinimizerRC(kmerRC, seq[i+k], k);
+			kmer=min(kmerRC,kmerS);
+		}else{
+			return sketch;
+		}
 	}
 	return sketch;
 }
@@ -128,7 +165,7 @@ vector<minimizer> allHash(size_t k,const string& seq){
 
 unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
 	unordered_set<minimizer> sketch;
-	for(size_t i(0);i+k<seq.size();++i){
+	for(size_t i(0);i+k<=seq.size();++i){
 		sketch.insert(seq2int(seq.substr(i,k)));
 	}
 	return sketch;
@@ -136,8 +173,15 @@ unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
 
 unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	unordered_set<minimizer> sketch;
-	for(size_t i(0);i+k<seq.size();++i){
-		sketch.insert(seq2intStranded(seq.substr(i,k)));
+	minimizer min(seq2intStranded(seq.substr(0,k)));
+	for(size_t i(0);;++i){
+		sketch.insert(min);
+		if(i+k<seq.size()){
+			updateMinimizer(min, seq[i+k], k);
+		}else{
+			return sketch;
+		}
+
 	}
 	return sketch;
 }
@@ -163,13 +207,17 @@ double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genom
 }
 
 double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
-	minimizer kmer;
+	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	double inter(0);
 
-	for(size_t i(0);i+k<seq.size();++i){
-		kmer=seq2intStranded(seq.substr(i,k));
+	for(size_t i(0);;++i){
 		if(genomicKmers.unordered_set::count(kmer)>0){
 			++inter;
+		}
+		if(i+k<seq.size()){
+			updateMinimizer(kmer, seq[i+k], k);
+		}else{
+			return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 		}
 	}
 	//	return double(100*inter/(genomicKmers.size()));
@@ -178,28 +226,18 @@ double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer
 }
 
 
-double jaccardAlt(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
-	minimizer kmer;
-	double inter(0);
 
-	for(size_t i(0);i+k<seq.size();++i){
-		kmer=seq2intStranded(seq.substr(i,k));
-		if(genomicKmers.unordered_set::count(kmer)>0){
-			++inter;
-		}
-	}
-	return double(100*inter/(seq.size()-k));
-}
 
 
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
 	vector<uint64_t> sketch(H);
 	vector<minimizer> sketchs(H);
 	uint64_t hashValue;
-	minimizer kmer;
 	//	hash<uint32_t> hash;
 
-	kmer=seq2int(seq.substr(0,k));
+	minimizer kmerS(seq2intStranded(seq.substr(0,k)));
+	minimizer kmerRC(seq2intStranded(reversecomplement(seq.substr(0,k))));
+	minimizer kmer(min(kmerS,kmerRC));
 	//	hashValue=hash(kmer);
 	hashValue=xorshift64(kmer);
 	for(size_t j(0); j<H; ++j){
@@ -208,7 +246,9 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 		hashValue=xorshift64(hashValue);
 	}
 	for(size_t i(1); i+k<seq.size(); ++i){
-		kmer=seq2int(seq.substr(i,k));
+		updateMinimizer(kmerS, seq[i+k], k);
+		updateMinimizerRC(kmerRC, seq[i+k], k);
+		kmer=(min(kmerS,kmerRC));
 		hashValue=xorshift64(kmer);
 		//		hashValue=hash(kmer);
 		for(size_t j(0); j<H; ++j){
@@ -225,10 +265,12 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 
 minimizer seq2int(const string& seq){
 	string str(getRepresent(seq));
+	cout<<"lol"<<endl;
+	cin.get();
 	minimizer res(0);
 	for(uint i(0);i<seq.size();++i){
-		res+=nuc2int(str[i]);
 		res<<=2;
+		res+=nuc2int(str[i]);
 	}
 	return res;
 }
@@ -237,8 +279,8 @@ minimizer seq2int(const string& seq){
 minimizer seq2intStranded(const string& seq){
 	minimizer res(0);
 	for(uint i(0);i<seq.size();++i){
-		res+=nuc2int(seq[i]);
 		res<<=2;
+		res+=nuc2int(seq[i]);
 	}
 	return res;
 }
@@ -501,14 +543,38 @@ unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, si
 	return graph;
 }
 
-size_t positionInSeq(const string& seq, minimizer min, size_t k){
-	for(size_t i(0); i+k<=seq.size(); ++i){
-		if(min==seq2intStranded(seq.substr(i,k))){
-			return i;
+int positionInSeq(const string& seq, minimizer min, size_t k){
+	minimizer kmer(seq2intStranded(seq.substr(0,k)));
+	minimizer kmerRC(seq2intStranded(reversecomplement((seq.substr(0,k)))));
+	for(size_t i(0);; ++i){
+		if(min==kmer or min==kmerRC){
+			return (int)i;
+		}
+		if(i+k<seq.size()){
+			updateMinimizer(kmer, seq[i+k], k);
+			updateMinimizerRC(kmerRC, seq[i+k], k);
+		}else{
+			return -1;
 		}
 	}
-	return seq.size()+1;
+	return -1;
 }
+
+int positionInSeqStranded(const string& seq, minimizer min, size_t k){
+	minimizer kmer(seq2intStranded(seq.substr(0,k)));
+	for(size_t i(0);; ++i){
+		if(min==kmer){
+			return (int)i;
+		}
+		if(i+k<seq.size()){
+			updateMinimizer(kmer, seq[i+k], k);
+		}else{
+			return -1;
+		}
+	}
+	return -1;
+}
+
 
 
 
@@ -528,7 +594,9 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 			if(homo){
 				res.push_back(homocompression(line));
 			}else{
+//				res.push_back(randomString(10000));
 				res.push_back(line);
+//				cout<<line<<endl;
 			}
 			++n;
 			size+=line.size();
@@ -554,6 +622,40 @@ string homocompression(const string& seq){
 	return res;
 }
 
+string randomString( size_t length )
+{
+	auto randchar = []() -> char
+	{
+		const char charset[] ="ATCG";
+		const size_t max_index = (sizeof(charset) - 1);
+		return charset[ rand() % max_index ];
+	};
+	string str(length,0);
+	generate_n( str.begin(), length, randchar );
+	return str;
+}
+
+void printMinimizer(minimizer min,size_t k){
+	string res;
+	for(size_t i(0); i<k; ++i){
+		res+=int2nuc(min%4);
+		min>>=2;
+	}
+	reverse(res.begin(),res.end());
+	cout<<res<<endl;
+}
+
+void updateMinimizer(minimizer&	min, char nuc,size_t k){
+	minimizer offset(1<<(2*k));
+	min<<=2;
+	min+=nuc2int(nuc);
+	min%=offset;
+}
+
+void updateMinimizerRC(minimizer&	min, char nuc,size_t k){
+	min>>=2;
+	min+=((3-nuc2int(nuc))<<(2*k-2));
+}
 
 vector<string> loadUnitigs(const string& unitigFile,bool homo){
 	ifstream in(unitigFile);
@@ -575,8 +677,10 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 			line=homocompression(read);
 		}
 		if(read.size()>2){
-			//			cout<<read<<endl;
+//			read=read.substr(2000+random(read.size()-4000),200);
 			res.push_back(read);
+			//			res.push_back("ACATCAAAGCTAGTGTGAGCTCCGATAATCACTGTGAGAAAAGGCGATAGGAACCGCATGACTCCAATGTAGGTCCTTCCCGGGTGGGGACCTGGCGTGAGGCAGACTGCGGCCGATGGTGAGAAAGGAATTCAATGAGTTGCATCGGCACCCCGAAGTATAGCACGTAGGTCAGGACGTTTCTTATACAGAGCCCGGAA");
+//			cout<<read<<endl;
 			++number;
 			size+=read.size();
 		}
@@ -589,15 +693,15 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 
 
 
-
 void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous, const unordered_set<minimizer>& filter){
 	vector<uint64_t> sketch(H);
 	vector<minimizer> sketchs(H);
-	uint64_t hashValue;
-	minimizer kmer;
+	uint64_t hashValue;;
 	//~ hash<uint32_t> hash;
 
-	kmer=seq2int(seq.substr(0,k));
+	minimizer kmerS=seq2intStranded(seq.substr(0,k));
+	minimizer kmerRC=seq2intStranded(reversecomplement(seq.substr(0,k)));
+	minimizer kmer(min(kmerS,kmerRC));
 	hashValue=xorshift64(kmer);
 	//~ hashValue=hash(kmer);
 	for(size_t j(0);j<H;++j){
@@ -607,7 +711,10 @@ void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous,
 	}
 
 	for(size_t i(1);i+k<seq.size();++i){
-		kmer=seq2int(seq.substr(i,k));
+		updateMinimizerRC(kmerRC, seq[i+k], k);
+		updateMinimizer(kmerS, seq[i+k], k);
+		kmer=min(kmerRC,kmerS);
+
 		if(filter.unordered_set::count(kmer)!=0){
 			hashValue=xorshift64(kmer);
 			//~ hashValue=hash(kmer);

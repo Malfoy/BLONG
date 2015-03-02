@@ -32,7 +32,7 @@ public:
 	double minJacc;
 	graph G;
 	mutex myMutex,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate;
 
 
 
@@ -52,12 +52,12 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=200;
+		offset=100;
 		minSizeUnitigs=100;
-		depthMax=5;
+		depthMax=6;
 		bigUnitig=0;
 		regionmapped=0;
-		leftmap=rightmap=0;
+		candidate=leftmap=rightmap=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
@@ -66,8 +66,7 @@ public:
 	void MapPart(size_t L, size_t R);
 	void findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& count, unordered_map<rNumber,unordered_set<minimizer>>& read2min);
 	void MapAll();
-	bool isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position);
-	bool isCandidateCorrectReverse(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position);
+	bool isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position,bool);
 	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
 	vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);

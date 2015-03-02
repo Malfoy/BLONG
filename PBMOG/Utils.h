@@ -27,7 +27,7 @@
 #include <vector>
 #include <thread>
 #include <atomic>
-
+#include <random>
 
 
 //~ #define unordered_map sparse_hash_map
@@ -66,10 +66,13 @@ uint64_t xorshift(uint64_t x);
 vector<minimizer> minHashpart2(size_t H, size_t k,const string& seq, size_t part, const unordered_set<minimizer>& filter);
 unordered_set <minimizer> allKmerSet(size_t k,const string& seq);
 unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq);
-size_t positionInSeq(const string& seq, minimizer min, size_t k);
-
-
-
+int positionInSeq(const string& seq, minimizer min, size_t k);
+int positionInSeqStranded(const string& seq, minimizer min, size_t k);
+size_t random(size_t max);
+string randomString( size_t length );
+void updateMinimizer(minimizer& min, char nuc,size_t k);
+void updateMinimizerRC(minimizer&	min, char nuc,size_t k);
+void printMinimizer(minimizer min,size_t k);
 
 
 #endif /* defined(__PBMOG__Utils__) */
