@@ -33,7 +33,7 @@ atomic<size_t> atomicount;
 void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& sequences, unordered_set<minimizer>* set, size_t L, size_t R){
 	for(size_t i(L); i<R; ++i){
 		string sequence(sequences[i]);
-		if(sequence.size()>5){
+		if(sequence.size()>=k){
 			vector<minimizer> sketch;
 			if(sequence.size()<=H){
 				sketch=allHash(k, sequence);
@@ -158,7 +158,7 @@ int main(){
 	//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 	//	exit(0);
 
-	size_t H(1000),k(15),part(1),kgraph(30),k2(11),minsize(1000),threshold(1);
+	size_t H(100),k(15),part(1),kgraph(30),k2(11),minsize(1000),threshold(3);
 	//	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1);
 	bool homo(false);
 	srand((int)time(NULL));

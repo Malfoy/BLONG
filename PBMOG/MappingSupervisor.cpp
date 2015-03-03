@@ -91,7 +91,7 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimi
 		minimizer kmerS=seq2intStranded(unitig.substr(0,k));
 		minimizer kmerRC=seq2intStranded(reversecomplement(unitig.substr(0,k)));
 		minimizer seq(min(kmerRC,kmerS));
-		for(size_t j(0);j+k<=unitig.size();++j){
+		for(size_t i(0);;++i){
 			if(minSet.unordered_set::count(seq)==0){
 				minSet.insert(seq);
 				if(min2Reads.unordered_map::count(seq)!=0){
@@ -104,12 +104,12 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimi
 					}
 				}
 			}
-			if(j+k<unitig.size()){
-				updateMinimizer(kmerS, unitig[j+k], k);
-				updateMinimizerRC(kmerRC, unitig[j+k], k);
+			if(i+k<unitig.size()){
+				updateMinimizer(kmerS, unitig[i+k], k);
+				updateMinimizerRC(kmerRC, unitig[i+k], k);
 				seq=(min(kmerRC,kmerS));
 			}else{
-				break;
+				return;
 			}
 		}
 	}else{
@@ -182,13 +182,15 @@ bool MappingSupervisor::isCandidateCorrect(const string& unitig, rNumber readNum
 
 bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>& numbers){
 	unordered_set<minimizer> genomicKmers=allKmerSetStranded(k2,path.str);
+//	cout<<"go"<<endl;
 	minimizer kmer(seq2intStranded(read.substr(position,k2)));
+//	cout<<"kmer done"<<endl;
 	int start(0);
 	bool found(false);
 
 	for(uint i(0); i<path.str.size(); ++i){
 		if(genomicKmers.unordered_set::count(kmer)!=0){
-			start=i+(int)position-(int)positionInSeqStranded(path.str, kmer, k2);
+			start=max(((int)i+(int)position-(int)positionInSeqStranded(path.str, kmer, k2)),0);
 			found=true;
 			break;
 		}
@@ -200,7 +202,10 @@ bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, si
 	}
 
 	if(found){
-		string region(read.substr(max(0,start),path.str.size()));
+//		cout<<"found"<<endl;
+		string region(read.substr(start,path.str.size()));
+//		cout<<region<<endl;
+//		cout<<"start ok"<<endl;
 		if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
 			regionmapped++;
 			size_t size(numbers.size());
@@ -208,7 +213,11 @@ bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, si
 			if(read.size()<start+path.str.size()-kgraph+offset){
 				return true;
 			}else{
+//				cout<<read.size()<<endl;
+//				cout<<start+path.str.size()-kgraph<<endl;
+//				cout<<path.str<<endl;
 				auto list(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0));
+//				cout<<"recur"<<endl;
 				for(size_t i(0);i<list.size();++i){
 					if(alignOnPathSons(list[i], read, start+path.str.size()-kgraph,numbers)){
 						return true;
@@ -229,7 +238,7 @@ bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read,
 	bool found(false);
 	for(uint i(0); i<path.str.size(); ++i){
 		if(genomicKmers.unordered_set::count(kmer)!=0){
-			start=(int)read.size()-(int)position-i-(int)positionInSeqStranded(path.str, kmer, k2);
+			start=max(((int)read.size()-(int)position-(int)i-(int)positionInSeqStranded(path.str, kmer, k2)),0);
 			found=true;
 			break;
 		}
@@ -241,7 +250,7 @@ bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read,
 	}
 
 	if(found){
-		string region(read.substr(max(0,start),path.str.size()));
+		string region(read.substr(start,path.str.size()));
 		if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
 			regionmapped++;
 			size_t size(numbers.size());
