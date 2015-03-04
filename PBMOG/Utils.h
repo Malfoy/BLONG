@@ -68,10 +68,13 @@ unordered_set <minimizer> allKmerSet(size_t k,const string& seq);
 unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq);
 int positionInSeq(const string& seq, minimizer min, size_t k);
 int positionInSeqStranded(const string& seq, minimizer min, size_t k);
+int positionInSeqStrandedEnd(const string& seq, minimizer min, size_t k);
 size_t random(size_t max);
 string randomString( size_t length );
 void updateMinimizer(minimizer& min, char nuc,size_t k);
 void updateMinimizerRC(minimizer&	min, char nuc,size_t k);
+void updateMinimizerEnd(minimizer&	min, char nuc,size_t k);
+
 void printMinimizer(minimizer min,size_t k);
 
 

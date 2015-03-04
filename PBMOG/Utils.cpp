@@ -149,8 +149,10 @@ vector<minimizer> allHash(size_t k,const string& seq){
 	minimizer kmerS(seq2intStranded((seq.substr(0,k))));
 	minimizer kmerRC(seq2intStranded((reversecomplement(seq.substr(0,k)))));
 	minimizer kmer(min(kmerRC,kmerS));
-	for(size_t i(0);;++i){
+	size_t i(0);
+	do{
 		sketch.push_back(kmer);
+		++i;
 		if(i+k<seq.size()){
 			updateMinimizer(kmerS, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
@@ -158,7 +160,7 @@ vector<minimizer> allHash(size_t k,const string& seq){
 		}else{
 			return sketch;
 		}
-	}
+	}while(true);
 	return sketch;
 }
 
@@ -174,15 +176,17 @@ unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
 unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	unordered_set<minimizer> sketch;
 	minimizer min(seq2intStranded(seq.substr(0,k)));
-	for(size_t i(0);;++i){
+	size_t i(0);
+	do{
 		sketch.insert(min);
+		++i;
 		if(i+k<seq.size()){
 			updateMinimizer(min, seq[i+k], k);
 		}else{
 			return sketch;
 		}
 
-	}
+	}while(true);
 	return sketch;
 }
 
@@ -209,17 +213,18 @@ double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genom
 double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	double inter(0);
-
-	for(size_t i(0);;++i){
+	size_t i(0);
+	do{
 		if(genomicKmers.unordered_set::count(kmer)>0){
 			++inter;
 		}
+		++i;
 		if(i+k<seq.size()){
 			updateMinimizer(kmer, seq[i+k], k);
 		}else{
 			return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 		}
-	}
+	}while(true);
 	//	return double(100*inter/(genomicKmers.size()));
 	//	return double(100*inter/(seq.size()-k));
 	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
@@ -546,13 +551,48 @@ unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, si
 int positionInSeq(const string& seq, minimizer min, size_t k){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	minimizer kmerRC(seq2intStranded(reversecomplement((seq.substr(0,k)))));
-	for(size_t i(0);; ++i){
+	int i(0);
+	do{
 		if(min==kmer or min==kmerRC){
-			return (int)i;
+			return i;
 		}
+		++i;
 		if(i+k<seq.size()){
 			updateMinimizer(kmer, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
+		}else{
+			return -1;
+		}
+	}while (true);
+	return -1;
+}
+
+int positionInSeqStranded(const string& seq, minimizer min, size_t k){
+	minimizer kmer(seq2intStranded(seq.substr(0,k)));
+	int i(0);
+	do{
+		if(min==kmer){
+			return (int)i;
+		}
+		++i;
+		if(i+k<seq.size()){
+			updateMinimizer(kmer, seq[i+k], k);
+		}else{
+			return -1;
+		}
+	}while(true);
+	return -1;
+}
+
+int positionInSeqStrandedEnd(const string& seq, minimizer min, size_t k){
+	minimizer kmer(seq2intStranded(seq.substr(seq.size()-k,k)));
+	for(int i((int)seq.size()-(int)k);; ){
+		if(min==kmer){
+			return (int)i;
+		}
+		--i;
+		if(i>=0){
+			updateMinimizerEnd(kmer, seq[i], k);
 		}else{
 			return -1;
 		}
@@ -560,20 +600,6 @@ int positionInSeq(const string& seq, minimizer min, size_t k){
 	return -1;
 }
 
-int positionInSeqStranded(const string& seq, minimizer min, size_t k){
-	minimizer kmer(seq2intStranded(seq.substr(0,k)));
-	for(size_t i(0);; ++i){
-		if(min==kmer){
-			return (int)i;
-		}
-		if(i+k<seq.size()){
-			updateMinimizer(kmer, seq[i+k], k);
-		}else{
-			return -1;
-		}
-	}
-	return -1;
-}
 
 
 
@@ -650,6 +676,11 @@ void updateMinimizer(minimizer&	min, char nuc,size_t k){
 	min<<=2;
 	min+=nuc2int(nuc);
 	min%=offset;
+}
+
+void updateMinimizerEnd(minimizer&	min, char nuc,size_t k){
+	min>>=2;
+	min+=(nuc2int(nuc)<<(2*k-2));
 }
 
 void updateMinimizerRC(minimizer&	min, char nuc,size_t k){

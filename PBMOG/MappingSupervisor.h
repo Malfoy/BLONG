@@ -52,9 +52,9 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=100;
+		offset=200;
 		minSizeUnitigs=100;
-		depthMax=6;
+		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
 		candidate=leftmap=rightmap=0;
@@ -69,15 +69,13 @@ public:
 	bool isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position,bool);
 	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
-	vector<path> listPathSons(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
-	vector<path> listPathFathers(size_t lengthRequired, uNumber ind, unordered_set<uNumber>& usedUnitigs);
 	bool alignOnPath(const path& path, const string& read, size_t position,set<uNumber>& usedUnitigs);
 
-	vector<path> listPathSons(size_t lengthRequired, const string& substr,char);
-	vector<path> listPathFathers(size_t lengthRequired, const string& substr, char depth);
+	vector<path> listPathSons(size_t lengthRequired, const string& substr,int depth);
+	vector<path> listPathFathers(size_t lengthRequired, const string& substr, int depth);
 
-	bool alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>&);
-	bool alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>&);
+	bool alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>& n);
+	bool alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>& n);
 
 	bool alignOnPathSons2(const path& path, const string& read, size_t position,vector<uNumber>&);
 	bool alignOnPathFathers2(const path& path, const string& read, size_t position,vector<uNumber>&);
