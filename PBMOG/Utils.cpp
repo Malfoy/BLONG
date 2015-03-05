@@ -152,7 +152,6 @@ vector<minimizer> allHash(size_t k,const string& seq){
 	size_t i(0);
 	do{
 		sketch.push_back(kmer);
-		++i;
 		if(i+k<seq.size()){
 			updateMinimizer(kmerS, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
@@ -160,6 +159,7 @@ vector<minimizer> allHash(size_t k,const string& seq){
 		}else{
 			return sketch;
 		}
+		++i;
 	}while(true);
 	return sketch;
 }
@@ -179,13 +179,12 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	size_t i(0);
 	do{
 		sketch.insert(min);
-		++i;
 		if(i+k<seq.size()){
 			updateMinimizer(min, seq[i+k], k);
 		}else{
 			return sketch;
 		}
-
+		++i;
 	}while(true);
 	return sketch;
 }
@@ -218,12 +217,12 @@ double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer
 		if(genomicKmers.unordered_set::count(kmer)>0){
 			++inter;
 		}
-		++i;
 		if(i+k<seq.size()){
 			updateMinimizer(kmer, seq[i+k], k);
 		}else{
 			return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 		}
+		++i;
 	}while(true);
 	//	return double(100*inter/(genomicKmers.size()));
 	//	return double(100*inter/(seq.size()-k));
@@ -270,8 +269,8 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 
 minimizer seq2int(const string& seq){
 	string str(getRepresent(seq));
-	cout<<"lol"<<endl;
-	cin.get();
+//	cout<<"lol"<<endl;
+//	cin.get();
 	minimizer res(0);
 	for(uint i(0);i<seq.size();++i){
 		res<<=2;
@@ -551,49 +550,50 @@ unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, si
 int positionInSeq(const string& seq, minimizer min, size_t k){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	minimizer kmerRC(seq2intStranded(reversecomplement((seq.substr(0,k)))));
-	int i(0);
-	do{
+	for(int i(0);;++i){
 		if(min==kmer or min==kmerRC){
 			return i;
 		}
-		++i;
+
 		if(i+k<seq.size()){
 			updateMinimizer(kmer, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
 		}else{
 			return -1;
 		}
-	}while (true);
+	}
 	return -1;
 }
 
 int positionInSeqStranded(const string& seq, minimizer min, size_t k){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
-	int i(0);
-	do{
+	for(int i(0);;++i){
 		if(min==kmer){
 			return (int)i;
 		}
-		++i;
+
 		if(i+k<seq.size()){
 			updateMinimizer(kmer, seq[i+k], k);
 		}else{
+
 			return -1;
 		}
-	}while(true);
+	}
 	return -1;
 }
 
 int positionInSeqStrandedEnd(const string& seq, minimizer min, size_t k){
+//	cout<<seq<<endl;
 	minimizer kmer(seq2intStranded(seq.substr(seq.size()-k,k)));
-	for(int i((int)seq.size()-(int)k);; ){
+	for(int i((int)seq.size()-(int)k);; --i){
+//		printMinimizer(kmer, k);
 		if(min==kmer){
 			return (int)i;
 		}
-		--i;
 		if(i>=0){
 			updateMinimizerEnd(kmer, seq[i], k);
 		}else{
+//			cin.get();
 			return -1;
 		}
 	}
@@ -614,8 +614,8 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 	while(!in.eof()){
 		getline(in,lol);
 		getline(in,line);
-		getline(in,lol);
-		getline(in,lol);
+//		getline(in,lol);
+//		getline(in,lol);
 		if(line.size()>sizeMin){
 			if(homo){
 				res.push_back(homocompression(line));
@@ -684,8 +684,11 @@ void updateMinimizerEnd(minimizer&	min, char nuc,size_t k){
 }
 
 void updateMinimizerRC(minimizer&	min, char nuc,size_t k){
+//	printMinimizer(min, k);
+//	cout<<nuc<<endl;
 	min>>=2;
 	min+=((3-nuc2int(nuc))<<(2*k-2));
+//	printMinimizer(min, k);
 }
 
 vector<string> loadUnitigs(const string& unitigFile,bool homo){

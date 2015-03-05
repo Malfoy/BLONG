@@ -24,9 +24,10 @@ struct path {
 class MappingSupervisor{
 public:
 	ofstream outFile;
-	size_t offset,minSizeUnitigs;
+	size_t offset,minSizeUnitigs,nbThreads;
 	vector<string> unitigs,reads;
 	unordered_map<minimizer, vector<rNumber>> min2Reads;
+	unordered_set<rNumber> readused;
 	size_t k,multi,H,part,k2,kgraph;
 	char depthMax;
 	double minJacc;
@@ -52,21 +53,23 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=200;
+		offset=100;
 		minSizeUnitigs=100;
 		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
-		candidate=leftmap=rightmap=0;
+		candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
+		nbThreads=4;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
 
 
 	void MapPart(size_t L, size_t R);
-	void findCandidate(const string& unitig, unordered_set<minimizer>& min, unordered_map<rNumber,size_t>& count, unordered_map<rNumber,unordered_set<minimizer>>& read2min);
+	void findCandidate(const string& unitig, unordered_set<minimizer>& minSet, unordered_map<rNumber,size_t>& Candidate, vector<unordered_set<minimizer>>& read2Min);
 	void MapAll();
-	bool isCandidateCorrect(const string& unitig, rNumber readNumber, unordered_map<rNumber,unordered_set<minimizer>>& read2min, unordered_set<minimizer>& genomicKmers,int& position,bool);
+	bool isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
+		bool isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
 	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
 	bool alignOnPath(const path& path, const string& read, size_t position,set<uNumber>& usedUnitigs);
