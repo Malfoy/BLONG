@@ -31,6 +31,7 @@ public:
 	size_t k,multi,H,part,k2,kgraph;
 	char depthMax;
 	double minJacc;
+	bool mapPartAllowed;
 	graph G;
 	mutex myMutex,mutexEraseReads;
 	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate;
@@ -38,6 +39,7 @@ public:
 
 
 	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph){
+		mapPartAllowed=false;
 		unitigs=Iunitigs;
 		min2Reads=Iindex;
 		k=Ik;
@@ -55,7 +57,9 @@ public:
 		unitigsPreMapped=0;
 		offset=100;
 		minSizeUnitigs=100;
-		depthMax=5;
+//		offset=6;
+//		minSizeUnitigs=6;
+		depthMax=6;
 		bigUnitig=0;
 		regionmapped=0;
 		candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
@@ -66,6 +70,7 @@ public:
 
 
 	void MapPart(size_t L, size_t R);
+	bool mapUnitig(const string& unitig, const rNumber n, int& position, unordered_set<minimizer>& genomicKmers, string& read);
 	void findCandidate(const string& unitig, unordered_set<minimizer>& minSet, unordered_map<rNumber,size_t>& Candidate, vector<unordered_set<minimizer>>& read2Min);
 	void MapAll();
 	bool isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
@@ -85,6 +90,8 @@ public:
 
 	string getPathEnd(vector<uNumber>& numbers);
 	string getPathBegin(vector<uNumber>& numbers);
+
+	void MapFromUnitigs(unordered_map<rNumber,size_t> Candidate,const string& unitig);
 
 
 };
