@@ -324,7 +324,6 @@ void MappingSupervisor::MapFromUnitigs(unordered_map<rNumber,size_t> Candidate,c
 				}
 			}
 
-
 			if(preMapped){
 				if(!done){
 					done=true;
@@ -386,10 +385,7 @@ void MappingSupervisor::MapFromUnitigs(unordered_map<rNumber,size_t> Candidate,c
 				if(mappedRight and mappedLeft){
 					++aligneOnPathSucess;
 					regionmapped+=read.size();
-					//							cout<<"go2"<<endl;
-					//							cout<<getPathBegin(ref)<<endl;
-					//							cout<<getPathEnd(ref2)<<endl;
-					//							cout<<" end"<<endl;cin.get();
+					//							cout<<"go2"<<endl;cout<<getPathBegin(ref)<<endl;cout<<getPathEnd(ref2)<<endl;cout<<" end"<<endl;cin.get();
 					mutexEraseReads.lock();
 					reads[it->first].clear();
 					mutexEraseReads.unlock();
@@ -409,6 +405,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 		const string unitig=unitigs[i];
 		//		cout<<"unitig :"<<unitig<<endl;
 		if(unitig.size()>=minSizeUnitigs){
+			bigUnitig++;
 			if(bigUnitig%100==0){
 				cout<<bigUnitig<<endl;
 				cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig+1)<<endl;
@@ -421,171 +418,36 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 				cout<<leftmapFail<<" "<<rightmapFail<<endl;
 				cout<<endl;
 			}
-			vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
-//			vector<path> ListFathers(listPathSons(offset, (reversecomplement(unitig)).substr(unitig.size()-kgraph,kgraph),0));
-			vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
-			if( ListFathers.empty() and ListSons.empty()){
-				island++;
-				continue;
-			}
-			bigUnitig++;
-			unordered_set<minimizer> min;
-			bool done(false);
-			unordered_map<rNumber,size_t> Candidate;Candidate.set_empty_key(-1);
-			vector<unordered_set<minimizer>> read2min(reads.size());
-			unordered_set<minimizer> genomicKmers(allKmerSetStranded(k2,unitig));
-			findCandidate(unitig,min,Candidate,read2min);
+
 			if(unitig.size()<offset){
-				for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
-					if(Candidate.empty()){
-						candidate++;
-						continue;
-					}
-					if(it->second>=multi){
-						bool mappedOnGraph(false);
-						string read(reads[it->first]);
-						//here we want to find a position
-						vector<uNumber> ref;
-						for(size_t ii(0); ii<ListSons.size() and !mappedOnGraph; ++ii){
-							path path(ListSons[ii]);
-							path.str=compaction(path.str, unitig, kgraph);
-							if(!path.str.empty()){
-								if(alignOnPathSons(path, read, 0,ref) or alignOnPathFathers(path, read, 0,ref)){
-									mappedOnGraph=true;
-								}
 
-								if(mappedOnGraph){
-									++aligneOnPathSucess;
-									mutexEraseReads.lock();
-									reads[it->first].clear();
-									mutexEraseReads.unlock();
-								}
-							}
-						}
-						for(size_t ii(0); ii<ListFathers.size() and !mappedOnGraph; ++ii){
-							path path(ListFathers[ii]);
-							path.str=compaction(path.str, unitig, kgraph);
-							if(!path.str.empty()){
-								if(alignOnPathSons(path, read, 0,ref) or alignOnPathFathers(path, read, 0,ref)){
-									mappedOnGraph=true;
-								}
-
-								if(mappedOnGraph){
-									++aligneOnPathSucess;
-									mutexEraseReads.lock();
-									reads[it->first].clear();
-									mutexEraseReads.unlock();
-								}
-							}
-						}
-					}
+				vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
+				for(size_t j(0); j<ListFathers.size(); ++j){
+					path pathFather(ListFathers[j]);
+					string newUnitig(compactionBegin(unitig, pathFather.str, kgraph));
+					unordered_set<minimizer> min;
+					unordered_map<rNumber,size_t> Candidate;Candidate.set_empty_key(-1);
+					vector<unordered_set<minimizer>> read2min(reads.size());
+					findCandidate(newUnitig,min,Candidate,read2min);
+					MapFromUnitigs(Candidate, newUnitig);
 				}
+				vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
+				for(size_t j(0); j<ListSons.size(); ++j){
+					path pathSon(ListSons[j]);
+					string newUnitig(compactionEnd(unitig, pathSon.str, kgraph));
+					unordered_set<minimizer> min;
+					unordered_map<rNumber,size_t> Candidate;Candidate.set_empty_key(-1);
+					vector<unordered_set<minimizer>> read2min(reads.size());
+					findCandidate(newUnitig,min,Candidate,read2min);
+					MapFromUnitigs(Candidate, newUnitig);
+				}
+
 			}else{
-				if(Candidate.empty()){
-					//					candidate++;
-					continue;
-				}
-				//				bigUnitig++;
-				//foreach reads that could map on the unitig (prepremapped)
-				for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
-					if(it->second>=multi){
-						//						readused.insert(it->first);
-						bool preMapped(false);
-						int position,position1,position2;
-						string read=reads[it->first];
-						if(read.empty()){
-							continue;
-						}
-						bool correct1(isCandidateCorrect(unitig,read,genomicKmers,position1,read2min[it->first]));
-						if(correct1){
-							position=max(0,position1);
-							preMapped=true;
-						}else{
-							read=reversecomplement(read);
-							bool correct2(isCandidateCorrect(unitig,read,genomicKmers,position2,read2min[it->first]));
-							if(correct2){
-								position=max(position2,0);
-								preMapped=true;
-							}else{
-								candidate++;
-								continue;
-							}
-						}
-
-
-						if(preMapped){
-							if(!done){
-								done=true;
-								//								regionmapped+=unitig.size();
-								unitigsPreMapped++;
-							}
-							bool mappedLeft(false),mappedRight(false);
-
-							vector<uNumber> ref,ref2;
-							string beg,end;
-							if(position+kgraph<offset){
-								mappedLeft=true;
-								//								leftmap++;
-							}else{
-								beg=(read.substr(0,position+kgraph));
-							}
-							if(read.size()<position+unitig.size()+offset-kgraph){
-								mappedRight=true;
-								//								rightmap++;
-							}else{
-								end=(read.substr(position+unitig.size()-kgraph));
-							}
-							if(!mappedLeft){
-								for(size_t j(0); j<ListFathers.size(); ++j){
-									path pathFather(ListFathers[j]);
-									pathFather.str=reversecomplement(pathFather.str);
-									if(alignOnPathSons(pathFather, reversecomplement(beg), 0,ref)){
-//										regionmapped+=beg.size();
-										mappedLeft=true;
-										if(mapPartAllowed){
-											mutexEraseReads.lock();
-											reads[it->first]=end;
-											mutexEraseReads.unlock();
-										}
-										leftmap++;
-										break;
-									}
-								}
-								leftmapFail++;
-							}
-							if(!mappedRight){
-								for(size_t j(0); j<ListSons.size(); ++j){
-									path pathSon(ListSons[j]);
-									if(alignOnPathSons(pathSon,end , 0,ref2)){
-//										regionmapped+=end.size();
-										mappedRight=true;
-										if(mapPartAllowed){
-											mutexEraseReads.lock();
-											reads[it->first]=beg;
-											mutexEraseReads.unlock();
-										}
-										rightmap++;
-										break;
-									}
-								}
-								rightmapFail++;
-							}
-
-							if(mappedRight and mappedLeft){
-								++aligneOnPathSucess;
-								regionmapped+=read.size();
-								//							cout<<"go2"<<endl;
-								//							cout<<getPathBegin(ref)<<endl;
-								//							cout<<getPathEnd(ref2)<<endl;
-								//							cout<<" end"<<endl;cin.get();
-								mutexEraseReads.lock();
-								reads[it->first].clear();
-								mutexEraseReads.unlock();
-								continue;
-							}
-						}
-					}
-				}
+				unordered_set<minimizer> min;
+				unordered_map<rNumber,size_t> Candidate;Candidate.set_empty_key(-1);
+				vector<unordered_set<minimizer>> read2min(reads.size());
+				findCandidate(unitig,min,Candidate,read2min);
+				MapFromUnitigs(Candidate, unitig);
 			}
 		}
 	}
