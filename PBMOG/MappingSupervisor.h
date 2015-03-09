@@ -56,14 +56,14 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=100;
-		minSizeUnitigs=100;
+		minSizeUnitigs=30;
 //		offset=6;
 //		minSizeUnitigs=6;
-		depthMax=6;
+		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
 		candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
-		nbThreads=4;
+		nbThreads=1;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
@@ -91,7 +91,7 @@ public:
 	string getPathEnd(vector<uNumber>& numbers);
 	string getPathBegin(vector<uNumber>& numbers);
 
-	void MapFromUnitigs(unordered_map<rNumber,size_t> Candidate,const string& unitig);
+	void MapFromUnitigs(const string& unitig);
 
 
 };

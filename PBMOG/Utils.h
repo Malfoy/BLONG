@@ -74,6 +74,7 @@ string randomString( size_t length );
 void updateMinimizer(minimizer& min, char nuc,size_t k);
 void updateMinimizerRC(minimizer&	min, char nuc,size_t k);
 void updateMinimizerEnd(minimizer&	min, char nuc,size_t k);
+vector<string> kmerCounting(const string& fileName,size_t k);
 
 void printMinimizer(minimizer min,size_t k);
 

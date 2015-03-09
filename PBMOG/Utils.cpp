@@ -189,6 +189,33 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	return sketch;
 }
 
+vector<string> kmerCounting(const string& fileName,size_t k){
+	ifstream in(fileName);
+	unordered_set<string> set;
+	vector<string> res;
+	string read,line;
+	getline(in,line);
+	getline(in,read);
+//	cout<<read<<endl;
+//	read+=line;
+//	while (in.peek()=='A' or in.peek()=='C' or in.peek()=='G' or in.peek()=='T') {
+//		getline(in,line);
+//		read+=line;
+//	}
+	for(size_t i(0);i+k<read.size() ;++i){
+		string kmer(read.substr(i,k));
+//		cout<<kmer<<endl;
+		set.insert(kmer);
+	}
+
+	for (auto it=set.begin(); it!=set.end(); ++it){
+		res.push_back(*it);
+	}
+
+
+	return res;
+}
+
 
 double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer;
@@ -220,13 +247,15 @@ double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer
 		if(i+k<seq.size()){
 			updateMinimizer(kmer, seq[i+k], k);
 		}else{
-			return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
+//			cout<<inter<<" "<<genomicKmers.size()<<" "<<seq.size()<<endl;
+			return double(100*inter/(seq.size()-k+1));
+//			return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 		}
 		++i;
 	}while(true);
 	//	return double(100*inter/(genomicKmers.size()));
 	//	return double(100*inter/(seq.size()-k));
-	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
+//	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
 
@@ -614,8 +643,8 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 	while(!in.eof()){
 		getline(in,lol);
 		getline(in,line);
-//		getline(in,lol);
-//		getline(in,lol);
+		getline(in,lol);
+		getline(in,lol);
 		if(line.size()>sizeMin){
 			if(homo){
 				res.push_back(homocompression(line));

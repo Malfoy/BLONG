@@ -35,7 +35,7 @@ void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& seque
 		string sequence(sequences[i]);
 		if(sequence.size()>=k){
 			vector<minimizer> sketch;
-			if(sequence.size()<=H){
+			if(sequence.size()<=100000*H){
 				sketch=allHash(k, sequence);
 			}else{
 				sketch=minHashpart(H,k,sequence,part);
@@ -158,28 +158,29 @@ int main(){
 	//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 	//	exit(0);
 
-	size_t H(1000),k(15),part(1),kgraph(30),k2(11),minsize(100),threshold(3);
+	size_t H(1000),k(15),part(1),kgraph(30),k2(15),minsize(100),threshold(1);
 //	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1),threshold(1);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(0);
-	double errorRate(0.1);
+	double errorRate(0);
 	double minjacc(100*(pow(1-errorRate,k2)));
 	//	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/positive_0001.fastq",homo,minsize));
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/perfectReads.fa.fasta",homo,minsize));
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigfromperfect31", kgraph, false, false, false);
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/perfectReadsrandom.fasta",homo,minsize));
+//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigfromperfect31", kgraph, false, false, false);
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
 //	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
 
-	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
-//	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/randomref1.fa",homo));
+//	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
+	vector<string> Unitigs(kmerCounting("/Applications/PBMOG/Build/Products/Debug/randomref.fa", kgraph+1));
+	//	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/randomref1.fa",homo));
 	graph Graph(Unitigs,kgraph);
 	auto Filter(filterUnitigs(Unitigs,k,H,part));
 	auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
