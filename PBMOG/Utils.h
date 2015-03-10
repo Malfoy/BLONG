@@ -26,7 +26,9 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <cctype>
 #include <atomic>
+
 #include <random>
 
 

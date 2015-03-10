@@ -195,21 +195,29 @@ vector<string> kmerCounting(const string& fileName,size_t k){
 	vector<string> res;
 	string read,line;
 	getline(in,line);
-	getline(in,read);
+	getline(in,line);
+	ofstream out("kmers.dot");
 //	cout<<read<<endl;
-//	read+=line;
-//	while (in.peek()=='A' or in.peek()=='C' or in.peek()=='G' or in.peek()=='T') {
-//		getline(in,line);
-//		read+=line;
-//	}
-	for(size_t i(0);i+k<read.size() ;++i){
-		string kmer(read.substr(i,k));
+	read+=line;
+	while (in.peek()=='A' or in.peek()=='C' or in.peek()=='G' or in.peek()=='T') {
+		getline(in,line);
+		read+=line;
+	}
+	for(size_t i(0);i<read.size() ;++i){
+		string kmer(getRepresent((read.substr(i,k))));
+		if(kmer.size()==k){
 //		cout<<kmer<<endl;
-		set.insert(kmer);
+			set.insert(kmer);
+		}else{
+			break;
+		}
 	}
 
 	for (auto it=set.begin(); it!=set.end(); ++it){
-		res.push_back(*it);
+		string str(*it);
+		transform(str.begin(), str.end(), str.begin(), ::tolower);
+		out<<str<<":"<<endl;
+//		res.push_back(*it);
 	}
 
 
@@ -636,15 +644,15 @@ int positionInSeqStrandedEnd(const string& seq, minimizer min, size_t k){
 vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 	ifstream in(unitigFile);
 	vector<string> res;
-	uint64_t n(0);
+	int n(0);
 	uint64_t size(0);
 
 	string line,lol;
 	while(!in.eof()){
 		getline(in,lol);
 		getline(in,line);
-		getline(in,lol);
-		getline(in,lol);
+//		getline(in,lol);
+//		getline(in,lol);
 		if(line.size()>sizeMin){
 			if(homo){
 				res.push_back(homocompression(line));
@@ -659,7 +667,7 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 	}
 	random_shuffle (res.begin(),res.end());
 	cout<<"number of reads : "<<n<<endl;
-	cout<<"Mean  size : "<<size/(n+1)<<endl;
+	cout<<"Mean  size : "<<size/(max(1,n))<<endl;
 	return res;
 }
 

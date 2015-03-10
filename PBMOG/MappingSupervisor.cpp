@@ -415,11 +415,13 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				}
 
 				if(mappedRight and mappedLeft){
-					++aligneOnPathSucess;
-					regionmapped+=read.size();
 					//							cout<<"go2"<<endl;cout<<getPathBegin(ref)<<endl;cout<<getPathEnd(ref2)<<endl;cout<<" end"<<endl;cin.get();
 					mutexEraseReads.lock();
-					reads[it->first].clear();
+					if(!reads[it->first].empty()){
+						reads[it->first].clear();
+						++aligneOnPathSucess;
+						regionmapped+=read.size();
+					}
 					mutexEraseReads.unlock();
 					continue;
 				}
@@ -440,10 +442,10 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 			bigUnitig++;
 			if(bigUnitig%100==0){
 				cout<<bigUnitig<<endl;
-				cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig+1)<<endl;
-				cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size()+1)<<endl;
-				cout<<"Read used: "<<readMapped<<" Percent read used : "<<(100*readused.size())/(reads.size()+1)<<endl;
-				cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size()+1)<<endl;
+				cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig)<<endl;
+				cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size())<<endl;
+				cout<<"Read used: "<<readMapped<<" Percent read used : "<<(100*readused.size())/(reads.size())<<endl;
+				cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size())<<endl;
 				cout<<island<<" islands..."<<endl;
 				cout<<regionmapped/(1000*1000)<<" Mnuc mapped or "<<regionmapped/(1000*1)<<" Knuc "<<endl;
 				cout<<leftmap<<" "<< rightmap<<endl;
@@ -535,11 +537,16 @@ void MappingSupervisor::MapAll(){
 //			cin.get();
 //		}
 //	}
-	cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig+1)<<endl;
-	cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size()+1)<<endl;
-	cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size()+1)<<endl;
+	cout<<bigUnitig<<endl;
+	cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig)<<endl;
+	cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size())<<endl;
+	cout<<"Read used: "<<readMapped<<" Percent read used : "<<(100*readused.size())/(reads.size())<<endl;
+	cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size())<<endl;
 	cout<<island<<" islands..."<<endl;
-	cout<<candidate<<" candidate..."<<endl;
+	cout<<regionmapped/(1000*1000)<<" Mnuc mapped or "<<regionmapped/(1000*1)<<" Knuc "<<endl;
+	cout<<leftmap<<" "<< rightmap<<endl;
+	cout<<leftmapFail<<" "<<rightmapFail<<endl;
+	cout<<endl;
 }
 
 

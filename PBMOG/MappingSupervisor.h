@@ -56,14 +56,14 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=100;
-		minSizeUnitigs=30;
+		minSizeUnitigs=100;
 //		offset=6;
 //		minSizeUnitigs=6;
 		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
 		candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
-		nbThreads=1;
+		nbThreads=4;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
