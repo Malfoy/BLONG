@@ -16,7 +16,7 @@
 
 
 vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, const string& substr, int depth){
-//	if(depth>depthMax){return {};}
+	if(depth>depthMax){return {};}
 	vector<path> paths;
 	vector<uNumber> Sons(G.getBegin(substr));
 	for (size_t i(0); i<Sons.size(); ++i){
@@ -53,7 +53,7 @@ vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, const string
 
 
 vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, const string& substr, int depth){
-//	if(depth>depthMax){return {};}
+	if(depth>depthMax){return {};}
 	vector<path> paths;
 	vector<uNumber> Fathers(G.getEnd(substr));
 
@@ -183,16 +183,16 @@ bool MappingSupervisor::isCandidateCorrect(const string& unitig, const string& r
 				}else{
 					region=(read.substr(0,unitig.size()+pos));
 				}
-//				cout<<"jacc "<<jaccardStranded(k2,region,genomicKmers)<<endl;
-//				cout<<region<<endl<<unitig<<endl;
-//				cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
-//				cout<<pos<<" "<<posInSeq<<" "<<i<<endl;
-//				cin.get();
+				//				cout<<"jacc "<<jaccardStranded(k2,region,genomicKmers)<<endl;
+				//				cout<<region<<endl<<unitig<<endl;
+				//				cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+				//				cout<<pos<<" "<<posInSeq<<" "<<i<<endl;
+				//				cin.get();
 				if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
 
-//					cout<<"candidate correct"<<endl;
-//					cout<<region<<" "<<unitig<<endl;
-//					cin.get();
+					//					cout<<"candidate correct"<<endl;
+					//					cout<<region<<" "<<unitig<<endl;
+					//					cin.get();
 					readMapped++;
 					position=(pos);
 					return true;
@@ -236,10 +236,13 @@ bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, si
 
 	if(found){
 		string region(read.substr(start,path.str.size()));
-//		cout<<"region : "<<region<<" path : "<<path.str<<endl;
+		//		cout<<"region : "<<region<<" path : "<<path.str<<endl;
 		if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
 			size_t size(numbers.size());
-			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
+			for(int i((int)path.numbers.size()-1);i>=0;--i){
+				numbers.push_back(path.numbers[i]);
+			}
+//			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
 			if(read.size()<start+path.str.size()+offset){
 				return true;
 			}else{
@@ -284,6 +287,7 @@ bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read,
 			//			regionmapped+=region.size();
 			size_t size(numbers.size());
 			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
+//			path.numbers.insert(path.numbers.end(),numbers.begin(),numbers.end());
 			if(start<(int)offset){
 				return true;
 			}else{
@@ -367,16 +371,16 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					end=(read.substr(position+unitig.size()-kgraph));
 				}
 				if(!mappedLeft){
-//					cout<<read<<endl;
-//					cout<<"beg : "<<reversecomplement(beg)<<endl;
-//					cout<<ListFathers.size()<<endl;
+					//					cout<<read<<endl;
+					//					cout<<"beg : "<<reversecomplement(beg)<<endl;
+					//					cout<<ListFathers.size()<<endl;
 					for(size_t j(0); j<ListFathers.size(); ++j){
 						path pathFather(ListFathers[j]);
 						pathFather.str=reversecomplement(pathFather.str);
-//						cout<<"pather : "<<pathFather.str<<endl;
-//						cout<<"pather : "<<reversecomplement(pathFather.str)<<endl;
+						//						cout<<"pather : "<<pathFather.str<<endl;
+						//						cout<<"pather : "<<reversecomplement(pathFather.str)<<endl;
 						if(alignOnPathSons(pathFather, reversecomplement(beg), 0,ref)){
-//							cout<<"sucess"<<endl;cin.get();
+							//							cout<<"sucess"<<endl;cin.get();
 							//regionmapped+=beg.size();
 							mappedLeft=true;
 							if(mapPartAllowed){
@@ -390,14 +394,14 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 
 					}
 					leftmapFail++;
-//					cout<<"FAIl"<<endl;cin.get();
+					//					cout<<"FAIl"<<endl;cin.get();
 				}
 				if(!mappedRight){
 					for(size_t j(0); j<ListSons.size(); ++j){
 						path pathSon(ListSons[j]);
-//						cout<<"pathson : "<<pathSon.str<<endl;
+						//						cout<<"pathson : "<<pathSon.str<<endl;
 						if(alignOnPathSons(pathSon,end , 0,ref2)){
-//							cout<<"sucess"<<endl;cin.get();
+							//							cout<<"sucess"<<endl;cin.get();
 							//regionmapped+=end.size();
 							mappedRight=true;
 							if(mapPartAllowed){
@@ -411,11 +415,23 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 
 					}
 					rightmapFail++;
-//					cout<<"FAIl"<<endl;cin.get();
+					//					cout<<"FAIl"<<endl;cin.get();
 				}
 
 				if(mappedRight and mappedLeft){
-					//							cout<<"go2"<<endl;cout<<getPathBegin(ref)<<endl;cout<<getPathEnd(ref2)<<endl;cout<<" end"<<endl;cin.get();
+//					cout<<"go2"<<endl;
+//					cout<<ref.size()<<endl;
+//					cout<<getPathBegin(ref)<<endl;
+//					cout<<ref2.size()<<endl;
+//					cout<<getPathEnd(ref2)<<endl;
+//					cout<<" end"<<endl;
+//					cin.get();
+					if(getPathBegin(ref).empty() and ref.size()!=0){
+						cout<<"fail to recompose path begin"<<endl;
+					}
+					if(getPathEnd(ref2).empty() and ref2.size()!=0){
+						cout<<"fail to recompose path end"<<endl;
+					}
 					mutexEraseReads.lock();
 					if(!reads[it->first].empty()){
 						reads[it->first].clear();
@@ -503,16 +519,19 @@ string MappingSupervisor::getPathBegin(vector<uNumber>& numbers){
 	if(numbers.empty()){
 		return "";
 	}
+//	reverse(numbers.begin(), numbers.end());
 	string path(unitigs[numbers[0]]);
 
 	for(size_t i(1); i<numbers.size(); ++i){
 		string unitig(unitigs[numbers[i]]);
+//		cout<<unitig<<" : unitig "<<endl;
 		string inter=compactionBegin(path, unitig, kgraph);
 		if(inter.empty()){
 			path=compactionBegin(path, reversecomplement(unitig), kgraph);
 		}else{
 			path=inter;
 		}
+//		cout<<inter<<" <-this was inter lol"<<endl;
 	}
 	return path;
 }
@@ -531,12 +550,12 @@ void MappingSupervisor::MapAll(){
 
 	for(auto &t : threads){t.join();}
 
-//	for(size_t i(0);i<reads.size();++i){
-//		if(!reads[i].empty()){
-//			cout<<reads[i]<<endl;
-//			cin.get();
-//		}
-//	}
+	//	for(size_t i(0);i<reads.size();++i){
+	//		if(!reads[i].empty()){
+	//			cout<<reads[i]<<endl;
+	//			cin.get();
+	//		}
+	//	}
 	cout<<bigUnitig<<endl;
 	cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig)<<endl;
 	cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size())<<endl;

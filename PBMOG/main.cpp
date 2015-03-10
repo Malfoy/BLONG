@@ -170,8 +170,8 @@ int main(){
 
 	auto start=chrono::system_clock::now();
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/positive_0001.fastq",homo,minsize));
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/10KperfectReads10K.fasta",homo,minsize));
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitig.fa", kgraph, false, true, false);
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/1KperfectReads10K.fasta",homo,minsize));
+	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitig61.fa", kgraph, false, true, false);
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
 //	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){

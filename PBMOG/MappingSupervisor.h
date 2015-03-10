@@ -63,7 +63,7 @@ public:
 		bigUnitig=0;
 		regionmapped=0;
 		candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
-		nbThreads=4;
+		nbThreads=1;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
