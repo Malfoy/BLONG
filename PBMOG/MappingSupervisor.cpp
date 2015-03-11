@@ -242,7 +242,7 @@ bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, si
 			for(int i((int)path.numbers.size()-1);i>=0;--i){
 				numbers.push_back(path.numbers[i]);
 			}
-//			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
+			//			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
 			if(read.size()<start+path.str.size()+offset){
 				return true;
 			}else{
@@ -287,7 +287,7 @@ bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read,
 			//			regionmapped+=region.size();
 			size_t size(numbers.size());
 			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
-//			path.numbers.insert(path.numbers.end(),numbers.begin(),numbers.end());
+			//			path.numbers.insert(path.numbers.end(),numbers.begin(),numbers.end());
 			if(start<(int)offset){
 				return true;
 			}else{
@@ -419,27 +419,54 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				}
 
 				if(mappedRight and mappedLeft){
-//					cout<<"go2"<<endl;
-//					cout<<ref.size()<<endl;
-//					cout<<getPathBegin(ref)<<endl;
-//					cout<<ref2.size()<<endl;
-//					cout<<getPathEnd(ref2)<<endl;
-//					cout<<" end"<<endl;
-//					cin.get();
-					if(getPathBegin(ref).empty() and ref.size()!=0){
+					string pathbegin(getPathBegin(ref));
+					if(pathbegin.empty() and ref.size()!=0){
 						cout<<"fail to recompose path begin"<<endl;
 					}
 					string pathend(getPathEnd(ref2));
 					if(pathend.empty() and ref2.size()!=0){
 						cout<<"fail to recompose path end"<<endl;
-//						cout<<ref2.size()<<endl;
-//						cout<<pathend<<endl;
-//						cin.get();
+						//						cout<<ref2.size()<<endl;
+						//						cout<<pathend<<endl;
+						//						cin.get();
 
 					}
+					string path;
+					if(!ref.empty()){
+						path=(compactionEnd(pathbegin, unitig,kgraph));
+						if(path.empty()){
+							path=(compactionEnd(reversecomplement(pathbegin), unitig,kgraph));
+						}
+						if(path.empty()){
+							cout<<pathbegin<<endl<<endl<<unitig<<endl;
+							cout<<"fuck"<<endl;cin.get();
+						}
+					}else{
+						path=unitig;
+					}
+
+					if(!ref2.empty()){
+						path=compactionEnd(path, pathend, kgraph);
+						if(path.empty()){
+							path=(compactionEnd(reversecomplement(path), unitig,kgraph));
+						}
+						if(path.empty()){
+							cout<<"nadine2"<<endl;
+							cin.get();
+						}
+					}
+
+
+					if(path.empty()){
+						cout<<"argh"<<endl;
+						cin.get();
+					}
+
+
+
 					mutexEraseReads.lock();
 					if(!reads[it->first].empty()){
-//						reads[it->first].clear();
+						reads[it->first].clear();
 						++aligneOnPathSucess;
 						regionmapped+=read.size();
 					}
@@ -504,11 +531,11 @@ string MappingSupervisor::getPathEnd(vector<uNumber>& numbers){
 	if(numbers.empty()){
 		return "";
 	}
-//	for(size_t i(0); i<numbers.size(); ++i){
-//		string unitig(unitigs[numbers[i]]);
-//		cout<<unitig<<endl;
-//	}
-//	cout<<"end"<<endl;
+	//	for(size_t i(0); i<numbers.size(); ++i){
+	//		string unitig(unitigs[numbers[i]]);
+	//		cout<<unitig<<endl;
+	//	}
+	//	cout<<"end"<<endl;
 
 	string path(unitigs[numbers[0]]);
 
@@ -518,10 +545,10 @@ string MappingSupervisor::getPathEnd(vector<uNumber>& numbers){
 		string inter=compactionEnd(path, unitig, kgraph);
 		if(inter.empty()){
 			path=compactionEnd(reversecomplement(path), unitig, kgraph);
-//			if(path.empty()){
-//				cout<<"!"<<path<<"!"<<unitig<<endl;
-//				cin.get();
-//			}
+			//			if(path.empty()){
+			//				cout<<"!"<<path<<"!"<<unitig<<endl;
+			//				cin.get();
+			//			}
 		}else{
 			path=inter;
 		}
@@ -536,19 +563,19 @@ string MappingSupervisor::getPathBegin(vector<uNumber>& numbers){
 	if(numbers.empty()){
 		return "";
 	}
-//	reverse(numbers.begin(), numbers.end());
+	//	reverse(numbers.begin(), numbers.end());
 	string path(unitigs[numbers[0]]);
 
 	for(size_t i(1); i<numbers.size(); ++i){
 		string unitig(unitigs[numbers[i]]);
-//		cout<<unitig<<" : unitig "<<endl;
+		//		cout<<unitig<<" : unitig "<<endl;
 		string inter=compactionBegin(path, unitig, kgraph);
 		if(inter.empty()){
 			path=compactionBegin(reversecomplement(path), unitig, kgraph);
 		}else{
 			path=inter;
 		}
-//		cout<<inter<<" <-this was inter lol"<<endl;
+		//		cout<<inter<<" <-this was inter lol"<<endl;
 	}
 	return path;
 }
