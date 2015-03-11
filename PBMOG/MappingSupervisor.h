@@ -57,7 +57,7 @@ public:
 		unitigsPreMapped=0;
 		offset=100;
 		minSizeUnitigs=100;
-//		offset=6;
+//		offset=8;
 //		minSizeUnitigs=6;
 		depthMax=5;
 		bigUnitig=0;
