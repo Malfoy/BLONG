@@ -312,7 +312,8 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 	bool done(false);
 	unordered_set<minimizer> genomicKmers(allKmerSetStranded(k2,unitig));
 	vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
-	vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
+	//	vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
+	vector<path> ListFathers(listPathSons(offset, reversecomplement(unitig.substr(0,kgraph)),0));
 	if( ListFathers.empty() and ListSons.empty()){
 		island++;
 		return;
@@ -376,10 +377,12 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					//					cout<<ListFathers.size()<<endl;
 					for(size_t j(0); j<ListFathers.size(); ++j){
 						path pathFather(ListFathers[j]);
-						pathFather.str=reversecomplement(pathFather.str);
+						//						pathFather.str=reversecomplement(pathFather.str);
 						//						cout<<"pather : "<<pathFather.str<<endl;
+						//						cout<<reversecomplement(beg)<<endl;
 						//						cout<<"pather : "<<reversecomplement(pathFather.str)<<endl;
 						if(alignOnPathSons(pathFather, reversecomplement(beg), 0,ref)){
+							//							cout<<"sucess"<<endl;
 							//							cout<<"sucess"<<endl;cin.get();
 							//regionmapped+=beg.size();
 							mappedLeft=true;
@@ -419,7 +422,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				}
 
 				if(mappedRight and mappedLeft){
-					string pathbegin(getPathBegin(ref));
+					string pathbegin(getPathEnd(ref));
 					if(pathbegin.empty() and ref.size()!=0){
 						cout<<"fail to recompose path begin"<<endl;
 					}
@@ -433,13 +436,15 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					}
 					string path;
 					if(!ref.empty()){
-						path=(compactionEnd(pathbegin, unitig,kgraph));
+						path=(compactionBegin( unitig,pathbegin,kgraph));
 						if(path.empty()){
-							path=(compactionEnd(reversecomplement(pathbegin), unitig,kgraph));
+							path=(compactionBegin(unitig,reversecomplement(pathbegin), kgraph));
 						}
 						if(path.empty()){
-							cout<<pathbegin<<endl<<endl<<unitig<<endl;
-							cout<<"fuck"<<endl;cin.get();
+							//							cout<<pathbegin<<endl<<endl<<unitig<<endl;
+							cout<<"fuck"<<endl;
+							//							cin.get();p
+							path=unitig;
 						}
 					}else{
 						path=unitig;
@@ -448,7 +453,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					if(!ref2.empty()){
 						path=compactionEnd(path, pathend, kgraph);
 						if(path.empty()){
-							path=(compactionEnd(reversecomplement(path), unitig,kgraph));
+							path=(compactionEnd(reversecomplement(path), pathend,kgraph));
 						}
 						if(path.empty()){
 							cout<<"nadine2"<<endl;
@@ -459,13 +464,15 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 
 					if(path.empty()){
 						cout<<"argh"<<endl;
-						cin.get();
+						//						cin.get();
 					}
 
 
 
 					mutexEraseReads.lock();
 					if(!reads[it->first].empty()){
+						outFile<<"read : "<<reads[it->first]<<endl;
+						outFile<<"path : "<<path<<endl;
 						reads[it->first].clear();
 						++aligneOnPathSucess;
 						regionmapped+=read.size();
@@ -571,7 +578,13 @@ string MappingSupervisor::getPathBegin(vector<uNumber>& numbers){
 		//		cout<<unitig<<" : unitig "<<endl;
 		string inter=compactionBegin(path, unitig, kgraph);
 		if(inter.empty()){
-			path=compactionBegin(reversecomplement(path), unitig, kgraph);
+			inter=compactionBegin(reversecomplement(path), unitig, kgraph);
+			if(inter.empty()){
+				cout<<"wtf : "<<path<<" "<<unitig<<endl;
+				cin.get();
+			}else{
+				path=inter;
+			}
 		}else{
 			path=inter;
 		}
