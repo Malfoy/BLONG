@@ -87,6 +87,13 @@ string reversecomplement (const string &s){
 
 }
 
+bool isNuc(char c){
+//	if((65<c and c<116)){
+//		cout<<c<<endl;
+//	}
+	return (c>64 and c<116);
+}
+
 
 string getRepresent (const string& str){
 	string rc(reversecomplement(str));
@@ -171,6 +178,28 @@ unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
 		sketch.insert(seq2int(seq.substr(i,k)));
 	}
 	return sketch;
+}
+
+
+double scoreFromAlignment(const string& seq){
+	size_t begin(seq.size()),end(0);
+	size_t errors(0),temp(0);
+	for(size_t i(0);i<seq.size();++i){
+		if(isNuc(seq[i])){
+			if(begin==seq.size()){
+				begin=i;
+			}
+			errors+=temp;
+			temp=0;
+			end=i;
+		}else{
+//			cout<<seq[i]<<endl;
+			temp++;
+		}
+	}
+//	cout<<errors<<" "<<begin<<" "<<end<<endl;
+	double res((100*errors)/(end-begin));
+	return res;
 }
 
 unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){

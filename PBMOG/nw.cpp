@@ -11,18 +11,11 @@
 using namespace std;
 
 
-int nw(
-	   string       seq_1,          /*  Needleman-Wunsch   */
-	   string       seq_2,          /*  algorithm for      */
-	   string&      seq_1_al,       /*  global alignment   */
-	   string&      seq_2_al,       /*  of nt sequence.    */
-	   bool         prm
-	   )
-{
+int nw(const string& seq_1, const string& seq_2, string& seq_1_al, string& seq_2_al, bool prm){
 	int  d = 2 ;                 /* gap penalty */
 
-	int  L1 = seq_1.length();
-	int  L2 = seq_2.length();
+	int  L1 = (int)seq_1.length();
+	int  L2 = (int)seq_2.length();
 
 	// Dynamic programming matrix
 	int ** F = new int * [ L2+1 ];
@@ -38,7 +31,7 @@ int nw(
 	// Create alignment
 	nw_align( F, traceback, seq_1, seq_2, seq_1_al, seq_2_al, d );
 
-#if DEBUG
+#if 0
 	int  L_al = seq_1_al.length();
 	cout << "Length after alignment: " << L_al << endl;
 #endif
@@ -83,16 +76,7 @@ void  dpm_init( int ** F, char ** traceback, int L1, int L2, int d )
 }
 
 
-int nw_align(                  // Needleman-Wunsch algorithm
-			 int **     F,
-			 char **    traceback,
-			 string     seq_1,
-			 string     seq_2,
-			 string&    seq_1_al,
-			 string&    seq_2_al,
-			 int        d         // Gap penalty
-)
-{
+int nw_align(int ** F,char ** traceback,const string& seq_1, const string& seq_2,string& seq_1_al, string& seq_2_al, int d/* Gap penalty*/){
 	int        k = 0, x = 0, y = 0;
 	int        fU, fD, fL ;
 	char       ptr, nuc ;
@@ -106,8 +90,8 @@ int nw_align(                  // Needleman-Wunsch algorithm
 		{ b, b, a, b },
 		{ b, b, b, a } } ;
 
-	int  L1 = seq_1.length();
-	int  L2 = seq_2.length();
+	int  L1 = (int)seq_1.length();
+	int  L2 = (int)seq_2.length();
 
 	for( i = 1; i <= L2; i++ )
 	{
@@ -196,10 +180,10 @@ int  max( int f1, int f2, int f3, char * ptr )
 }
 
 
-void  print_matrix( int ** F, string seq_1, string seq_2 )
+void  print_matrix( int ** F, const string& seq_1, const string& seq_2 )
 {
-	int  L1 = seq_1.length();
-	int  L2 = seq_2.length();
+	int  L1 = (int)seq_1.length();
+	int  L2 = (int)seq_2.length();
 
 	cout << "        ";
 	for( int j = 0; j < L1; j++ )
@@ -224,10 +208,10 @@ void  print_matrix( int ** F, string seq_1, string seq_2 )
 }
 
 
-void  print_traceback( char ** traceback, string seq_1, string seq_2 )
+void  print_traceback( char ** traceback, const string& seq_1, const string& seq_2 )
 {
-	int  L1 = seq_1.length();
-	int  L2 = seq_2.length();
+	int  L1 = (int)seq_1.length();
+	int  L2 = (int)seq_2.length();
 
 	cout << "    ";
 	for( int j = 0; j < L1; j++ )

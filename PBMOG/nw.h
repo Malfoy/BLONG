@@ -22,22 +22,22 @@ using namespace std;
 
 
 extern int  nw(
-			   string, string,
+			   const string&, const string&,
 			   string&, string&,
 			   bool
 			   );
 
 extern int  nw_align(
 					 int **, char **,
-					 string, string,
+					 const string&, const string&,
 					 string&, string&,
 					 int
 					 );
 
 extern void  dpm_init        ( int **, char **, int, int, int );
 extern void  print_al        ( string&, string& );
-extern void  print_matrix    ( int ** const, string, string );
-extern void  print_traceback ( char ** const, string, string );
+extern void  print_matrix    ( int ** const, const string&, const string& );
+extern void  print_traceback ( char ** const, const string&, const string& );
 extern int   max             ( int, int, int, char * );
 
 #endif /* defined(__PBMOG__nw__) */

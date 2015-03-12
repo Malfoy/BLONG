@@ -32,6 +32,7 @@ public:
 	char depthMax;
 	double minJacc;
 	bool mapPartAllowed;
+	double errorRate;
 	graph G;
 	mutex myMutex,mutexEraseReads;
 	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate;
@@ -63,7 +64,8 @@ public:
 		bigUnitig=0;
 		regionmapped=0;
 		candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
-		nbThreads=1;
+		nbThreads=4;
+		errorRate=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 

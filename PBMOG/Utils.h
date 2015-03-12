@@ -43,6 +43,7 @@ using namespace std;
 using namespace google;
 
 minimizer seq2int(const string& seq);
+double scoreFromAlignment(const string& seq);
 minimizer seq2intStranded(const string& seq);
 string reversecomplement(const string& str);
 char nuc2int(char c);

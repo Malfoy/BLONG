@@ -423,19 +423,19 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				}
 
 				if(mappedRight and mappedLeft){
-					cout<<unitig<<endl;
+					//					cout<<unitig<<endl;
 					string pathbegin(getPathEnd(ref));
 					if(pathbegin.empty() and ref.size()!=0){
 						cout<<"fail to recompose path begin"<<endl;
 					}
-					cout<<pathbegin.size()<<endl;
+					//					cout<<pathbegin.size()<<endl;
 					pathbegin=pathbegin.substr(0,beg.size());
-					cout<<pathbegin.size()<<endl;
+					//					cout<<pathbegin.size()<<endl;
 
 					string pathend(getPathEnd(ref2));
-					cout<<pathend.size()<<endl;
+					//					cout<<pathend.size()<<endl;
 					pathend=pathend.substr(0,end.size());
-					cout<<pathend.size()<<endl;
+					//					cout<<pathend.size()<<endl;
 
 					if(pathend.empty() and ref2.size()!=0){
 						cout<<"fail to recompose path end"<<endl;
@@ -444,7 +444,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					string path;
 					if(!ref.empty()){
 						path=(compactionBegin(unitig,pathbegin,kgraph));
-//						cout<<path<<endl;
+						//						cout<<path<<endl;
 						//						if(path.empty()){
 						//							path=(compactionBegin(reversecomplement(unitig),path, kgraph));
 						//							cout<<1<<endl;
@@ -460,7 +460,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					}
 
 					if(!ref2.empty()){
-						cout<<pathend<<endl;
+						//						cout<<pathend<<endl;
 						string final(compactionEnd(path, pathend, kgraph));
 						//						if(path.empty()){
 						//							path=(compactionEnd(reversecomplement(path), pathend,kgraph));
@@ -472,10 +472,10 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 							cout<<"fail compactend..."<<endl;
 						}
 					}else{
-						cout<<"go"<<endl;
+						//						cout<<"go"<<endl;
 						path=path.substr(0,read.size());
-						cout<<read.size()<<endl;
-						cout<<path.size()<<endl;
+						//						cout<<read.size()<<endl;
+						//						cout<<path.size()<<endl;
 					}
 
 
@@ -485,21 +485,17 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					}
 
 
-
-					mutexEraseReads.lock();
-					if(!reads[it->first].empty()){
-						string seq1,seq2;
-						nw(reads[it->first], path, seq1, seq2, false);
-//						cout<<reads[it->first]<<endl;
-//						cout<<path<<endl;
-						cout<<seq1<<"END"<<endl;
-//						cout<<seq2<<"END"<<endl;
-						cin.get();
-						outFile<<"read : "<<reads[it->first]<<endl;
-						outFile<<"path : "<<path<<endl;
-//						reads[it->first].clear();
-						++aligneOnPathSucess;
-						regionmapped+=read.size();
+					string seq1,seq2;
+					nw(read, path, seq1, seq2, false);
+					if(scoreFromAlignment(seq1)<=errorRate){
+						mutexEraseReads.lock();
+						if(!reads[it->first].empty()){
+							outFile<<"read : "<<reads[it->first]<<endl;
+							outFile<<"path : "<<path<<endl;
+							reads[it->first].clear();
+							++aligneOnPathSucess;
+							regionmapped+=read.size();
+						}
 					}
 					mutexEraseReads.unlock();
 					continue;
@@ -519,7 +515,7 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 		//		cout<<"unitig :"<<unitig<<endl;
 		if(unitig.size()>=minSizeUnitigs){
 			bigUnitig++;
-			if(bigUnitig%100==0){
+			if(bigUnitig%1==0){
 				cout<<bigUnitig<<endl;
 				cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig)<<endl;
 				cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size())<<endl;
