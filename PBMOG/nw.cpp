@@ -19,18 +19,23 @@ int nw(const string& seq_1, const string& seq_2, string& seq_1_al, string& seq_2
 
 	// Dynamic programming matrix
 	int ** F = new int * [ L2+1 ];
-	for( int i = 0; i <= L2; i++ )  F[ i ] = new int [ L1 ];
+	for( int i = 0; i <= L2; i++ ){
+		F[ i ] = new int [ L1+1 ];
+	}
 
 	// Traceback matrix
 	char ** traceback = new char * [ L2+1 ];
-	for( int i = 0; i <= L2; i++ )  traceback[ i ] = new char [ L1 ];
+	for( int i = 0; i <= L2; i++ ){
+		traceback[ i ] = new char [ L1+1];
+	}
 
 	// Initialize traceback and F matrix (fill in first row and column)
 	dpm_init( F, traceback, L1, L2, d );
 
 	// Create alignment
+//	cout<<"nwalign"<<endl;
 	nw_align( F, traceback, seq_1, seq_2, seq_1_al, seq_2_al, d );
-
+//	cout<<"end"<<endl;
 #if 0
 	int  L_al = seq_1_al.length();
 	cout << "Length after alignment: " << L_al << endl;
@@ -127,7 +132,7 @@ int nw_align(int ** F,char ** traceback,const string& seq_1, const string& seq_2
 		}
 	}
 	i-- ; j-- ;
-
+//	cout<<"while"<<endl;
 	while( i > 0 || j > 0 )
 	{
 		switch( traceback[ i ][ j ] )
@@ -146,8 +151,11 @@ int nw_align(int ** F,char ** traceback,const string& seq_1, const string& seq_2
 				seq_2_al += '-' ;
 				j-- ;
 		}
+//		cout<<traceback[ i ][ j ]<<endl;
+//		cin.get();
 		k++ ;
 	}
+//	cout<<"end"<<endl;
 
 	reverse( seq_1_al.begin(), seq_1_al.end() );
 	reverse( seq_2_al.begin(), seq_2_al.end() );

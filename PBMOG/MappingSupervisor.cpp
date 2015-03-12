@@ -358,7 +358,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				}
 				bool mappedLeft(false),mappedRight(false);
 
-				vector<uNumber> ref,ref2;
+				vector<uNumber> numberBegin,numberEnd;
 				string beg,end;
 				if(position+kgraph<offset){
 					mappedLeft=true;
@@ -382,7 +382,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 						//						cout<<"pather : "<<pathFather.str<<endl;
 						//						cout<<reversecomplement(beg)<<endl;
 						//						cout<<"pather : "<<reversecomplement(pathFather.str)<<endl;
-						if(alignOnPathSons(pathFather, reversecomplement(beg), 0,ref)){
+						if(alignOnPathSons(pathFather, reversecomplement(beg), 0,numberBegin)){
 							//							cout<<"sucess"<<endl;
 							//							cout<<"sucess"<<endl;cin.get();
 							//regionmapped+=beg.size();
@@ -404,7 +404,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					for(size_t j(0); j<ListSons.size(); ++j){
 						path pathSon(ListSons[j]);
 						//						cout<<"pathson : "<<pathSon.str<<endl;
-						if(alignOnPathSons(pathSon,end , 0,ref2)){
+						if(alignOnPathSons(pathSon,end , 0,numberEnd)){
 							//							cout<<"sucess"<<endl;cin.get();
 							//regionmapped+=end.size();
 							mappedRight=true;
@@ -423,81 +423,63 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				}
 
 				if(mappedRight and mappedLeft){
-					//					cout<<unitig<<endl;
-					string pathbegin(getPathEnd(ref));
-					if(pathbegin.empty() and ref.size()!=0){
+					string pathbegin(getPathEnd(numberBegin));
+					pathbegin=pathbegin.substr(0,beg.size());
+					if(pathbegin.empty() and numberBegin.size()!=0){
 						cout<<"fail to recompose path begin"<<endl;
 					}
-					//					cout<<pathbegin.size()<<endl;
-					pathbegin=pathbegin.substr(0,beg.size());
-					//					cout<<pathbegin.size()<<endl;
 
-					string pathend(getPathEnd(ref2));
-					//					cout<<pathend.size()<<endl;
+					string pathend(getPathEnd(numberEnd));
 					pathend=pathend.substr(0,end.size());
-					//					cout<<pathend.size()<<endl;
-
-					if(pathend.empty() and ref2.size()!=0){
+					if(pathend.empty() and numberEnd.size()!=0){
 						cout<<"fail to recompose path end"<<endl;
 					}
 
 					string path;
-					if(!ref.empty()){
+					if(!numberBegin.empty()){
 						path=(compactionBegin(unitig,pathbegin,kgraph));
-						//						cout<<path<<endl;
-						//						if(path.empty()){
-						//							path=(compactionBegin(reversecomplement(unitig),path, kgraph));
-						//							cout<<1<<endl;
-						//						}
 						if(path.empty()){
-							//							cout<<pathbegin<<endl<<endl<<unitig<<endl;
 							cout<<"fail compactbegin..."<<endl;
-							//							cin.get();p
 							path=unitig;
 						}
 					}else{
-						path=unitig.substr(unitig.size()-(read.size()-end.size()));
+						path=unitig.substr(max(0,(int)unitig.size()-((int)read.size()-(int)end.size())));
 					}
 
-					if(!ref2.empty()){
-						//						cout<<pathend<<endl;
+					if(!numberEnd.empty()){
 						string final(compactionEnd(path, pathend, kgraph));
-						//						if(path.empty()){
-						//							path=(compactionEnd(reversecomplement(path), pathend,kgraph));
-						//							cout<<"?"<<endl;
-						//						}
 						if(!final.empty()){
 							path=final;
 						}else{
 							cout<<"fail compactend..."<<endl;
 						}
 					}else{
-						//						cout<<"go"<<endl;
 						path=path.substr(0,read.size());
-						//						cout<<read.size()<<endl;
-						//						cout<<path.size()<<endl;
 					}
 
 
 					if(path.empty()){
-						cout<<"Can recompose path...."<<endl;
-						//						cin.get();
+						cout<<"Cant recompose path...."<<endl;
 					}
 
 
 					string seq1,seq2;
-					nw(read, path, seq1, seq2, false);
+					cout<<"nw"<<endl;
+					cout<<"!"<<read<<"!"<<" !"<<path<<"!"<<endl;
+					nw(path, read, seq1, seq2, false);
+					cout<<"end"<<endl;
 					if(scoreFromAlignment(seq1)<=errorRate){
 						mutexEraseReads.lock();
 						if(!reads[it->first].empty()){
-							outFile<<"read : "<<reads[it->first]<<endl;
+							outFile<<"read : "<<read<<endl;
 							outFile<<"path : "<<path<<endl;
 							reads[it->first].clear();
 							++aligneOnPathSucess;
 							regionmapped+=read.size();
 						}
+						mutexEraseReads.unlock();
 					}
-					mutexEraseReads.unlock();
+
 					continue;
 				}
 			}
@@ -626,7 +608,7 @@ void MappingSupervisor::MapAll(){
 	}
 
 	for(auto &t : threads){t.join();}
-
+	
 	//	for(size_t i(0);i<reads.size();++i){
 	//		if(!reads[i].empty()){
 	//			cout<<reads[i]<<endl;
