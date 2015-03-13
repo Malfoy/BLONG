@@ -676,13 +676,15 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 	vector<string> res;
 	int n(0);
 	uint64_t size(0);
-
+	//TODO compatibility fastq and fasta plz
 	string line,lol;
 	while(!in.eof()){
 		getline(in,lol);
 		getline(in,line);
-//		getline(in,lol);
-//		getline(in,lol);
+		if(in.peek()=='+'){
+			getline(in,lol);
+			getline(in,lol);
+		}
 		if(line.size()>sizeMin){
 			if(homo){
 				res.push_back(homocompression(line));

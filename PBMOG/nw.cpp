@@ -12,7 +12,7 @@ using namespace std;
 
 
 int nw(const string& seq_1, const string& seq_2, string& seq_1_al, string& seq_2_al, bool prm){
-	int  d = 3 ;  /* gap penalty */
+	int  d = 2 ;  /* gap penalty */
 
 	int  L1 = (int)seq_1.length();
 	int  L2 = (int)seq_2.length();

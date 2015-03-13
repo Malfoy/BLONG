@@ -488,13 +488,18 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					string seq1,seq2;
 //					cout<<"nw"<<endl;
 //					cout<<"!"<<read<<"!"<<" !"<<path<<"!"<<endl;
-					nw(read, path, seq1, seq2, false);
+					nw(path, read, seq1, seq2, false);
 					if(scoreFromAlignment(seq1)<=errorRate){
+//						cout<<read<<" ENDREAD"<<endl;
+//						cout<<path<<" ENDPATH"<<endl;
+//						cout<<seq1<<" ENDALIGN"<<endl;
+//						cout<<seq2<<" ENDALIGN"<<endl;
+//						cin.get();
 						mutexEraseReads.lock();
 						if(!reads[it->first].empty()){
 							outFile<<"read : "<<read<<endl;
 							outFile<<"path : "<<path<<endl;
-//							reads[it->firs	t].clear();
+//							reads[it->first].clear();
 							++aligneOnPathSucess;
 							regionmapped+=read.size();
 						}
@@ -516,10 +521,13 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 
 
 
-void MappingSupervisor::MapPart(size_t L, size_t R){
+void MappingSupervisor::MapPart(){
 	//foreach unitig (sort of)
-	for (size_t i(L); i<R; ++i){
-		const string unitig=unitigs[i];
+	while(indice<unitigs.size()){
+		mutexReadReads.lock();
+		const string unitig=unitigs[indice];
+		indice++;
+		mutexReadReads.unlock();
 		//		cout<<"unitig :"<<unitig<<endl;
 		if(unitig.size()>=minSizeUnitigs){
 			bigUnitig++;
@@ -633,7 +641,7 @@ void MappingSupervisor::MapAll(){
 	vector<size_t> limits = bounds(nbThreads, unitigs.size());
 
 	for(size_t i(0); i<nbThreads; ++i) {
-		threads.push_back(thread(&MappingSupervisor::MapPart, this, limits[i], limits[i+1]));
+		threads.push_back(thread(&MappingSupervisor::MapPart, this));
 	}
 
 	for(auto &t : threads){t.join();}

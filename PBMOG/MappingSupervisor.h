@@ -34,8 +34,8 @@ public:
 	bool mapPartAllowed;
 	double errorRate;
 	graph G;
-	mutex myMutex,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail;
+	mutex mutexReadReads,mutexEraseReads;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice;
 
 
 
@@ -56,22 +56,23 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=100;
-		minSizeUnitigs=100;
-//		offset=8;
-//		minSizeUnitigs=6;
+//		offset=100;
+//		minSizeUnitigs=100;
+		offset=6;
+		minSizeUnitigs=6;
 		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
 		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
 		nbThreads=1;
-		errorRate=0;
+		errorRate=15;
+		indice=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
 
 
 
-	void MapPart(size_t L, size_t R);
+	void MapPart();
 	bool mapUnitig(const string& unitig, const rNumber n, int& position, unordered_set<minimizer>& genomicKmers, string& read);
 	void findCandidate(const string& unitig, unordered_set<minimizer>& minSet, unordered_map<rNumber,size_t>& Candidate, vector<unordered_set<minimizer>>& read2Min);
 	void MapAll();
