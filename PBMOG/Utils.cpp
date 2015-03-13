@@ -88,9 +88,9 @@ string reversecomplement (const string &s){
 }
 
 bool isNuc(char c){
-//	if((65<c and c<116)){
-//		cout<<c<<endl;
-//	}
+	//	if((65<c and c<116)){
+	//		cout<<c<<endl;
+	//	}
 	return (c>64 and c<116);
 }
 
@@ -198,7 +198,7 @@ double scoreFromAlignment(const string& seq){
 			}
 		}
 	}
-//	cout<<errors<<" "<<begin<<" "<<end<<endl;
+	//	cout<<errors<<" "<<begin<<" "<<end<<endl;
 	double res((100*errors)/(end-begin));
 	return res;
 }
@@ -219,6 +219,20 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	return sketch;
 }
 
+unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq){
+	unordered_multimap<string,string> sketch;
+	for(size_t i(0); i+k<=seq.size(); ++i){
+		string kmer(seq.substr(i,k));
+//		if(kmer.size()!=k){
+//			cout<<"watfw"<<endl;
+//		}
+		sketch.insert({kmer.substr(0,5),kmer.substr(5)});
+		//		cout<<kmer.substr(0,5)<<" "<<kmer.substr(5)<<endl;
+	}
+
+	return sketch;
+}
+
 vector<string> kmerCounting(const string& fileName,size_t k){
 	ifstream in(fileName);
 	unordered_set<string> set;
@@ -227,7 +241,7 @@ vector<string> kmerCounting(const string& fileName,size_t k){
 	getline(in,line);
 	getline(in,line);
 	ofstream out("kmers.dot");
-//	cout<<read<<endl;
+	//	cout<<read<<endl;
 	read+=line;
 	while (in.peek()=='A' or in.peek()=='C' or in.peek()=='G' or in.peek()=='T') {
 		getline(in,line);
@@ -236,7 +250,7 @@ vector<string> kmerCounting(const string& fileName,size_t k){
 	for(size_t i(0);i<read.size() ;++i){
 		string kmer(getRepresent((read.substr(i,k))));
 		if(kmer.size()==k){
-//		cout<<kmer<<endl;
+			//		cout<<kmer<<endl;
 			set.insert(kmer);
 		}else{
 			break;
@@ -247,7 +261,7 @@ vector<string> kmerCounting(const string& fileName,size_t k){
 		string str(*it);
 		transform(str.begin(), str.end(), str.begin(), ::tolower);
 		out<<str<<":"<<endl;
-//		res.push_back(*it);
+		//		res.push_back(*it);
 	}
 
 
@@ -274,7 +288,7 @@ double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genom
 	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
-double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer>& genomicKmers){
+double jaccardStranded(size_t k, const string& seq, const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	double inter(0);
 	size_t i(0);
@@ -285,15 +299,71 @@ double jaccardStranded(size_t k, const string& seq,const unordered_set<minimizer
 		if(i+k<seq.size()){
 			updateMinimizer(kmer, seq[i+k], k);
 		}else{
-//			cout<<inter<<" "<<genomicKmers.size()<<" "<<seq.size()<<endl;
+			//			cout<<inter<<" "<<genomicKmers.size()<<" "<<seq.size()<<endl;
 			return double(100*inter/(seq.size()-k+1));
-//			return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
+			//			return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 		}
 		++i;
 	}while(true);
 	//	return double(100*inter/(genomicKmers.size()));
 	//	return double(100*inter/(seq.size()-k));
-//	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
+	//	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
+}
+
+bool equalStr(const string& seq1, const string& seq2){
+	size_t size(min(seq1.size(),seq2.size()));
+	return (seq1.substr(0,size))==seq2.substr(0,size);
+}
+
+bool isCorrect(const string& seq,const string& ref){
+	for(size_t i(0); i<seq.size(); ++i){
+		if(seq[i]!=ref[i]){
+			if(seq[i+1]==ref[i]){
+				return equalStr(seq.substr(i+2),ref.substr(i+1));
+			}
+			if(seq[i]==ref[i+1]){
+				return equalStr(seq.substr(i+1),ref.substr(i+2));
+			}
+			return (seq.substr(i+1)==ref.substr(i+1));
+		}
+	}
+	return true;
+}
+
+
+double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers){
+	double inter(0);
+	string kmer;
+	kmer.reserve(k);
+	size_t i(0);
+	for(; i+k<=seq.size(); ++i){
+		kmer=seq.substr(i,k);
+		if(kmer.size()!=k){
+			cout<<"wtf"<<endl;
+		}
+		auto range(genomicKmers.equal_range(kmer.substr(0,5)));
+		for (auto it(range.first); it!=range.second; it++){
+			if(isCorrect(kmer.substr(5),it->second)){
+//				if(isCorrect("ATCGTTTT", "ATTGTTTT")){
+//					cout<<"true"<<endl;
+//					cin.get();
+//				}else{
+//					cout<<"false"<<endl;
+//					cin.get();
+//				}
+//				if(kmer.substr(5)!=it->second){
+//					cout<<kmer.substr(5)<<" "<<it->second<<endl;
+//					cin.get();
+//				}
+				inter++;
+				break;
+			}else{
+				//				cout<<"fail : "<<kmer.substr(5)<<" "<<it->second<<endl;
+			}
+		}
+	}
+//	cout<<i<<" "<<seq.size()-k+1<<endl;
+	return double(100*inter/(seq.size()-k+1));;
 }
 
 
@@ -336,8 +406,8 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 
 minimizer seq2int(const string& seq){
 	string str(getRepresent(seq));
-//	cout<<"lol"<<endl;
-//	cin.get();
+	//	cout<<"lol"<<endl;
+	//	cin.get();
 	minimizer res(0);
 	for(uint i(0);i<seq.size();++i){
 		res<<=2;
@@ -650,17 +720,17 @@ int positionInSeqStranded(const string& seq, minimizer min, size_t k){
 }
 
 int positionInSeqStrandedEnd(const string& seq, minimizer min, size_t k){
-//	cout<<seq<<endl;
+	//	cout<<seq<<endl;
 	minimizer kmer(seq2intStranded(seq.substr(seq.size()-k,k)));
 	for(int i((int)seq.size()-(int)k);; --i){
-//		printMinimizer(kmer, k);
+		//		printMinimizer(kmer, k);
 		if(min==kmer){
 			return (int)i;
 		}
 		if(i>=0){
 			updateMinimizerEnd(kmer, seq[i], k);
 		}else{
-//			cin.get();
+			//			cin.get();
 			return -1;
 		}
 	}
@@ -689,9 +759,9 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 			if(homo){
 				res.push_back(homocompression(line));
 			}else{
-//				res.push_back(randomString(10000));
+				//				res.push_back(randomString(10000));
 				res.push_back(line);
-//				cout<<line<<endl;
+				//				cout<<line<<endl;
 			}
 			++n;
 			size+=line.size();
@@ -753,11 +823,11 @@ void updateMinimizerEnd(minimizer&	min, char nuc,size_t k){
 }
 
 void updateMinimizerRC(minimizer&	min, char nuc,size_t k){
-//	printMinimizer(min, k);
-//	cout<<nuc<<endl;
+	//	printMinimizer(min, k);
+	//	cout<<nuc<<endl;
 	min>>=2;
 	min+=((3-nuc2int(nuc))<<(2*k-2));
-//	printMinimizer(min, k);
+	//	printMinimizer(min, k);
 }
 
 vector<string> loadUnitigs(const string& unitigFile,bool homo){
@@ -780,10 +850,10 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 			line=homocompression(read);
 		}
 		if(read.size()>2){
-//			read=read.substr(2000+random(read.size()-4000),200);
+			//			read=read.substr(2000+random(read.size()-4000),200);
 			res.push_back(read);
 			//			res.push_back("ACATCAAAGCTAGTGTGAGCTCCGATAATCACTGTGAGAAAAGGCGATAGGAACCGCATGACTCCAATGTAGGTCCTTCCCGGGTGGGGACCTGGCGTGAGGCAGACTGCGGCCGATGGTGAGAAAGGAATTCAATGAGTTGCATCGGCACCCCGAAGTATAGCACGTAGGTCAGGACGTTTCTTATACAGAGCCCGGAA");
-//			cout<<read<<endl;
+			//			cout<<read<<endl;
 			++number;
 			size+=read.size();
 		}

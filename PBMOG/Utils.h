@@ -15,6 +15,7 @@
 #include <fstream>
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_map>
 #include <functional>
 #include <unordered_set>
 #include <set>
@@ -78,8 +79,10 @@ void updateMinimizer(minimizer& min, char nuc,size_t k);
 void updateMinimizerRC(minimizer&	min, char nuc,size_t k);
 void updateMinimizerEnd(minimizer&	min, char nuc,size_t k);
 vector<string> kmerCounting(const string& fileName,size_t k);
-
+unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq);
+double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers);
 void printMinimizer(minimizer min,size_t k);
+bool isCorrect(const string& seq,const string& ref);
 
 
 #endif /* defined(__PBMOG__Utils__) */

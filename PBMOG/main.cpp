@@ -158,22 +158,22 @@ int main(){
 	//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 	//	exit(0);
 
-//	size_t H(100),k(15),part(1),kgraph(30),k2(7),minsize(100),threshold(3);
-	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1),threshold(1);
+	size_t H(100),k(15),part(1),kgraph(30),k2(15),minsize(100),threshold(3);
+//	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1),threshold(1);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(0);
-	double errorRate(0);
-	double minjacc(100*(pow(1-errorRate,k2)));
+	double errorRate(0.1);
+	double minjacc(1*100*(pow(1-errorRate,k2)));
 	//	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/positive_0001.fastq",homo,minsize));
-//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/1Xnormal10K09_0001.fastq",homo,minsize));
-//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitig31.fa", kgraph, false, true, false);
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/1Xnormal10K09_0001.fastq",homo,minsize));
+	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitig31.fa", kgraph, false, true, false);
+//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
+//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}

@@ -72,9 +72,9 @@
 			isa = PBXGroup;
 			children = (
 				C7103C821A6013CF00B2475E /* MappingSupervisor.cpp */,
+				C7103C831A6013CF00B2475E /* MappingSupervisor.h */,
 				C707FAD91AB07C19000F7DF5 /* nw.cpp */,
 				C707FADA1AB07C19000F7DF5 /* nw.h */,
-				C7103C831A6013CF00B2475E /* MappingSupervisor.h */,
 				C7103C851A6017A600B2475E /* Utils.cpp */,
 				C7103C861A6017A600B2475E /* Utils.h */,
 				C70F23751A777F5A00A131F1 /* binSeq.cpp */,

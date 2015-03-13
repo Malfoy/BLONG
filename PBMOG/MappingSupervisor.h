@@ -56,10 +56,10 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-//		offset=100;
-//		minSizeUnitigs=100;
-		offset=6;
-		minSizeUnitigs=6;
+		offset=100;
+		minSizeUnitigs=100;
+//		offset=8;
+//		minSizeUnitigs=6;
 		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
@@ -77,7 +77,7 @@ public:
 	void findCandidate(const string& unitig, unordered_set<minimizer>& minSet, unordered_map<rNumber,size_t>& Candidate, vector<unordered_set<minimizer>>& read2Min);
 	void MapAll();
 	bool isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
-		bool isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
+	bool isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
 	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
 	bool alignOnPath(const path& path, const string& read, size_t position,set<uNumber>& usedUnitigs);
@@ -86,6 +86,7 @@ public:
 	vector<path> listPathFathers(size_t lengthRequired, const string& substr, int depth);
 
 	bool alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>& n);
+	bool alignOnPathSonsErrors(const path& path, const string& read, size_t position,vector<uNumber>& n);
 	bool alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>& n);
 
 	bool alignOnPathSons2(const path& path, const string& read, size_t position,vector<uNumber>&);
@@ -95,6 +96,8 @@ public:
 	string getPathBegin(vector<uNumber>& numbers);
 
 	void MapFromUnitigs(const string& unitig);
+
+	bool isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin);
 
 
 };
