@@ -35,7 +35,7 @@ public:
 	double errorRate;
 	graph G;
 	mutex myMutex,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail;
 
 
 
@@ -56,14 +56,14 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-//		offset=100;
-//		minSizeUnitigs=100;
-		offset=8;
-		minSizeUnitigs=6;
+		offset=100;
+		minSizeUnitigs=100;
+//		offset=8;
+//		minSizeUnitigs=6;
 		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
-		candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
+		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
 		nbThreads=1;
 		errorRate=0;
 		outFile.open("zout.txt",ofstream::trunc);

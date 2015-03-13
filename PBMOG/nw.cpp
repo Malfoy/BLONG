@@ -12,7 +12,7 @@ using namespace std;
 
 
 int nw(const string& seq_1, const string& seq_2, string& seq_1_al, string& seq_2_al, bool prm){
-	int  d = 2 ;                 /* gap penalty */
+	int  d = 3 ;  /* gap penalty */
 
 	int  L1 = (int)seq_1.length();
 	int  L2 = (int)seq_2.length();
@@ -87,10 +87,11 @@ int nw_align(int ** F,char ** traceback,const string& seq_1, const string& seq_2
 	char       ptr, nuc ;
 	int        i = 0, j = 0;
 
-	const int  a =  2;   // Match
+	const int  a =  1;   // Match
 	const int  b = -1;   // Mismatch
 
-	const int  s[ 4 ][ 4 ] = { { a, b, b, b },    /* substitution matrix */
+	const int  s[ 4 ][ 4 ] =
+	  { { a, b, b, b },    /* substitution matrix */
 		{ b, a, b, b },
 		{ b, b, a, b },
 		{ b, b, b, a } } ;

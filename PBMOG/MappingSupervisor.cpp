@@ -332,18 +332,21 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				continue;
 			}
 			bool preMapped(false);
-			int position,position1,position2;
+			bool stranded;
+			int position,position1(-1),position2(-1);
 
 			bool correct1(isCandidateCorrect(unitig,read,genomicKmers,position1,read2min[it->first]));
 			if(correct1){
 				position=max(0,position1);
 				preMapped=true;
+				stranded=true;
 			}else{
 				read=reversecomplement(read);
 				bool correct2(isCandidateCorrect(unitig,read,genomicKmers,position2,read2min[it->first]));
 				if(correct2){
 					position=max(position2,0);
 					preMapped=true;
+					stranded=false;
 				}else{
 					candidate++;
 					continue;
@@ -423,31 +426,50 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 				}
 
 				if(mappedRight and mappedLeft){
-					string pathbegin(getPathEnd(numberBegin));
-					pathbegin=pathbegin.substr(0,beg.size());
-					if(pathbegin.empty() and numberBegin.size()!=0){
+//					cout<<"go "<<unitig<<endl;
+//					cout<<numberBegin.size()<<" "<<numberEnd.size()<<endl;
+					string pathBegin(getPathEnd(numberBegin));
+//					cout<<pathBegin<<endl;
+					pathBegin=pathBegin.substr(0,beg.size());
+//					cout<<pathBegin<<endl;
+					if(pathBegin.empty() and numberBegin.size()!=0){
 						cout<<"fail to recompose path begin"<<endl;
 					}
 
-					string pathend(getPathEnd(numberEnd));
-					pathend=pathend.substr(0,end.size());
-					if(pathend.empty() and numberEnd.size()!=0){
+					string pathEnd(getPathEnd(numberEnd));
+//					cout<<pathEnd<<endl;
+					pathEnd=pathEnd.substr(0,end.size());
+//					cout<<pathEnd<<endl;
+					if(pathEnd.empty() and numberEnd.size()!=0){
 						cout<<"fail to recompose path end"<<endl;
 					}
 
 					string path;
 					if(!numberBegin.empty()){
-						path=(compactionBegin(unitig,pathbegin,kgraph));
+						path=(compactionBegin(unitig,pathBegin,kgraph));
 						if(path.empty()){
 							cout<<"fail compactbegin..."<<endl;
 							path=unitig;
 						}
 					}else{
-						path=unitig.substr(max(0,(int)unitig.size()-((int)read.size()-(int)end.size())));
+//						path=unitig.substr(max(0,(int)unitig.size()-((int)read.size()-(int)end.size())));
+						if(stranded){
+							if(position1>0){
+								path=unitig;
+							}else{
+								path=unitig.substr(-position1);
+							}
+						}else{
+							if(position2>0){
+								path=unitig;
+							}else{
+								path=unitig.substr(-position2);
+							}
+						}
 					}
 
 					if(!numberEnd.empty()){
-						string final(compactionEnd(path, pathend, kgraph));
+						string final(compactionEnd(path, pathEnd, kgraph));
 						if(!final.empty()){
 							path=final;
 						}else{
@@ -464,20 +486,24 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 
 
 					string seq1,seq2;
-					cout<<"nw"<<endl;
-					cout<<"!"<<read<<"!"<<" !"<<path<<"!"<<endl;
-					nw(path, read, seq1, seq2, false);
-					cout<<"end"<<endl;
+//					cout<<"nw"<<endl;
+//					cout<<"!"<<read<<"!"<<" !"<<path<<"!"<<endl;
+					nw(read, path, seq1, seq2, false);
 					if(scoreFromAlignment(seq1)<=errorRate){
 						mutexEraseReads.lock();
 						if(!reads[it->first].empty()){
 							outFile<<"read : "<<read<<endl;
 							outFile<<"path : "<<path<<endl;
-							reads[it->first].clear();
+//							reads[it->firs	t].clear();
 							++aligneOnPathSucess;
 							regionmapped+=read.size();
 						}
 						mutexEraseReads.unlock();
+					}else{
+						fail++;
+						cout<<read<<" "<<path<<" "<<seq1<<endl;
+//						cout<<scoreFromAlignment(seq1)<<endl;
+//						cin.get();
 					}
 
 					continue;
@@ -507,6 +533,9 @@ void MappingSupervisor::MapPart(size_t L, size_t R){
 				cout<<regionmapped/(1000*1000)<<" Mnuc mapped or "<<regionmapped/(1000*1)<<" Knuc "<<endl;
 				cout<<leftmap<<" "<< rightmap<<endl;
 				cout<<leftmapFail<<" "<<rightmapFail<<endl;
+				if(fail+aligneOnPathSucess!=0){
+					cout<<(100*aligneOnPathSucess)/(fail+aligneOnPathSucess);
+				}
 				cout<<endl;
 			}
 

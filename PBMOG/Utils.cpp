@@ -193,8 +193,9 @@ double scoreFromAlignment(const string& seq){
 			temp=0;
 			end=i;
 		}else{
-//			cout<<seq[i]<<endl;
-			temp++;
+			if(begin!=seq.size()){
+				temp++;
+			}
 		}
 	}
 //	cout<<errors<<" "<<begin<<" "<<end<<endl;
