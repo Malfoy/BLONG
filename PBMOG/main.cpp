@@ -163,7 +163,7 @@ int main(){
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(0);
-	double errorRate(0.1);
+	double errorRate(0.10);
 	double minjacc(1*100*(pow(1-errorRate,k2)));
 	//	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;

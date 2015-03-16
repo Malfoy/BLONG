@@ -64,7 +64,7 @@ public:
 		bigUnitig=0;
 		regionmapped=0;
 		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
-		nbThreads=1;
+		nbThreads=4;
 		errorRate=15;
 		indice=0;
 		outFile.open("zout.txt",ofstream::trunc);
@@ -98,6 +98,8 @@ public:
 	void MapFromUnitigs(const string& unitig);
 
 	bool isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin);
+
+	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
 
 
 };

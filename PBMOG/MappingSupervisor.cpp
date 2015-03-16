@@ -214,8 +214,8 @@ bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string
 				}else{
 					region=(read.substr(0,unitig.size()+pos));
 				}
-//				cout<<jaccardStrandedErrors(k2,region,genomicKmers)<<endl;
-//				cin.get();
+				//				cout<<jaccardStrandedErrors(k2,region,genomicKmers)<<endl;
+				//				cin.get();
 				if(jaccardStrandedErrors(k2,region,genomicKmers)>=minJacc){
 					readMapped++;
 					position=(pos);
@@ -278,6 +278,7 @@ bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, si
 				}
 				numbers.resize(size);
 			}
+			//			return false;
 		}
 	}
 	return false;
@@ -308,8 +309,8 @@ bool MappingSupervisor::alignOnPathSonsErrors(const path& path, const string& re
 		string region(read.substr(start,path.str.size()));
 		//		cout<<"region : "<<region<<" path : "<<path.str<<endl;
 		if(jaccardStrandedErrors(k2,region,genomicKmersErrors)>=minJacc){
-//			cout<<jaccardStrandedErrors(k2,region,genomicKmersErrors)<<" "<<jaccardStranded(k2, region, genomicKmers)<<endl;
-//			cin.get();
+			//			cout<<jaccardStrandedErrors(k2,region,genomicKmersErrors)<<" "<<jaccardStranded(k2, region, genomicKmers)<<endl;
+			//			cin.get();
 			size_t size(numbers.size());
 			for(int i((int)path.numbers.size()-1);i>=0;--i){
 				numbers.push_back(path.numbers[i]);
@@ -326,65 +327,105 @@ bool MappingSupervisor::alignOnPathSonsErrors(const path& path, const string& re
 				}
 				numbers.resize(size);
 			}
-		}
-	}
-	return false;
-}
-
-
-
-bool MappingSupervisor::alignOnPathFathers(const path& path, const string& read, size_t position, vector<uNumber>& numbers ){
-	//	cout<<read<<endl;
-	unordered_set<minimizer> genomicKmers=allKmerSetStranded(k2,path.str);
-	minimizer kmer(seq2intStranded(read.substr(position-k2,k2)));
-	int start(0);
-	bool found(false);
-	for(uint i(0); i<path.str.size();){
-		//		printMinimizer(kmer, k2);
-		if(genomicKmers.unordered_set::count(kmer)!=0){
-			start=max(((int)position-(int)i-positionInSeqStrandedEnd(path.str, kmer, k2)),0);
-			found=true;
-			break;
-		}
-		++i;
-		if(position>=k2+i){
-			updateMinimizerEnd(kmer, read[position-k2-i], k2);
-		}else{
 			return false;
 		}
 	}
-
-	if(found){
-		string region(read.substr(max(start-(int)k2,0),path.str.size()));
-		if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
-			//			regionmapped+=region.size();
-			size_t size(numbers.size());
-			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
-			//			path.numbers.insert(path.numbers.end(),numbers.begin(),numbers.end());
-			if(start<(int)offset){
-				return true;
-			}else{
-				auto list(listPathFathers(offset, path.str.substr(0,kgraph),0));
-				for(size_t i(0);i<list.size();++i){
-					if(alignOnPathFathers(list[i], read, start,numbers)){
-						return true;
-					}
-				}
-				numbers.resize(size);
-			}
-		}
-	}
 	return false;
 }
 
+bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers){
+	double maxScore(0);
+	size_t maxIndice(0);
+	int maxStart(0);
+	for(size_t ii(0); ii<Paths.size();++ii){
+		path path(Paths[ii]);
+		unordered_set<minimizer> genomicKmers=allKmerSetStranded(k2,path.str);
+		minimizer kmer(seq2intStranded(read.substr(position,k2)));
+		int start(0);
+		bool found(false);
+
+		for(uint i(0); i<path.str.size();++i){
+			if(genomicKmers.unordered_set::count(kmer)!=0){
+				start=max(((int)i+(int)position-(int)positionInSeqStranded(path.str, kmer, k2)),0);
+				found=true;
+				break;
+			}
+			if(read.size()>position+i+k2){
+				updateMinimizer(kmer, read[position+i+k2], k2);
+			}else{
+				return false;
+			}
+		}
+		auto genomicKmersErrors(allKmerMapStranded(k2,path.str));
+		if(found){
+			string region(read.substr(start,path.str.size()));
+			double score(jaccardStrandedErrors(k2,region,genomicKmersErrors));
+			if(score>minJacc){
+				maxScore=score;
+				maxIndice=ii;
+				maxStart=start;
+			}
+		}
+	}
+
+	if(maxScore>minJacc){
+		path path(Paths[maxIndice]);
+		size_t size(numbers.size());
+		for(int i((int)path.numbers.size()-1);i>=0;--i){
+			numbers.push_back(path.numbers[i]);
+		}
+		if(read.size()<maxStart+path.str.size()+offset){
+			return true;
+		}else{
+			return alignOnPathsSonsErrors(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,maxStart+path.str.size()-kgraph,numbers);
+		}
+	}
+
+	return false;
+}
+//
+//
+//
+//	auto genomicKmersErrors(allKmerMapStranded(k2,path.str));
+//	if(found){
+//		string region(read.substr(start,path.str.size()));
+//		//		cout<<"region : "<<region<<" path : "<<path.str<<endl;
+//		if(jaccardStrandedErrors(k2,region,genomicKmersErrors)>=minJacc){
+//			//			cout<<jaccardStrandedErrors(k2,region,genomicKmersErrors)<<" "<<jaccardStranded(k2, region, genomicKmers)<<endl;
+//			//			cin.get();
+//			size_t size(numbers.size());
+//			for(int i((int)path.numbers.size()-1);i>=0;--i){
+//				numbers.push_back(path.numbers[i]);
+//			}
+//			//			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
+//			if(read.size()<start+path.str.size()+offset){
+//				return true;
+//			}else{
+//				auto list(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0));
+//				for(size_t i(0);i<list.size();++i){
+//					if(alignOnPathSons(list[i], read, start+path.str.size()-kgraph,numbers)){
+//						return true;
+//					}
+//				}
+//				numbers.resize(size);
+//			}
+//			return false;
+//		}
+//	}
+//	return false;
+//}
+
+
+
+
 void MappingSupervisor::MapFromUnitigs(const string& unitig){
-//	cout<<"unitigs : "<<unitig<<endl;
+	//	cout<<"unitigs : "<<unitig<<endl;
 	unordered_set<minimizer> min;
 	unordered_map<rNumber,size_t> Candidate;Candidate.set_empty_key(-1);
 	vector<unordered_set<minimizer>> read2min(reads.size());
 	findCandidate(unitig,min,Candidate,read2min);
 	bool done(false);
-//	unordered_set<minimizer> genomicKmers(allKmerSetStranded(k2,unitig));
+	//	unordered_set<minimizer> genomicKmers(allKmerSetStranded(k2,unitig));
 	auto genomicKmers(allKmerMapStranded(k2,unitig));
 	vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
 	//	vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
@@ -402,7 +443,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 		if(it->second>=multi){
 			//						readused.insert(it->first);
 			string read=reads[it->first];
-//			cout<<"read : "<<read<<endl;
+			//			cout<<"read : "<<read<<endl;
 			if(read.empty()){
 				continue;
 			}
@@ -429,7 +470,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 			}
 
 			if(preMapped){
-//				cout<<"premaped"<<endl;
+				//				cout<<"premaped"<<endl;
 				if(!done){
 					done=true;
 					//regionmapped+=unitig.size();
@@ -452,70 +493,76 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					end=(read.substr(position+unitig.size()-kgraph));
 				}
 				if(!mappedLeft){
-					//					cout<<read<<endl;
-					//					cout<<"beg : "<<reversecomplement(beg)<<endl;
-					//					cout<<ListFathers.size()<<endl;
-					for(size_t j(0); j<ListFathers.size(); ++j){
-						path pathFather(ListFathers[j]);
-						//						pathFather.str=reversecomplement(pathFather.str);
-						//						cout<<"pather : "<<pathFather.str<<endl;
-						//						cout<<reversecomplement(beg)<<endl;
-						//						cout<<"pather : "<<reversecomplement(pathFather.str)<<endl;
-						if(alignOnPathSonsErrors(pathFather, reversecomplement(beg), 0,numberBegin)){
-							//							cout<<"sucess"<<endl;
-							//							cout<<"sucess"<<endl;cin.get();
-							//regionmapped+=beg.size();
-							mappedLeft=true;
-							if(mapPartAllowed){
-								mutexEraseReads.lock();
-								reads[it->first]=end;
-								mutexEraseReads.unlock();
-							}
-							leftmap++;
-							break;
+					//					for(size_t j(0); j<ListFathers.size(); ++j){
+					//						path pathFather(ListFathers[j]);
+					//						if(alignOnPathSonsErrors(pathFather, reversecomplement(beg), 0,numberBegin)){
+					//							mappedLeft=true;
+					//							if(mapPartAllowed){
+					//								mutexEraseReads.lock();
+					//								reads[it->first]=end;
+					//								mutexEraseReads.unlock();
+					//							}
+					//							leftmap++;
+					//							break;
+					//						}
+					//
+					//					}
+					if(alignOnPathsSonsErrors(ListFathers, reversecomplement(beg), 0,numberBegin)){
+						mappedLeft=true;
+						if(mapPartAllowed){
+							mutexEraseReads.lock();
+							reads[it->first]=end;
+							mutexEraseReads.unlock();
 						}
-
+						leftmap++;
+					}else{
+						leftmapFail++;
 					}
-					leftmapFail++;
-					//					cout<<"FAIl"<<endl;cin.get();
 				}
 				if(!mappedRight){
-					for(size_t j(0); j<ListSons.size(); ++j){
-						path pathSon(ListSons[j]);
-						//						cout<<"pathson : "<<pathSon.str<<endl;
-						if(alignOnPathSonsErrors(pathSon,end , 0,numberEnd)){
-							//							cout<<"sucess"<<endl;cin.get();
-							//regionmapped+=end.size();
-							mappedRight=true;
-							if(mapPartAllowed){
-								mutexEraseReads.lock();
-								reads[it->first]=beg;
-								mutexEraseReads.unlock();
-							}
-							rightmap++;
-							break;
+//					for(size_t j(0); j<ListSons.size(); ++j){
+//						path pathSon(ListSons[j]);
+//						if(alignOnPathSonsErrors(pathSon,end , 0,numberEnd)){
+//							mappedRight=true;
+//							if(mapPartAllowed){
+//								mutexEraseReads.lock();
+//								reads[it->first]=beg;
+//								mutexEraseReads.unlock();
+//							}
+//							rightmap++;
+//							break;
+//						}
+//					}
+//					rightmapFail++;
+					if(alignOnPathsSonsErrors(ListSons,end , 0,numberEnd)){
+						mappedRight=true;
+						if(mapPartAllowed){
+							mutexEraseReads.lock();
+							reads[it->first]=beg;
+							mutexEraseReads.unlock();
 						}
+						rightmap++;
+					}else{
+						rightmapFail++;
 
 					}
-					rightmapFail++;
-					//					cout<<"FAIl"<<endl;cin.get();
 				}
 
 				if(mappedRight and mappedLeft){
-//					cout<<"go "<<unitig<<endl;
-//					cout<<numberBegin.size()<<" "<<numberEnd.size()<<endl;
+					//					cout<<"go "<<unitig<<endl;
+					//					cout<<numberBegin.size()<<" "<<numberEnd.size()<<endl;
 					string pathBegin(getPathEnd(numberBegin));
-//					cout<<pathBegin<<endl;
+					//					cout<<pathBegin<<endl;
 					pathBegin=pathBegin.substr(0,beg.size());
-//					cout<<pathBegin<<endl;
+					//					cout<<pathBegin<<endl;
 					if(pathBegin.empty() and numberBegin.size()!=0){
 						cout<<"fail to recompose path begin"<<endl;
 					}
 
 					string pathEnd(getPathEnd(numberEnd));
-//					cout<<pathEnd<<endl;
+					//					cout<<pathEnd<<endl;
 					pathEnd=pathEnd.substr(0,end.size());
-//					cout<<pathEnd<<endl;
+					//					cout<<pathEnd<<endl;
 					if(pathEnd.empty() and numberEnd.size()!=0){
 						cout<<"fail to recompose path end"<<endl;
 					}
@@ -528,7 +575,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 							path=unitig;
 						}
 					}else{
-//						path=unitig.substr(max(0,(int)unitig.size()-((int)read.size()-(int)end.size())));
+						//						path=unitig.substr(max(0,(int)unitig.size()-((int)read.size()-(int)end.size())));
 						if(stranded){
 							if(position1>0){
 								path=unitig;
@@ -555,22 +602,21 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 						path=path.substr(0,read.size());
 					}
 
-
 					if(path.empty()){
 						cout<<"Cant recompose path...."<<endl;
 					}
 
 
 					string seq1,seq2;
-//					cout<<"nw"<<endl;
-//					cout<<"!"<<read<<"!"<<" !"<<path<<"!"<<endl;
+					//					cout<<"nw"<<endl;
+					//					cout<<"!"<<read<<"!"<<" !"<<path<<"!"<<endl;
 					nw(path, read, seq1, seq2, false);
 					if(scoreFromAlignment(seq1)<=errorRate){
-//						cout<<read<<" ENDREAD"<<endl;
-//						cout<<path<<" ENDPATH"<<endl;
-//						cout<<seq1<<" ENDALIGN"<<endl;
-//						cout<<seq2<<" ENDALIGN"<<endl;
-//						cin.get();
+						//						cout<<read<<" ENDREAD"<<endl;
+						//						cout<<path<<" ENDPATH"<<endl;
+						//						cout<<seq1<<" ENDALIGN"<<endl;
+						//						cout<<seq2<<" ENDALIGN"<<endl;
+						//						cin.get();
 						mutexEraseReads.lock();
 						if(!reads[it->first].empty()){
 							outFile<<"read : "<<read<<endl;
@@ -578,18 +624,18 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 							reads[it->first].clear();
 							++aligneOnPathSucess;
 							regionmapped+=read.size();
-//							cout<<read<<endl<<endl<<path<<endl<<endl<<seq1<<endl;
-//							cout<<scoreFromAlignment(seq1)<<endl;
-//							cout<<"suceed"<<endl;
-//							cin.get();
+							//							cout<<read<<endl<<endl<<path<<endl<<endl<<seq1<<endl;
+							//							cout<<scoreFromAlignment(seq1)<<endl;
+							//							cout<<"suceed"<<endl;
+							//							cin.get();
 						}
 						mutexEraseReads.unlock();
 					}else{
 						fail++;
-//						cout<<read<<endl<<endl<<path<<endl<<endl<<seq1<<endl;
-//						cout<<scoreFromAlignment(seq1)<<endl;
-//						cout<<"fail"<<endl;
-//						cin.get();
+						//						cout<<read<<endl<<endl<<path<<endl<<endl<<seq1<<endl;
+						//						cout<<scoreFromAlignment(seq1)<<endl;
+						//						cout<<"fail"<<endl;
+						//						cin.get();
 					}
 
 					continue;
@@ -726,7 +772,7 @@ void MappingSupervisor::MapAll(){
 	}
 
 	for(auto &t : threads){t.join();}
-	
+
 	//	for(size_t i(0);i<reads.size();++i){
 	//		if(!reads[i].empty()){
 	//			cout<<reads[i]<<endl;
