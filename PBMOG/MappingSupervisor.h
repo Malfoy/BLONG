@@ -29,9 +29,9 @@ public:
 	unordered_map<minimizer, vector<rNumber>> min2Reads;
 	unordered_set<rNumber> readused;
 	size_t k,multi,H,part,k2,kgraph;
-	char depthMax;
+	char depthMax,nuc;
 	double minJacc;
-	bool mapPartAllowed;
+	bool mapPartAllowed,errorInKmers;
 	double errorRate;
 	graph G;
 	mutex mutexReadReads,mutexEraseReads;
@@ -40,7 +40,9 @@ public:
 
 
 	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph){
+		nuc=4;
 		mapPartAllowed=false;
+		errorInKmers=true;
 		unitigs=Iunitigs;
 		min2Reads=Iindex;
 		k=Ik;
@@ -96,11 +98,12 @@ public:
 	string getPathBegin(vector<uNumber>& numbers);
 
 	void MapFromUnitigs(const string& unitig);
+	void MapFromUnitigsErrors(const string& unitig);
 
 	bool isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin);
 
 	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
-
+	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 
 };
 

@@ -219,15 +219,15 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	return sketch;
 }
 
-unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq){
+unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq, char nuc){
 	unordered_multimap<string,string> sketch;
 	for(size_t i(0); i+k<=seq.size(); ++i){
 		string kmer(seq.substr(i,k));
 //		if(kmer.size()!=k){
 //			cout<<"watfw"<<endl;
 //		}
-		sketch.insert({kmer.substr(0,5),kmer.substr(5)});
-		//		cout<<kmer.substr(0,5)<<" "<<kmer.substr(5)<<endl;
+		sketch.insert({kmer.substr(0,nuc),kmer.substr(nuc)});
+//				cout<<kmer.substr(0,nuc)<<" "<<kmer.substr(nuc)<<endl;
 	}
 
 	return sketch;
@@ -331,7 +331,7 @@ bool isCorrect(const string& seq,const string& ref){
 }
 
 
-double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers){
+double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers, char nuc){
 	double inter(0);
 	string kmer;
 	kmer.reserve(k);
@@ -341,9 +341,9 @@ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multim
 		if(kmer.size()!=k){
 			cout<<"wtf"<<endl;
 		}
-		auto range(genomicKmers.equal_range(kmer.substr(0,5)));
+		auto range(genomicKmers.equal_range(kmer.substr(0,nuc)));
 		for (auto it(range.first); it!=range.second; it++){
-			if(isCorrect(kmer.substr(5),it->second)){
+			if(isCorrect(kmer.substr(nuc),it->second)){
 //				if(isCorrect("ATCGTTTT", "ATTGTTTT")){
 //					cout<<"true"<<endl;
 //					cin.get();
