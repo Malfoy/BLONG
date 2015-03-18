@@ -540,8 +540,8 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 						cout<<"Cant recompose path...."<<endl;
 					}
 					string seq1,seq2;
-					nw(path, read, seq1, seq2, false);
-					if(scoreFromAlignment(seq1)<=errorRate){
+					if(numberEnd.empty() and numberBegin.empty()){
+//						TODO BETTER
 						mutexEraseReads.lock();
 						if(!reads[it->first].empty()){
 							outFile<<"read : "<<read<<endl;
@@ -552,7 +552,24 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 						}
 						mutexEraseReads.unlock();
 					}else{
-						fail++;
+						nw(path, read, seq1, seq2, false);
+						if(scoreFromAlignment(seq1,seq2)<=errorRate){
+							mutexEraseReads.lock();
+							if(!reads[it->first].empty()){
+								outFile<<"read : "<<read<<endl;
+								outFile<<"path : "<<path<<endl;
+								reads[it->first].clear();
+								++aligneOnPathSucess;
+								regionmapped+=read.size();
+							}
+							mutexEraseReads.unlock();
+						}else{
+//							cout<<read.size()<<endl;
+//							cout<<path.size()<<endl;
+//							cout<<numberBegin.size()<<" "<<numberEnd.size()<<endl;
+//							cin.get();
+							fail++;
+						}
 					}
 
 					continue;
@@ -694,7 +711,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					}
 					string seq1,seq2;
 					nw(path, read, seq1, seq2, false);
-					if(scoreFromAlignment(seq1)<=errorRate){
+					if(scoreFromAlignment(seq1,seq2)<=errorRate){
 						mutexEraseReads.lock();
 						if(!reads[it->first].empty()){
 							outFile<<"read : "<<read<<endl;

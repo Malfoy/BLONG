@@ -181,7 +181,7 @@ unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
 }
 
 
-double scoreFromAlignment(const string& seq){
+double scoreFromAlignment2(const string& seq){
 	size_t begin(seq.size()),end(0);
 	size_t errors(0),temp(0);
 	for(size_t i(0);i<seq.size();++i){
@@ -200,6 +200,17 @@ double scoreFromAlignment(const string& seq){
 	}
 	//	cout<<errors<<" "<<begin<<" "<<end<<endl;
 	double res((100*errors)/(end-begin));
+	return res;
+}
+
+double scoreFromAlignment(const string& seq1,const string& seq2){
+	size_t errors(0);
+	for(size_t i(0);i<seq1.size();++i){
+		if(seq1[i]!=seq2[i]){
+			++errors;
+		}
+	}
+	double res((100*errors)/(seq1.size()));
 	return res;
 }
 

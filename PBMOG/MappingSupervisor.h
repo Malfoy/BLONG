@@ -67,7 +67,7 @@ public:
 		regionmapped=0;
 		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
 		nbThreads=4;
-		errorRate=15;
+		errorRate=15	;
 		indice=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}

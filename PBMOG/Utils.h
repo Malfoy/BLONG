@@ -44,7 +44,6 @@ using namespace std;
 using namespace google;
 
 minimizer seq2int(const string& seq);
-double scoreFromAlignment(const string& seq);
 minimizer seq2intStranded(const string& seq);
 string reversecomplement(const string& str);
 char nuc2int(char c);
@@ -83,6 +82,7 @@ unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq,
 double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers,char nuc);
 void printMinimizer(minimizer min,size_t k);
 bool isCorrect(const string& seq,const string& ref);
+double scoreFromAlignment(const string& seq1,const string& seq2);
 
 
 #endif /* defined(__PBMOG__Utils__) */

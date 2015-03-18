@@ -70,12 +70,14 @@ void  dpm_init( int ** F, char ** traceback, int L1, int L2, int d )
 
 	for( j = 1; j <= L1; j++ )
 	{
-		F[ 0 ][ j ] =  -j * d ;
+//		F[ 0 ][ j ] =  -j * d ;
+		F[ 0 ][ j ] =  0 ;
 		traceback[ 0 ][ j ] =  '-' ;
 	}
 	for( i = 1; i <= L2; i++ )
 	{
-		F[ i ][ 0 ] =  -i * d ;
+//		F[ i ][ 0 ] =  -i * d ;
+		F[ i ][ 0 ] = 0 ;
 		traceback[ i ][ 0 ] =  '|' ;
 	}
 }
