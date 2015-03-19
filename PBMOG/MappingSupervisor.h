@@ -58,15 +58,15 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=100;
-		minSizeUnitigs=100;
+		offset=50;
+		minSizeUnitigs=50;
 //		offset=8;
 //		minSizeUnitigs=6;
 		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
 		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
-		nbThreads=4;
+		nbThreads=1;
 		errorRate=15	;
 		indice=0;
 		outFile.open("zout.txt",ofstream::trunc);
@@ -104,6 +104,7 @@ public:
 
 	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
+	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 
 };
 

@@ -340,7 +340,6 @@ bool MappingSupervisor::alignOnPathSonsErrors(const path& path, const string& re
 			for(int i((int)path.numbers.size()-1);i>=0;--i){
 				numbers.push_back(path.numbers[i]);
 			}
-			//			numbers.insert(numbers.end(),path.numbers.begin(),path.numbers.end());
 			if(read.size()<start+path.str.size()+offset){
 				return true;
 			}else{
@@ -403,6 +402,47 @@ bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const 
 	return false;
 }
 
+
+bool MappingSupervisor::alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers){
+	for(size_t ii(0); ii<Paths.size();++ii){
+		path path(Paths[ii]);
+		unordered_set<minimizer> genomicKmers=allKmerSetStranded(k2,path.str);
+		minimizer kmer(seq2intStranded(read.substr(position,k2)));
+		int start(0);
+		bool found(false);
+
+		for(uint i(0); i<path.str.size();++i){
+			if(genomicKmers.unordered_set::count(kmer)!=0){
+				start=max(((int)i+(int)position-(int)positionInSeqStranded(path.str, kmer, k2)),0);
+				found=true;
+				break;
+			}
+			if(read.size()>position+i+k2){
+				updateMinimizer(kmer, read[position+i+k2], k2);
+			}else{
+				break;
+			}
+		}
+
+		if(found){
+			auto genomicKmersErrors(allKmerMapStranded(k2,path.str,nuc));
+			string region(read.substr(start,path.str.size()));
+			double score(jaccardStrandedErrors(k2,region,genomicKmersErrors,nuc));
+			if(score>minJacc){
+				size_t size(numbers.size());
+				for(int i((int)path.numbers.size()-1);i>=0;--i){
+					numbers.push_back(path.numbers[i]);
+				}
+				if(read.size()<start+path.str.size()+offset ? true : alignOnPathsSonsErrorsAll(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,start+path.str.size()-kgraph,numbers)){
+					return true;
+				}else{
+					numbers.resize(size);
+				}
+			}
+		}
+	}
+	return false;
+}
 
 
 
