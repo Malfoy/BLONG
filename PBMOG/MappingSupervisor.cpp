@@ -10,6 +10,7 @@
 #include "MappingSupervisor.h"
 #include "Utils.h"
 #include "nw.h"
+#include <math.h>
 
 
 
@@ -135,7 +136,7 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_set<minimi
 
 
 
-bool MappingSupervisor::isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setMin){
+bool MappingSupervisor::isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setMin){
 	if(read.empty()){return false;}
 	minimizer minS(seq2intStranded(read.substr(0,k)));
 	minimizer minRC(seq2intStranded(reversecomplement(read.substr(0,k))));
@@ -146,6 +147,9 @@ bool MappingSupervisor::isCandidateCorrect2(const string& unitig, const string& 
 			if(posInSeq>=0){
 				int pos(max((i-posInSeq),0));
 				string region(read.substr(pos,unitig.size()));
+				//				cout<<region.size()<<" "<<log2(region.size())/2<<" "<<100*(pow(1-0.1,log2(region.size())/2))<<endl;
+				//				size_t kAlt((size_t)log2(region.size())/2+1);
+				//				double minJaccAlt(100*(pow(1-0.1,kAlt)));
 				if(jaccardStranded(k2,region,genomicKmers)>=minJacc){
 					readMapped++;
 					position=(pos);
@@ -165,7 +169,7 @@ bool MappingSupervisor::isCandidateCorrect2(const string& unitig, const string& 
 }
 
 
-bool MappingSupervisor::isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setMin){
+bool MappingSupervisor::isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setMin){
 	if(read.empty()){return false;}
 	minimizer minS(seq2intStranded(read.substr(0,k2)));
 	for(int i(0);;++i){
@@ -190,7 +194,7 @@ bool MappingSupervisor::isCandidateCorrect(const string& unitig, const string& r
 	return false;
 }
 
-bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin){
+bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin, int&positionRead){
 	if(read.empty()){return false;}
 	minimizer minS(seq2intStranded(read.substr(0,k)));
 	minimizer minRC(seq2intStranded(reversecomplement(read.substr(0,k))));
@@ -205,6 +209,7 @@ bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string
 				if(jaccardStrandedErrors(k2,region,genomicKmers,nuc)>=minJacc){
 					readMapped++;
 					position=(pos);
+					positionRead=pos;
 					return true;
 				}
 			}
@@ -265,6 +270,7 @@ bool MappingSupervisor::alignOnPathSons(const path& path, const string& read, si
 	return false;
 }
 
+
 bool MappingSupervisor::alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers){
 	double maxScore(0);
 	size_t maxIndice(0);
@@ -285,13 +291,13 @@ bool MappingSupervisor::alignOnPathsSons(const vector<path>& Paths, const string
 			if(read.size()>position+i+k2){
 				updateMinimizer(kmer, read[position+i+k2], k2);
 			}else{
-				return false;
+				break;
 			}
 		}
 		if(found){
 			string region(read.substr(start,path.str.size()));
 			double score(jaccardStranded(k2,region,genomicKmers));
-			if(score>minJacc){
+			if(score>maxScore){
 				maxScore=score;
 				maxIndice=ii;
 				maxStart=start;
@@ -332,10 +338,7 @@ bool MappingSupervisor::alignOnPathSonsErrors(const path& path, const string& re
 	auto genomicKmersErrors(allKmerMapStranded(k2,path.str,nuc));
 	if(found){
 		string region(read.substr(start,path.str.size()));
-		//		cout<<"region : "<<region<<" path : "<<path.str<<endl;
 		if(jaccardStrandedErrors(k2,region,genomicKmersErrors,nuc)>=minJacc){
-			//			cout<<jaccardStrandedErrors(k2,region,genomicKmersErrors)<<" "<<jaccardStranded(k2, region, genomicKmers)<<endl;
-			//			cin.get();
 			size_t size(numbers.size());
 			for(int i((int)path.numbers.size()-1);i>=0;--i){
 				numbers.push_back(path.numbers[i]);
@@ -377,14 +380,14 @@ bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const 
 			if(read.size()>position+i+k2){
 				updateMinimizer(kmer, read[position+i+k2], k2);
 			}else{
-				return false;
+				break;
 			}
 		}
 		auto genomicKmersErrors(allKmerMapStranded(k2,path.str,nuc));
 		if(found){
 			string region(read.substr(start,path.str.size()));
 			double score(jaccardStrandedErrors(k2,region,genomicKmersErrors,nuc));
-			if(score>minJacc){
+			if(score>maxScore){
 				maxScore=score;
 				maxIndice=ii;
 				maxStart=start;
@@ -397,7 +400,7 @@ bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const 
 		for(int i((int)path.numbers.size()-1);i>=0;--i){
 			numbers.push_back(path.numbers[i]);
 		}
-	return (read.size()<maxStart+path.str.size()+offset ? true : alignOnPathsSonsErrors(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,maxStart+path.str.size()-kgraph,numbers));
+		return (read.size()<maxStart+path.str.size()+offset ? true : alignOnPathsSonsErrors(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,maxStart+path.str.size()-kgraph,numbers));
 	}
 	return false;
 }
@@ -433,11 +436,14 @@ bool MappingSupervisor::alignOnPathsSonsErrorsAll(const vector<path>& Paths, con
 				for(int i((int)path.numbers.size()-1);i>=0;--i){
 					numbers.push_back(path.numbers[i]);
 				}
-				if(read.size()<start+path.str.size()+offset ? true : alignOnPathsSonsErrorsAll(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,start+path.str.size()-kgraph,numbers)){
+				if(read.size()<start+path.str.size()+offset){
 					return true;
 				}else{
-					numbers.resize(size);
+					if(alignOnPathsSonsErrorsAll(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,start+path.str.size()-kgraph,numbers)){
+						return true;
+					}
 				}
+				numbers.resize(size);
 			}
 		}
 	}
@@ -475,16 +481,16 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 			}
 			bool preMapped(false);
 			bool stranded;
-			int position,position1(-1),position2(-1);
+			int position,position1(-1),position2(-1),positionUnitig;
 
-			bool correct1(isCandidateCorrectMap(unitig,read,genomicKmers,position1,read2min[it->first]));
+			bool correct1(isCandidateCorrectMap(unitig,read,genomicKmers,position1,read2min[it->first],positionUnitig));
 			if(correct1){
 				position=max(0,position1);
 				preMapped=true;
 				stranded=true;
 			}else{
 				read=reversecomplement(read);
-				bool correct2(isCandidateCorrectMap(unitig,read,genomicKmers,position2,read2min[it->first]));
+				bool correct2(isCandidateCorrectMap(unitig,read,genomicKmers,position2,read2min[it->first],positionUnitig));
 				if(correct2){
 					position=max(position2,0);
 					preMapped=true;
@@ -581,33 +587,48 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 					}
 					string seq1,seq2;
 					if(numberEnd.empty() and numberBegin.empty()){
-//						TODO BETTER
-						mutexEraseReads.lock();
-						if(!reads[it->first].empty()){
-							outFile<<"read : "<<read<<endl;
-							outFile<<"path : "<<path<<endl;
-							reads[it->first].clear();
-							++aligneOnPathSucess;
-							regionmapped+=read.size();
+						if(checking){
+							positionUnitig=max(0,-positionUnitig);
+							nw(unitig.substr(positionUnitig,read.size()), read, seq1, seq2, false);
 						}
-						mutexEraseReads.unlock();
-					}else{
-						nw(path, read, seq1, seq2, false);
-						if(scoreFromAlignment(seq1,seq2)<=errorRate){
+						if(!checking or scoreFromAlignment(seq1,seq2)<=errorRate){
 							mutexEraseReads.lock();
 							if(!reads[it->first].empty()){
-								outFile<<"read : "<<read<<endl;
-								outFile<<"path : "<<path<<endl;
+//								outFile<<"read : "<<read<<endl;
+//								outFile<<"path : "<<path<<endl;
+								reads[it->first].clear();
+								++aligneOnPathSucess;
+								readInUnitig++;
+								regionmapped+=read.size();
+							}
+							mutexEraseReads.unlock();
+						}else{
+//							cout<<unitig<<endl;
+//							cout<<read.substr(positionRead,unitig.size())<<endl;
+//							cout<<positionUnitig<<endl;
+//							cin.get();
+//							cout<<seq1<<endl;
+//							cout<<"OMG"<<endl;
+//							cout<<seq2<<endl;
+//							cin.get();
+							fail++;
+
+						}
+					}else{
+						if(checking){
+							nw(path, read, seq1, seq2, false);
+						}
+						if(!checking or scoreFromAlignment(seq1,seq2)<=errorRate){
+							//TODO MEASURE SCORE HERE (MEAN)							mutexEraseReads.lock();
+							if(!reads[it->first].empty()){
+//								outFile<<"read : "<<read<<endl;
+//								outFile<<"path : "<<path<<endl;
 								reads[it->first].clear();
 								++aligneOnPathSucess;
 								regionmapped+=read.size();
 							}
 							mutexEraseReads.unlock();
 						}else{
-//							cout<<read.size()<<endl;
-//							cout<<path.size()<<endl;
-//							cout<<numberBegin.size()<<" "<<numberEnd.size()<<endl;
-//							cin.get();
 							fail++;
 						}
 					}
@@ -625,7 +646,7 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 	vector<unordered_set<minimizer>> read2min(reads.size());
 	findCandidate(unitig,min,Candidate,read2min);
 	bool done(false);
-		unordered_set<minimizer> genomicKmers(allKmerSetStranded(k2,unitig));
+	unordered_set<minimizer> genomicKmers(allKmerSetStranded(k2,unitig));
 	vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
 	vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
 	if(ListFathers.empty() and ListSons.empty()){
@@ -749,9 +770,8 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 					if(path.empty()){
 						cout<<"Cant recompose path...."<<endl;
 					}
-					string seq1,seq2;
-					nw(path, read, seq1, seq2, false);
-					if(scoreFromAlignment(seq1,seq2)<=errorRate){
+					if(numberEnd.empty() and numberBegin.empty()){
+						//						TODO BETTER
 						mutexEraseReads.lock();
 						if(!reads[it->first].empty()){
 							outFile<<"read : "<<read<<endl;
@@ -759,12 +779,26 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 							reads[it->first].clear();
 							++aligneOnPathSucess;
 							regionmapped+=read.size();
+
 						}
 						mutexEraseReads.unlock();
 					}else{
-						fail++;
+						string seq1,seq2;
+						nw(path, read, seq1, seq2, false);
+						if(scoreFromAlignment(seq1,seq2)<=errorRate){
+							mutexEraseReads.lock();
+							if(!reads[it->first].empty()){
+								outFile<<"read : "<<read<<endl;
+								outFile<<"path : "<<path<<endl;
+								reads[it->first].clear();
+								++aligneOnPathSucess;
+								regionmapped+=read.size();
+							}
+							mutexEraseReads.unlock();
+						}else{
+							fail++;
+						}
 					}
-
 					continue;
 				}
 			}
@@ -794,8 +828,9 @@ void MappingSupervisor::MapPart(){
 				cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size())<<endl;
 				cout<<island<<" islands..."<<endl;
 				cout<<regionmapped/(1000*1000)<<" Mnuc mapped or "<<regionmapped/(1000*1)<<" Knuc "<<endl;
-				cout<<leftmap<<" "<< rightmap<<endl;
-				cout<<leftmapFail<<" "<<rightmapFail<<endl;
+				cout<<leftmap<<" left map "<< rightmap<<" right map"<<endl;
+				cout<<leftmapFail<<" left failt "<<rightmapFail<<" right fail"<<endl;
+				cout<<readInUnitig<<" reads in unitig"<<endl;
 				if(fail+aligneOnPathSucess!=0){
 					cout<<(100*aligneOnPathSucess)/(fail+aligneOnPathSucess);
 				}

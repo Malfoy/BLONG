@@ -31,11 +31,11 @@ public:
 	size_t k,multi,H,part,k2,kgraph;
 	char depthMax,nuc;
 	double minJacc;
-	bool mapPartAllowed,errorInKmers;
+	bool mapPartAllowed,errorInKmers,checking;
 	double errorRate;
 	graph G;
 	mutex mutexReadReads,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig;
 
 
 
@@ -43,6 +43,7 @@ public:
 		nuc=4;
 		mapPartAllowed=false;
 		errorInKmers=true;
+		checking=true;
 		unitigs=Iunitigs;
 		min2Reads=Iindex;
 		k=Ik;
@@ -59,15 +60,15 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=50;
-		minSizeUnitigs=50;
+		minSizeUnitigs=100;
 //		offset=8;
 //		minSizeUnitigs=6;
 		depthMax=5;
 		bigUnitig=0;
 		regionmapped=0;
-		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=0;
-		nbThreads=1;
-		errorRate=15	;
+		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=0;
+		nbThreads=4;
+		errorRate=15;
 		indice=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
@@ -100,7 +101,7 @@ public:
 	void MapFromUnitigs(const string& unitig);
 	void MapFromUnitigsErrors(const string& unitig);
 
-	bool isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin);
+	bool isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin,int& positionRead);
 
 	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);

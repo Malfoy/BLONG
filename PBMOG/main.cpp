@@ -158,7 +158,7 @@ int main(){
 	//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 	//	exit(0);
 
-	size_t H(10),k(15),part(1),kgraph(30),k2(15),minsize(100),threshold(3);
+	size_t H(100),k(15),part(1),kgraph(30),k2(15),minsize(100),threshold(3);
 //	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1),threshold(1);
 	bool homo(false);
 	srand((int)time(NULL));
@@ -177,9 +177,10 @@ int main(){
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
-
+//
 	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
-//	vector<string> Unitigs(kmerCounting("/Applications/PBMOG/Build/Products/Debug/ecoliref.fasta", kgraph+1));
+//	vector<string> Unitigs(kmerCounting("/Applications/PBMOG/Build/Products/Debug/ecoliref.fasta", 21));
+//	exit(0);
 	//	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/randomref1.fa",homo));
 	graph Graph(Unitigs,kgraph);
 	auto Filter(filterUnitigs(Unitigs,k,H,part));
