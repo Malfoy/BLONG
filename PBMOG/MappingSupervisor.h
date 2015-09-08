@@ -33,9 +33,10 @@ public:
 	double minJacc;
 	bool mapPartAllowed,errorInKmers,checking;
 	double errorRate;
+	atomic<double> globalscore;
 	graph G;
 	mutex mutexReadReads,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig,deepper;
 
 
 
@@ -59,16 +60,14 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=50;
+		offset=100;
 		minSizeUnitigs=100;
 //		offset=8;
 //		minSizeUnitigs=6;
-		depthMax=5;
-		bigUnitig=0;
-		regionmapped=0;
-		fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=0;
+		depthMax=100;
+		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=0;
 		nbThreads=4;
-		errorRate=15;
+		errorRate=30;
 		indice=0;
 		outFile.open("zout.txt",ofstream::trunc);
 	}
@@ -101,12 +100,15 @@ public:
 	void MapFromUnitigs(const string& unitig);
 	void MapFromUnitigsErrors(const string& unitig);
 
-	bool isCandidateCorrectMap(const string& unitig, const string& read, unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin,int& positionRead);
+	bool isCandidateCorrectMap(const string& unitig, const string& read, const unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin,int& positionRead);
 
 	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 
+	bool preMapUnitig(const string& unitig, string& read,const unordered_multimap<string,string>& genomicKmers,int& position,unordered_set<minimizer> setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
+	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, vector<path> ListFathers, vector<path> ListSons,rNumber rNum, string& beg, string& end);
+	string recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,size_t begsize,size_t endsize,size_t readsize,const string& unitig,bool stranded, int position1, int position2);
 };
 
 

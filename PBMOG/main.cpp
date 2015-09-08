@@ -97,7 +97,7 @@ unordered_map<minimizer,vector<rNumber>> indexSeq(const vector<string>& seqs, si
 	index.set_empty_key(-1);
 	vector<size_t> limits = bounds(nbThreads, seqs.size());
 
-	for (size_t i(0); i<nbThreads; ++i) {
+	for (size_t i(0); i<nbThreads; ++i){
 		threads.push_back(thread(indexSeqAux, seqs, H, k, part, filter, &index, limits[i], limits[i+1]));
 	}
 
@@ -158,26 +158,27 @@ int main(){
 	//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
 	//	exit(0);
 
-	size_t H(100),k(15),part(1),kgraph(30),k2(15),minsize(100),threshold(3);
+	size_t H(1000),k(15),part(1),kgraph(30),k2(13),minsize(100),threshold(1);
 //	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1),threshold(1);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(0);
-	double errorRate(0.10);
-	double minjacc(1*100*(pow(1-errorRate,k2)));
+	size_t nCycle(10);
+//	double errorRate(0.10);
+//	double minjacc(1*100*(pow(1-errorRate,k2)));
+	double minjacc(30);
 	//	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/positive_0001.fastq",homo,minsize));
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/1Xnormal10K09_0001.fastq",homo,minsize));
+	//auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/1Xnormal10K09_0001.fastq",homo,minsize));
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PacBio_10kb_CLR.fastq",homo,minsize));
 	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitig31.fa", kgraph, false, true, false);
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
 //	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
-//
 	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
 //	vector<string> Unitigs(kmerCounting("/Applications/PBMOG/Build/Products/Debug/ecoliref.fasta", 21));
 //	exit(0);

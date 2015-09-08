@@ -160,8 +160,8 @@ int nw_align(int ** F,char ** traceback,const string& seq_1, const string& seq_2
 	}
 //	cout<<"end"<<endl;
 
-	reverse( seq_1_al.begin(), seq_1_al.end() );
-	reverse( seq_2_al.begin(), seq_2_al.end() );
+//	reverse( seq_1_al.begin(), seq_1_al.end() );
+//	reverse( seq_2_al.begin(), seq_2_al.end() );
 
 	return  0 ;
 }

@@ -771,12 +771,44 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 				res.push_back(homocompression(line));
 			}else{
 				//				res.push_back(randomString(10000));
-				res.push_back(line);
-				//				cout<<line<<endl;
+				if(n%10==0)
+					res.push_back(line);
 			}
 			++n;
 			size+=line.size();
 		}
+	}
+	random_shuffle (res.begin(),res.end());
+	cout<<"number of reads : "<<n<<endl;
+	cout<<"Mean  size : "<<size/(max(1,n))<<endl;
+	return res;
+}
+
+vector<string> loadFASTA(const string& unitigFile,bool homo,size_t sizeMin){
+	ifstream in(unitigFile);
+	vector<string> res;
+	int n(0);
+	uint64_t size(0);
+	//TODO compatibility fastq and fasta plz
+	string line,lol,more;
+	while(!in.eof()){
+		getline(in,lol);
+		getline(in,line);
+		while(in.peek()!='>' and !in.eof()){
+			getline(in,more);
+			line+=more;
+		}
+		if(line.size()>sizeMin){
+			if(homo){
+				res.push_back(homocompression(line));
+			}else{
+				//				res.push_back(randomString(10000));
+				res.push_back(line);
+			}
+			++n;
+			size+=line.size();
+		}
+
 	}
 	random_shuffle (res.begin(),res.end());
 	cout<<"number of reads : "<<n<<endl;
