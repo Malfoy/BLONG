@@ -36,15 +36,15 @@ public:
 	atomic<double> globalscore;
 	graph G;
 	mutex mutexReadReads,mutexEraseReads;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig,deepper;
+	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig,deepper,failedCompaction,pathNumber;
 
 
 
 	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const vector<string>& Ireads, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph){
-		nuc=4;
+		nuc=5;
 		mapPartAllowed=false;
 		errorInKmers=true;
-		checking=true;
+		checking=false;
 		unitigs=Iunitigs;
 		min2Reads=Iindex;
 		k=Ik;
@@ -60,16 +60,16 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=100;
-		minSizeUnitigs=100;
+		offset=200;
+		minSizeUnitigs=200;
 //		offset=8;
 //		minSizeUnitigs=6;
-		depthMax=100;
-		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=0;
+		depthMax=15;
+		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=failedCompaction=pathNumber=0;
 		nbThreads=4;
 		errorRate=30;
 		indice=0;
-		outFile.open("zout.txt",ofstream::trunc);
+		outFile.open("myout.fa",ofstream::trunc);
 	}
 
 

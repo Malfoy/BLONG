@@ -60,7 +60,7 @@ string compactionEnd(const string& seq1,const  string& seq2, size_t k);
 string compactionBegin(const string& seq1,const  string& seq2, size_t k);
 void readContigsforstats(const string& File, size_t k, bool elag, bool compact,bool unitigb);
 unordered_map<string,vector<minimizer>> getGraph(const vector<string>& unitigs, size_t k);
-vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t size);
+vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t size,char frac);
 vector<string> loadFASTA(const string& unitigFile,bool homo,size_t size);
 string homocompression(const string& seq);
 vector<string> loadUnitigs(const string& unitigFile,bool homo);

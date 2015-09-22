@@ -234,11 +234,11 @@ unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq,
 	unordered_multimap<string,string> sketch;
 	for(size_t i(0); i+k<=seq.size(); ++i){
 		string kmer(seq.substr(i,k));
-//		if(kmer.size()!=k){
-//			cout<<"watfw"<<endl;
-//		}
+		//		if(kmer.size()!=k){
+		//			cout<<"watfw"<<endl;
+		//		}
 		sketch.insert({kmer.substr(0,nuc),kmer.substr(nuc)});
-//				cout<<kmer.substr(0,nuc)<<" "<<kmer.substr(nuc)<<endl;
+		//				cout<<kmer.substr(0,nuc)<<" "<<kmer.substr(nuc)<<endl;
 	}
 
 	return sketch;
@@ -355,17 +355,17 @@ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multim
 		auto range(genomicKmers.equal_range(kmer.substr(0,nuc)));
 		for (auto it(range.first); it!=range.second; it++){
 			if(isCorrect(kmer.substr(nuc),it->second)){
-//				if(isCorrect("ATCGTTTT", "ATTGTTTT")){
-//					cout<<"true"<<endl;
-//					cin.get();
-//				}else{
-//					cout<<"false"<<endl;
-//					cin.get();
-//				}
-//				if(kmer.substr(5)!=it->second){
-//					cout<<kmer.substr(5)<<" "<<it->second<<endl;
-//					cin.get();
-//				}
+				//				if(isCorrect("ATCGTTTT", "ATTGTTTT")){
+				//					cout<<"true"<<endl;
+				//					cin.get();
+				//				}else{
+				//					cout<<"false"<<endl;
+				//					cin.get();
+				//				}
+				//				if(kmer.substr(5)!=it->second){
+				//					cout<<kmer.substr(5)<<" "<<it->second<<endl;
+				//					cin.get();
+				//				}
 				inter++;
 				break;
 			}else{
@@ -373,7 +373,7 @@ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multim
 			}
 		}
 	}
-//	cout<<i<<" "<<seq.size()-k+1<<endl;
+	//	cout<<i<<" "<<seq.size()-k+1<<endl;
 	return double(100*inter/(seq.size()-k+1));;
 }
 
@@ -495,6 +495,7 @@ string compaction(const string& seq1,const string& seq2, size_t k){
 }
 
 string compactionEnd(const string& seq1,const string& seq2, size_t k){
+
 	size_t s1(seq1.size()),s2(seq2.size());
 	if(s1==0 or s2==0){return "";}
 
@@ -539,7 +540,7 @@ string compactionBegin(const string& seq1,const string& seq2, size_t k){
 
 void readContigsforstats(const string& File, size_t k, bool elag, bool compact,bool unitigb){
 	ifstream in(File);
-	uint minSize(100);
+	uint minSize(50);
 	unordered_map<string,vector<size_t>> kmer2reads;
 	kmer2reads.set_empty_key("0");
 	int i(0);
@@ -552,6 +553,7 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 			//~ getline(in,line);
 			getline(in,read);
 			read=read.substr(0,read.size()-1);
+			transform(read.begin(), read.end(),read.begin(), ::toupper);
 		}else{
 			read="";
 			getline(in,line);
@@ -603,9 +605,9 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 				}
 				if(v.size()==1){
 					island++;
-					//					if(unitig.size()<=minSize and elag){
-					nottake.insert(it->second[0]);
-					//					}
+					if(unitig.size()<=minSize and elag){
+						nottake.insert(it->second[0]);
+					}
 				}
 			}
 		}
@@ -695,6 +697,7 @@ unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, si
 	return graph;
 }
 
+
 int positionInSeq(const string& seq, minimizer min, size_t k){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	minimizer kmerRC(seq2intStranded(reversecomplement((seq.substr(0,k)))));
@@ -713,6 +716,7 @@ int positionInSeq(const string& seq, minimizer min, size_t k){
 	return -1;
 }
 
+
 int positionInSeqStranded(const string& seq, minimizer min, size_t k){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	for(int i(0);;++i){
@@ -729,6 +733,7 @@ int positionInSeqStranded(const string& seq, minimizer min, size_t k){
 	}
 	return -1;
 }
+
 
 int positionInSeqStrandedEnd(const string& seq, minimizer min, size_t k){
 	//	cout<<seq<<endl;
@@ -752,10 +757,10 @@ int positionInSeqStrandedEnd(const string& seq, minimizer min, size_t k){
 
 
 
-vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
+vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin,char frac){
 	ifstream in(unitigFile);
 	vector<string> res;
-	int n(0);
+	int n(0),rn(0);
 	uint64_t size(0);
 	//TODO compatibility fastq and fasta plz
 	string line,lol;
@@ -771,15 +776,17 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin){
 				res.push_back(homocompression(line));
 			}else{
 				//				res.push_back(randomString(10000));
-				if(n%10==0)
+				if(n%frac==0){
 					res.push_back(line);
+					rn++;
+				}
 			}
 			++n;
 			size+=line.size();
 		}
 	}
 	random_shuffle (res.begin(),res.end());
-	cout<<"number of reads : "<<n<<endl;
+	cout<<"number of reads : "<<rn<<endl;
 	cout<<"Mean  size : "<<size/(max(1,n))<<endl;
 	return res;
 }

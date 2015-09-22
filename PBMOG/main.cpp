@@ -36,6 +36,7 @@ void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& seque
 		if(sequence.size()>=k){
 			vector<minimizer> sketch;
 			if(sequence.size()<=H){
+//			if(true){
 				sketch=allHash(k, sequence);
 			}else{
 				sketch=minHashpart(H,k,sequence,part);
@@ -153,27 +154,23 @@ void testSimilarity(const string& refFaFile, const string& pbFileFq){
 
 
 int main(){
-	//	testBinSeq();
-	//	exit(0);
-	//	testSimilarity("/Applications/PBMOG/Build/Products/Debug/random.fa","/Applications/PBMOG/Build/Products/Debug/sd_0001.fastq");
-	//	exit(0);
-
-	size_t H(1000),k(15),part(1),kgraph(30),k2(13),minsize(100),threshold(1);
+	size_t H(1000),k(15),part(1),kgraph(30),k2(9),minsize(100),threshold(1);
 //	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1),threshold(1);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(10);
+	size_t nCycle(0);
 //	double errorRate(0.10);
 //	double minjacc(1*100*(pow(1-errorRate,k2)));
-	double minjacc(30);
+	double minjacc(10);
 	//	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/positive_0001.fastq",homo,minsize));
-	//auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/1Xnormal10K09_0001.fastq",homo,minsize));
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/PacBio_10kb_CLR.fastq",homo,minsize));
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitig31.fa", kgraph, false, true, false);
+//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/20X10K09_0001.fastq",homo,minsize,1));
+	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/ecolihighcov.fastq",homo,minsize,1));
+	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, false, false, false);
+//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/ERR022075.5.unitig", kgraph, false, true, true);
 //	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
 //	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
@@ -197,6 +194,5 @@ int main(){
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 	cout<<"Reads Mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
-
 	return 0;
 }
