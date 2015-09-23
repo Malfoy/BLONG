@@ -64,7 +64,7 @@ public:
 		minSizeUnitigs=200;
 //		offset=8;
 //		minSizeUnitigs=6;
-		depthMax=15;
+		depthMax=10;
 		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=failedCompaction=pathNumber=0;
 		nbThreads=4;
 		errorRate=30;

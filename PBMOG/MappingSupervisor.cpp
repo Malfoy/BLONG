@@ -365,6 +365,7 @@ bool MappingSupervisor::alignOnPathSonsErrors(const path& path, const string& re
 
 
 bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers){
+//	cout<<"align"<<endl;
 	double maxScore(0);
 	size_t maxIndice(0);
 	int maxStart(0);
@@ -410,15 +411,19 @@ bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const 
 		}
 		//		return (read.size()<maxStart+(int)(path.str.size())+offset ? true : (alignOnPathsSonsErrors(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,maxStart+(int)(path.str.size())-kgraph,numbers) ? true : (maxStart+(int)(path.str.size())>0*read.size()) ) );
 		if (read.size()<maxStart+(int)(path.str.size())+offset) {
+//				cout<<"align end"<<endl;
 			return true;
 		}else{
 			if (alignOnPathsSonsErrors(listPathSons(offset, path.str.substr(path.str.size()-kgraph,kgraph),0),read,maxStart+(int)(path.str.size())-kgraph,numbers)) {
+//				cout<<"align end"<<endl;
 				return true;
 			}else{
+//					cout<<"align end"<<endl;
 				return(maxStart+(int)(path.str.size())>1*read.size());
 			}
 		}
 	}
+//	cout<<"align end"<<endl;
 	return false;
 }
 
@@ -896,10 +901,9 @@ void MappingSupervisor::MapFromUnitigs(const string& unitig){
 
 void MappingSupervisor::MapPart(){
 	//foreach unitig (sort of)
+	mutexReadReads.lock();
 	while(indice<unitigs.size()){
-		mutexReadReads.lock();
-		const string unitig=unitigs[indice];
-		indice++;
+		const string unitig=unitigs[indice++];
 		mutexReadReads.unlock();
 		//		cout<<"unitig :"<<unitig<<endl;
 		if(unitig.size()>=minSizeUnitigs){
@@ -949,6 +953,7 @@ void MappingSupervisor::MapPart(){
 			}
 		}
 	}
+	mutexReadReads.unlock();
 }
 
 
@@ -1009,30 +1014,12 @@ string MappingSupervisor::getPathBegin(vector<uNumber>& numbers){
 
 void MappingSupervisor::MapAll(){
 	vector<thread> threads;
-	vector<size_t> limits = bounds(nbThreads, unitigs.size());
 
 	for(size_t i(0); i<nbThreads; ++i) {
 		threads.push_back(thread(&MappingSupervisor::MapPart, this));
 	}
 
 	for(auto &t : threads){t.join();}
-
-	//	for(size_t i(0);i<reads.size();++i){
-	//		if(!reads[i].empty()){
-	//			cout<<reads[i]<<endl;
-	//			cin.get();
-	//		}
-	//	}
-	//	cout<<bigUnitig<<endl;
-	//	cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig)<<endl;
-	//	cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(reads.size())<<endl;
-	//	cout<<"Read used: "<<readMapped<<" Percent read used : "<<(100*readused.size())/(reads.size())<<endl;
-	//	cout<<"Read mapped on graph: "<<aligneOnPathSucess<<" Percent read mapped  on graph: "<<(100*aligneOnPathSucess)/(reads.size())<<endl;
-	//	cout<<island<<" islands..."<<endl;
-	//	cout<<regionmapped/(1000*1000)<<" Mnuc mapped or "<<regionmapped/(1000*1)<<" Knuc "<<endl;
-	//	cout<<leftmap<<" "<< rightmap<<endl;
-	//	cout<<leftmapFail<<" "<<rightmapFail<<endl;
-	//	cout<<endl;
 }
 
 

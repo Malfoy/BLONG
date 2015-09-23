@@ -605,9 +605,9 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 				}
 				if(v.size()==1){
 					island++;
-					if(unitig.size()<=minSize and elag){
-						nottake.insert(it->second[0]);
-					}
+//					if(unitig.size()<=minSize and elag){
+//						nottake.insert(it->second[0]);
+//					}
 				}
 			}
 		}
