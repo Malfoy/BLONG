@@ -230,6 +230,7 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	return sketch;
 }
 
+
 unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq, char nuc){
 	unordered_multimap<string,string> sketch;
 	for(size_t i(0); i+k<=seq.size(); ++i){
@@ -243,6 +244,7 @@ unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq,
 
 	return sketch;
 }
+
 
 vector<string> kmerCounting(const string& fileName,size_t k){
 	ifstream in(fileName);
@@ -299,6 +301,7 @@ double jaccard(size_t k, const string& seq,const unordered_set<minimizer>& genom
 	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
+
 double jaccardStranded(size_t k, const string& seq, const unordered_set<minimizer>& genomicKmers){
 	minimizer kmer(seq2intStranded(seq.substr(0,k)));
 	double inter(0);
@@ -321,10 +324,12 @@ double jaccardStranded(size_t k, const string& seq, const unordered_set<minimize
 	//	return max(double(100*inter/(genomicKmers.size())),double(100*inter/(seq.size()-k)));
 }
 
+
 bool equalStr(const string& seq1, const string& seq2){
 	size_t size(min(seq1.size(),seq2.size()));
 	return (seq1.substr(0,size))==seq2.substr(0,size);
 }
+
 
 bool isCorrect(const string& seq,const string& ref){
 	for(size_t i(0); i<seq.size(); ++i){
@@ -542,7 +547,7 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 	ifstream in(File);
 	uint minSize(50);
 	unordered_map<string,vector<size_t>> kmer2reads;
-	kmer2reads.set_empty_key("0");
+//	kmer2reads.set_empty_key("0");
 	int i(0);
 	vector<string> unitigs;
 	unordered_set<size_t> nottake;
@@ -680,7 +685,7 @@ void readContigsforstats(const string& File, size_t k, bool elag, bool compact,b
 
 unordered_map<string,vector<uNumber>> getGraph(const vector<string>& unitigs, size_t k){
 	unordered_map<string,vector<uNumber>> graph;
-	graph.set_empty_key("0");
+//	graph.set_empty_key("0");
 	string unitig,seq1,seq2;
 
 	for(uint32_t i(0);i<unitigs.size();++i){
@@ -791,7 +796,7 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin,char 
 	return res;
 }
 
-vector<string> loadFASTA(const string& unitigFile,bool homo,size_t sizeMin){
+vector<string> loadFASTA(const string& unitigFile,bool homo,size_t sizeMin, size_t frac){
 	ifstream in(unitigFile);
 	vector<string> res;
 	int n(0);
@@ -806,13 +811,15 @@ vector<string> loadFASTA(const string& unitigFile,bool homo,size_t sizeMin){
 			line+=more;
 		}
 		if(line.size()>sizeMin){
+			++n;
 			if(homo){
 				res.push_back(homocompression(line));
 			}else{
 				//				res.push_back(randomString(10000));
-				res.push_back(line);
+				if(n%frac==0){
+					res.push_back(line);
+				}
 			}
-			++n;
 			size+=line.size();
 		}
 

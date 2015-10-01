@@ -36,7 +36,7 @@ void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& seque
 		if(sequence.size()>=k){
 			vector<minimizer> sketch;
 			if(sequence.size()<=H){
-//			if(true){
+				//			if(true){
 				sketch=allHash(k, sequence);
 			}else{
 				sketch=minHashpart(H,k,sequence,part);
@@ -70,9 +70,13 @@ unordered_set<minimizer> filterUnitigs(const vector<string>& unitigs, size_t k, 
 }
 
 
+void removeDuplicate(vector<minimizer>& vec){
+	sort( vec.begin(), vec.end() );
+	vec.erase( unique( vec.begin(), vec.end() ), vec.end() );
+}
+
 
 void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  const unordered_set<minimizer>& filter, unordered_map<minimizer,vector<rNumber>>* index, uint32_t L, size_t R){
-
 	for (uint32_t i(L); i<R; ++i){
 		string seq=seqs[i];
 		vector<minimizer> sketch;
@@ -81,6 +85,7 @@ void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  c
 		}else{
 			sketch=minHashpart2(H,k,seq,part,filter);
 		}
+		removeDuplicate(sketch);
 		myMutex.lock();
 		for(uint32_t j(0);j<sketch.size();++j){
 			(*index)[sketch[j]].push_back(i);
@@ -90,16 +95,84 @@ void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  c
 }
 
 
+void indexSeqAux2(const vector<string>& seqs, size_t H, size_t k, size_t part, unordered_map<minimizer,vector<rNumber>>* index, uint32_t L, size_t R){
+	for (uint32_t i(L); i<R; ++i){
+		string seq=seqs[i];
+		vector<minimizer> sketch;
+		if(seq.size()<=(uint)H){
+			sketch=allHash(k,seq);
+		}else{
+			sketch=minHashpart(H, k, seq, part);
+		}
+		removeDuplicate(sketch);
+		myMutex.lock();
+		for(uint32_t j(0);j<sketch.size();++j){
+			(*index)[sketch[j]].push_back(i);
+		}
+		myMutex.unlock();
+	}
+}
+
+
+void indexSeqAux3( vector<string>* seqs, size_t H, size_t k, size_t part, vector<rNumber>* index, uint32_t L, size_t R){
+	string seq;
+	vector<minimizer> sketch;
+	for (uint32_t i(L); i<R; ++i){
+		seq=(*seqs)[i];
+		if(seq.size()<=(uint)H){
+			sketch=allHash(k,seq);
+		}else{
+			sketch=minHashpart(H, k, seq, part);
+		}
+		removeDuplicate(sketch);
+		myMutex.lock();
+		for(uint32_t j(0);j<sketch.size();++j){
+			index[sketch[j]].push_back(i);
+		}
+		myMutex.unlock();
+	}
+}
+
 
 unordered_map<minimizer,vector<rNumber>> indexSeq(const vector<string>& seqs, size_t H, size_t k, size_t part, const unordered_set<minimizer>& filter){
 	size_t nbThreads(8);
 	vector<thread> threads;
 	unordered_map<minimizer,vector<rNumber>> index;
-	index.set_empty_key(-1);
+//	index.set_empty_key(-1);
 	vector<size_t> limits = bounds(nbThreads, seqs.size());
 
 	for (size_t i(0); i<nbThreads; ++i){
 		threads.push_back(thread(indexSeqAux, seqs, H, k, part, filter, &index, limits[i], limits[i+1]));
+	}
+
+	for(auto &t : threads){t.join();}
+	return index;
+}
+
+
+unordered_map<minimizer,vector<rNumber>> indexSeq2(const vector<string>& seqs, size_t H, size_t k, size_t part){
+	size_t nbThreads(4);
+	vector<thread> threads;
+	unordered_map<minimizer,vector<rNumber>> index;
+//	index.set_empty_key(-1);
+	vector<size_t> limits = bounds(nbThreads, seqs.size());
+
+	for (size_t i(0); i<nbThreads; ++i){
+		threads.push_back(thread(indexSeqAux2, seqs, H, k, part, &index, limits[i], limits[i+1]));
+	}
+
+	for(auto &t : threads){t.join();}
+	return index;
+}
+
+vector<rNumber>* indexSeq3( vector<string>* seqs, size_t H, size_t k, size_t part){
+	size_t nbThreads(4);
+	vector<thread> threads;
+	vector<rNumber>* index=new vector<rNumber> [4194304];
+	vector<size_t> limits = bounds(nbThreads, seqs->size());
+
+	for (size_t i(0); i<nbThreads; ++i){
+		threads.push_back(thread(indexSeqAux3, seqs, H, k, part, index, limits[i], limits[i+1]));
 	}
 
 	for(auto &t : threads){t.join();}
@@ -154,45 +227,39 @@ void testSimilarity(const string& refFaFile, const string& pbFileFq){
 
 
 int main(){
-	size_t H(1000),k(15),part(1),kgraph(30),k2(11),minsize(100),threshold(1);
-//	size_t H(100),k(5),part(1),kgraph(5),k2(5),minsize(1),threshold(1);
+	size_t H(100),k(11),part(10),kgraph(30),k2(11),minsize(100),threshold(3);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(1);
-//	double errorRate(0.10);
-//	double minjacc(1*100*(pow(1-errorRate,k2)));
-	double minjacc(10);
-	//	double minjacc(20);
+	size_t nCycle(0);
+	double minjacc(20);
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/positive_0001.fastq",homo,minsize));
-//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/20X10K09_0001.fastq",homo,minsize,1));
-	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/acineto_nanopore_2D_run4.fa.gz",homo,minsize,1));
-//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/ERR022075.contigs.fa", kgraph, false, false, false);
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/acineto313.unitig", kgraph, false, false, true);
-//	auto Reads(loadFASTQ("/Applications/PBMOG/Build/Products/Debug/read.fa",homo,minsize));
-//	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigs.fa", kgraph, false, false, false);
+	auto Reads(loadFASTA("/Applications/PBMOG/Build/Products/Debug/cel.fa",homo,minsize,1));
+	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/SRR065390.3.unitig", kgraph, false, false, true);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
 	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
-//	vector<string> Unitigs(kmerCounting("/Applications/PBMOG/Build/Products/Debug/ecoliref.fasta", 21));
-//	exit(0);
-	//	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/randomref1.fa",homo));
 	graph Graph(Unitigs,kgraph);
-	auto Filter(filterUnitigs(Unitigs,k,H,part));
+//	auto filter(filterUnitigs(Unitigs,k,H,part));
 	auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
 	cout<<"Reads loaded "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-	auto index(indexSeq(Reads,H,k,1*part,Filter));
+
+	unordered_map<minimizer, vector<rNumber>> index;
+	auto vect(indexSeq3(&Reads,H,k,part));
+//	auto index(indexSeq2(Reads,H,k,part));
+//	vector<rNumber>* vect;
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
-
-	MappingSupervisor supervisor(Unitigs, index, k, Reads, threshold, H, part, k2, minjacc, Graph, kgraph);
+	MappingSupervisor supervisor(Unitigs, index, k, Reads, threshold, H, part, k2, minjacc, Graph, kgraph,vect);
 
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
-	cout<<"Reads Mapped "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
+
+
+
 	return 0;
+
 }

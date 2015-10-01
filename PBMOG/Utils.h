@@ -33,7 +33,7 @@
 
 
 //~ #define unordered_map sparse_hash_map
-#define unordered_map dense_hash_map
+//#define unordered_map dense_hash_map
 #define minimizer uint32_t
 #define rNumber uint32_t
 #define uNumber uint32_t
@@ -61,7 +61,7 @@ string compactionBegin(const string& seq1,const  string& seq2, size_t k);
 void readContigsforstats(const string& File, size_t k, bool elag, bool compact,bool unitigb);
 unordered_map<string,vector<minimizer>> getGraph(const vector<string>& unitigs, size_t k);
 vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t size,char frac);
-vector<string> loadFASTA(const string& unitigFile,bool homo,size_t size);
+vector<string> loadFASTA(const string& unitigFile,bool homo,size_t size, size_t frac);
 string homocompression(const string& seq);
 vector<string> loadUnitigs(const string& unitigFile,bool homo);
 void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous, const unordered_set<minimizer>& filter);

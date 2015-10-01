@@ -75,8 +75,8 @@ public:
 
 
 	graph(size_t kgraph){
-		right.set_empty_key("0");
-		left.set_empty_key("0");
+//		right.set_empty_key("0");
+//		left.set_empty_key("0");
 		k=kgraph;
 	};
 
@@ -84,8 +84,8 @@ public:
 	};
 
 	graph(const vector<string>& unitigs,size_t kgraph){
-		right.set_empty_key("0");
-		left.set_empty_key("0");
+//		right.set_empty_key("0");
+//		left.set_empty_key("0");
 		k=kgraph;
 		string unitig,seq1,seq2;
 		for(uNumber i(0);i<unitigs.size();++i){
