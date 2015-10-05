@@ -25,7 +25,7 @@
 using namespace std;
 //using namespace google;
 
-mutex myMutex;
+mutex myMutex,myMutex2;
 atomic<size_t> atomicount;
 
 
@@ -138,7 +138,7 @@ unordered_map<minimizer,vector<rNumber>> indexSeq(const vector<string>& seqs, si
 	size_t nbThreads(8);
 	vector<thread> threads;
 	unordered_map<minimizer,vector<rNumber>> index;
-//	index.set_empty_key(-1);
+	//	index.set_empty_key(-1);
 	vector<size_t> limits = bounds(nbThreads, seqs.size());
 
 	for (size_t i(0); i<nbThreads; ++i){
@@ -149,21 +149,57 @@ unordered_map<minimizer,vector<rNumber>> indexSeq(const vector<string>& seqs, si
 	return index;
 }
 
+ifstream global;
 
-unordered_map<minimizer,vector<rNumber>> indexSeq2(const vector<string>& seqs, size_t H, size_t k, size_t part){
+
+void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<rNumber>>* index, int* readNumber){
+	vector<minimizer> sketch;
+	string seq,more;
+	rPosition position;
+	while (!global.eof()) {
+		myMutex2.lock();
+		getline(global, seq);
+		position=global.tellg();
+		++*readNumber;
+		getline(global, seq);
+		while(global.peek()!='>' and !global.eof()){
+			getline(global,more);
+			seq+=more;
+		}
+		myMutex2.unlock();
+
+		if(seq.size()<=(uint)H){
+			sketch=allHash(k,seq);
+		}else{
+			sketch=minHashpart(H, k, seq, part);
+		}
+		removeDuplicate(sketch);
+
+		myMutex.lock();
+		for(uint32_t j(0);j<sketch.size();++j){
+			(*index)[sketch[j]].push_back(position);
+		}
+		myMutex.unlock();
+	}
+}
+
+
+unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t H, size_t k, size_t part,int& readNumber){
 	size_t nbThreads(4);
 	vector<thread> threads;
 	unordered_map<minimizer,vector<rNumber>> index;
-//	index.set_empty_key(-1);
-	vector<size_t> limits = bounds(nbThreads, seqs.size());
+//	cout<<"go?"<<endl;
+	global.open(seqs);
+//	cout<<"go"<<endl;
 
 	for (size_t i(0); i<nbThreads; ++i){
-		threads.push_back(thread(indexSeqAux2, seqs, H, k, part, &index, limits[i], limits[i+1]));
+		threads.push_back(thread(indexFasta, H, k, part, &index,&readNumber));
 	}
 
 	for(auto &t : threads){t.join();}
 	return index;
 }
+
 
 vector<rNumber>* indexSeq3( vector<string>* seqs, size_t H, size_t k, size_t part){
 	size_t nbThreads(4);
@@ -181,84 +217,41 @@ vector<rNumber>* indexSeq3( vector<string>* seqs, size_t H, size_t k, size_t par
 
 
 
-void testSimilarity(const string& refFaFile, const string& pbFileFq){
-	size_t k(11);
-	bool homo(false);
-	ifstream refFile(refFaFile),pbFile(pbFileFq);
-	string read,ref,line;
-	getline(refFile,line);
-	getline(refFile,ref);
-
-	vector<string> pbReads;
-
-	while (!pbFile.eof()) {
-		getline(pbFile,line);
-		getline(pbFile,read);
-		getline(pbFile,line);
-		getline(pbFile,line);
-		pbReads.push_back(read);
-	}
-	unordered_set<minimizer> genomicKmers;
-	if(homo){
-		genomicKmers=allKmerSet(k,homocompression(ref));
-	}else{
-		genomicKmers=allKmerSet(k,ref);
-	}
-	//	unordered_set<minimizer> genomicKmers=allKmerSet(k2,path.str);
-
-
-	double acc(0);
-	for (size_t i(0); i<pbReads.size(); ++i) {
-		read=pbReads[i];
-		if(homo){
-			double jacc(jaccard(k,homocompression(read),genomicKmers));
-			acc+=jacc;
-			cout<<jacc<<endl;
-		}else{
-			double jacc(jaccard(k,read,genomicKmers));
-			cout<<jacc<<endl;
-			acc+=jacc;
-		}
-	}
-	cout<<"read number : "<<pbReads.size()<<endl;
-	cout<<"mean : "<<acc/pbReads.size()<<endl;
-}
 
 
 
 int main(){
-	size_t H(100),k(11),part(10),kgraph(30),k2(11),minsize(100),threshold(3);
+	size_t H(1000),k(15),part(10),kgraph(30),k2(11),threshold(3);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(0);
-	double minjacc(20);
+	size_t nCycle(10);
+	double minjacc(10);
+	int readNumber(0);
+	string fileName("/Applications/PBMOG/Build/Products/Debug/cel.fasta");
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-	auto Reads(loadFASTA("/Applications/PBMOG/Build/Products/Debug/cel.fa",homo,minsize,1));
 	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/SRR065390.3.unitig", kgraph, false, false, true);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
 	}
 	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
 	graph Graph(Unitigs,kgraph);
-//	auto filter(filterUnitigs(Unitigs,k,H,part));
+	//	auto filter(filterUnitigs(Unitigs,k,H,part));
 	auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
-	cout<<"Reads loaded "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
+	cout<<"Unitig loaded "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-
-	unordered_map<minimizer, vector<rNumber>> index;
-	auto vect(indexSeq3(&Reads,H,k,part));
-//	auto index(indexSeq2(Reads,H,k,part));
-//	vector<rNumber>* vect;
+	//	unordered_map<minimizer, vector<rNumber>> index;
+	//	auto vect(indexSeq3(&Reads,H,k,part));
+	auto index(indexSeqDisk(fileName,H,k,part,readNumber));
+	vector<rNumber>* vect;
 	auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 	cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
-	MappingSupervisor supervisor(Unitigs, index, k, Reads, threshold, H, part, k2, minjacc, Graph, kgraph,vect);
 
+	MappingSupervisor supervisor(Unitigs, index, k,fileName, threshold, H, part, k2, minjacc, Graph, kgraph,vect,readNumber);
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
-
-
+	cout<<"Read aligned in "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
 	return 0;
 

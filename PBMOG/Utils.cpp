@@ -831,6 +831,31 @@ vector<string> loadFASTA(const string& unitigFile,bool homo,size_t sizeMin, size
 }
 
 
+int countFASTA(const string& seqFile,size_t sizeMin){
+	ifstream in(seqFile);
+	int n(0);
+	uint64_t size(0);
+	//TODO compatibility fastq and fasta plz
+	string line,lol,more;
+	while(!in.eof()){
+		getline(in,lol);
+		getline(in,line);
+		while(in.peek()!='>' and !in.eof()){
+			getline(in,more);
+			line+=more;
+		}
+		if(line.size()>sizeMin){
+			++n;
+			size+=line.size();
+		}
+
+	}
+	cout<<"number of reads : "<<n<<endl;
+	cout<<"Mean  size : "<<size/(max(1,n))<<endl;
+	return n;
+}
+
+
 string homocompression(const string& seq){
 	string res;
 	res.push_back(seq[0]);

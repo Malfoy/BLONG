@@ -35,13 +35,14 @@
 //~ #define unordered_map sparse_hash_map
 //#define unordered_map dense_hash_map
 #define minimizer uint32_t
-#define rNumber uint32_t
+#define rPosition uint32_t
 #define uNumber uint32_t
 
 
 using namespace std;
 using namespace google;
 
+int countFASTA(const string& seqFile,size_t sizeMin);
 minimizer seq2int(const string& seq);
 minimizer seq2intStranded(const string& seq);
 string reversecomplement(const string& str);
