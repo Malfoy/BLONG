@@ -35,7 +35,8 @@
 //~ #define unordered_map sparse_hash_map
 //#define unordered_map dense_hash_map
 #define minimizer uint32_t
-#define rPosition uint32_t
+#define rNumber uint32_t
+#define rPosition uint64_t
 #define uNumber uint32_t
 
 

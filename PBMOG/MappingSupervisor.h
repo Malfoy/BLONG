@@ -27,9 +27,9 @@ public:
 	ifstream reads;
 	size_t offset,minSizeUnitigs,nbThreads;
 	vector<string> unitigs;
-	unordered_map<minimizer, vector<rPosition>> min2Reads;
-	vector<rPosition>* min2reads2;
-	unordered_set<rPosition> readused;
+	unordered_map<minimizer, vector<rNumber>> min2Reads;
+	vector<rPosition> number2position;
+//	unordered_set<rPosition> readused;
 	int readNumber;
 	size_t k,multi,H,part,k2,kgraph;
 	char depthMax,nuc;
@@ -38,14 +38,14 @@ public:
 	double errorRate;
 	atomic<double> globalscore;
 	graph G;
-	mutex mutexReadReads,mutexEraseReads;
+	mutex mutexReadReads,mutexEraseReads,mutexunitig,mutexReadUsed;
 	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig,deepper,failedCompaction,pathNumber,candidateNumber,pathlength;
 
 
 
-	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rPosition>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>* Ivect,size_t IreadNumber){
+	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>& Ivect,size_t IreadNumber){
 		readNumber=IreadNumber;
-		min2reads2=Ivect;
+		number2position=Ivect;
 		nuc=5;
 		mapPartAllowed=false;
 		errorInKmers=true;
@@ -70,7 +70,7 @@ public:
 		minSizeUnitigs=200;
 		depthMax=10;
 		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=failedCompaction=pathNumber=candidateNumber=pathlength=0;
-		nbThreads=4;
+		nbThreads=8;
 		errorRate=30;
 		indice=0;
 		outFile.open("myout.fa",ofstream::trunc);
@@ -79,9 +79,9 @@ public:
 
 
 	void MapPart();
-	string getRead(rPosition pos);
+	string getRead(rNumber pos);
 	bool mapUnitig(const string& unitig, const rPosition n, int& position, unordered_set<minimizer>& genomicKmers, string& read);
-	void findCandidate(const string& unitig, unordered_set<minimizer>& minSet, unordered_map<rPosition,size_t>& Candidate, unordered_map<rPosition,unordered_set<minimizer>>& read2Min);
+	void findCandidate(const string& unitig, unordered_map<rNumber,size_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min);
 	void MapAll();
 	bool isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
 	bool isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
@@ -111,7 +111,7 @@ public:
 	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 
 	bool preMapUnitig(const string& unitig, string& read,const unordered_multimap<string,string>& genomicKmers,int& position,unordered_set<minimizer> setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
-	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, vector<path> ListFathers, vector<path> ListSons,rPosition rNum, string& beg, string& end);
+	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, vector<path> ListFathers, vector<path> ListSons,rNumber rNum, string& beg, string& end);
 	string recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,size_t begsize,size_t endsize,size_t readsize,const string& unitig,bool stranded, int position1, int position2);
 };
 
