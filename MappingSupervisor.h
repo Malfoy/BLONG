@@ -31,8 +31,7 @@ public:
 	vector<string> unitigs;
 	unordered_map<minimizer, vector<rNumber>> min2Reads;
 	vector<rPosition> number2position;
-//	unordered_set<rPosition> readused;
-	int readNumber;
+	uint32_t readNumber;
 	size_t k,multi,H,part,k2,kgraph;
 	char depthMax,nuc;
 	double minJacc;
@@ -112,8 +111,8 @@ public:
 	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 
-	bool preMapUnitig(const string& unitig, string& read,const unordered_multimap<string,string>& genomicKmers,int& position,unordered_set<minimizer> setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
-	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, vector<path> ListFathers, vector<path> ListSons,rNumber rNum, string& beg, string& end);
+	bool preMapUnitig(const string& unitig, string& read,const unordered_multimap<string,string>& genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
+	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, vector<path>& ListFathers, vector<path>& ListSons, string& beg, string& end);
 	string recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,size_t begsize,size_t endsize,size_t readsize,const string& unitig,bool stranded, int position1, int position2);
 };
 

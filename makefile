@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS= -Wall -O3 -std=c++11 -march=native -pthread -pedantic -Wextra
+CFLAGS= -Wall -Ofast -std=c++11 -march=native -pthread -Wextra
 LDFLAGS=-pthread
 
 ifeq ($(gprof),1)
@@ -25,16 +25,13 @@ nw.o: nw.cpp nw.h
 graph.o: graph.cpp graph.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-binSeq.o: binSeq.cpp binSeq.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
 MappingSupervisor.o: MappingSupervisor.cpp MappingSupervisor.h Utils.h nw.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-main.o: main.cpp MappingSupervisor.h Utils.h graph.h binSeq.h
+main.o: main.cpp MappingSupervisor.h Utils.h graph.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-blong: main.o MappingSupervisor.o Utils.o graph.o binSeq.o nw.o
+blong: main.o MappingSupervisor.o Utils.o graph.o nw.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 

@@ -84,6 +84,7 @@ void printMinimizer(minimizer min,size_t k);
 bool isCorrect(const string& seq,const string& ref);
 double scoreFromAlignment(const string& seq1,const string& seq2);
 void removeDuplicate(vector<minimizer>& vec);
+unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t H, size_t k, size_t part,vector<rPosition>& number2position);
 
 
 #endif /* defined(__PBMOG__Utils__) */

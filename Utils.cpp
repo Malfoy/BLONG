@@ -45,6 +45,106 @@ string reversecompletment2(const string& str){
 }
 
 
+ifstream myifstreamglobal;
+mutex myMutex,myMutex2;
+
+
+void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& sequences, unordered_set<minimizer>* set, size_t L, size_t R){
+	for(size_t i(L); i<R; ++i){
+		string sequence(sequences[i]);
+		if(sequence.size()>=k){
+			vector<minimizer> sketch;
+			if(sequence.size()<=H){
+				//			if(true){
+				sketch=allHash(k, sequence);
+			}else{
+				sketch=minHashpart(H,k,sequence,part);
+			}
+			myMutex.lock();
+			for(size_t j(0);j<sketch.size();++j){
+				set->insert(sketch[j]);
+			}
+			myMutex.unlock();
+		}
+	}
+}
+
+
+void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<rNumber>>* index, vector<rPosition>* number2position){
+	vector<minimizer> sketch;
+	string seq,more;
+	rPosition position;
+	while (!myifstreamglobal.eof()){
+		bool take(true);
+		myMutex2.lock();
+		getline(myifstreamglobal, seq);
+		position=myifstreamglobal.tellg();
+		getline(myifstreamglobal, seq);
+		while(myifstreamglobal.peek()!='>' and !myifstreamglobal.eof()){
+			getline(myifstreamglobal,more);
+			seq+=more;
+		}
+		myMutex2.unlock();
+//		cout<<seq<<endgetl;
+//		for (size_t i(0); i<seq.size(); ++i){
+//			if(seq[i]!='A' and seq[i]!='C' and seq[i]!='G' and seq[i]!='T'){
+//				take=false;
+//				break;
+//			}
+//		}
+		if (take){
+			if(seq.size()<=(uint)H){
+				sketch=allHash(k,seq);
+			}else{
+				sketch=minHashpart(H, k, seq, part);
+			}
+			removeDuplicate(sketch);
+
+			myMutex.lock();
+			number2position->push_back(position);
+			rNumber n((uint32_t)number2position->size()-1);
+			for(uint32_t j(0);j<sketch.size();++j){
+				(*index)[sketch[j]].push_back(n);
+			}
+			myMutex.unlock();
+
+			if(n>1000){return;}
+		}
+	}
+}
+
+
+unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t H, size_t k, size_t part,vector<rPosition>& number2position){
+	size_t nbThreads(8);
+	vector<thread> threads;
+	unordered_map<minimizer,vector<rNumber>> index;
+	myifstreamglobal.open(seqs);
+
+	for (size_t i(0); i<nbThreads; ++i){
+		threads.push_back(thread(indexFasta, H, k, part, &index,&number2position));
+	}
+
+	for(auto &t : threads){t.join();}
+	return index;
+}
+
+
+unordered_set<minimizer> filterUnitigs(const vector<string>& unitigs, size_t k, size_t H, size_t part){
+	size_t nbThreads(8);
+	unordered_set<minimizer> res;
+	string line;
+	vector<thread> threads;
+
+	vector<size_t> limits = bounds(nbThreads, unitigs.size());
+
+	for (size_t i(0); i<nbThreads; ++i){
+		threads.push_back(thread(computeMinHash,H,k,part,unitigs,&res,limits[i],limits[i+1]));
+	}
+
+	for(auto &t : threads){t.join();}
+	return res;
+}
+
 char revcomp (char s) {
 	if (s == 'A') return 'T';
 	else if (s == 'C') return 'G';
@@ -214,16 +314,13 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 	return sketch;
 }
 
-
+//Very ineficcient, k time too slow plus multimap plus key and value are  string ...
 unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq, char nuc){
 	unordered_multimap<string,string> sketch;
+	string kmer;
 	for(size_t i(0); i+k<=seq.size(); ++i){
-		string kmer(seq.substr(i,k));
-		//		if(kmer.size()!=k){
-		//			cout<<"watfw"<<endl;
-		//		}
+		kmer=(seq.substr(i,k));
 		sketch.insert({kmer.substr(0,nuc),kmer.substr(nuc)});
-		//				cout<<kmer.substr(0,nuc)<<" "<<kmer.substr(nuc)<<endl;
 	}
 
 	return sketch;
@@ -344,30 +441,13 @@ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multim
 		auto range(genomicKmers.equal_range(kmer.substr(0,nuc)));
 		for (auto it(range.first); it!=range.second; it++){
 			if(isCorrect(kmer.substr(nuc),it->second)){
-				//				if(isCorrect("ATCGTTTT", "ATTGTTTT")){
-				//					cout<<"true"<<endl;
-				//					cin.get();
-				//				}else{
-				//					cout<<"false"<<endl;
-				//					cin.get();
-				//				}
-				//				if(kmer.substr(5)!=it->second){
-				//					cout<<kmer.substr(5)<<" "<<it->second<<endl;
-				//					cin.get();
-				//				}
 				inter++;
 				break;
-			}else{
-				//				cout<<"fail : "<<kmer.substr(5)<<" "<<it->second<<endl;
 			}
 		}
 	}
-	//	cout<<i<<" "<<seq.size()-k+1<<endl;
 	return double(100*inter/(seq.size()-k+1));;
 }
-
-
-
 
 
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
