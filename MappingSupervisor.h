@@ -16,10 +16,12 @@
 
 using namespace std;
 
+
 struct path {
 	string str;
 	vector<uNumber> numbers;
 };
+
 
 class MappingSupervisor{
 public:

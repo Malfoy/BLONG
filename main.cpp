@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <functional>
 #include <unordered_set>
-//#include <sparsehash/sparse_hash_map>
 #include <chrono>
 #include <iostream>
 #include <fstream>
@@ -29,7 +28,6 @@ atomic<size_t> atomicount;
 uint32_t nindexfasta(0);
 
 
-
 void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& sequences, unordered_set<minimizer>* set, size_t L, size_t R){
 	for(size_t i(L); i<R; ++i){
 		string sequence(sequences[i]);
@@ -51,8 +49,6 @@ void computeMinHash(size_t H, size_t k, size_t part, const vector<string>& seque
 }
 
 
-
-
 unordered_set<minimizer> filterUnitigs(const vector<string>& unitigs, size_t k, size_t H, size_t part){
 	size_t nbThreads(8);
 	unordered_set<minimizer> res;
@@ -68,7 +64,6 @@ unordered_set<minimizer> filterUnitigs(const vector<string>& unitigs, size_t k, 
 	for(auto &t : threads){t.join();}
 	return res;
 }
-
 
 
 void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  const unordered_set<minimizer>& filter, unordered_map<minimizer,vector<rPosition>>* index, uint32_t L, size_t R){
@@ -144,6 +139,7 @@ unordered_map<minimizer,vector<rPosition>> indexSeq(const vector<string>& seqs, 
 	return index;
 }
 
+
 ifstream global;
 
 
@@ -185,7 +181,7 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 				(*index)[sketch[j]].push_back(n);
 			}
 			myMutex.unlock();
-//			if(n>10000){return;}
+			//~ if(n>100){return;}
 		}
 	}
 //	cout<<n<<" reads"<<endl;
@@ -222,26 +218,22 @@ vector<rPosition>* indexSeq3( vector<string>* seqs, size_t H, size_t k, size_t p
 }
 
 
-
-
-
-
 int main(){
-	size_t H(100),k(15),part(1),kgraph(30),k2(11),threshold(2);
+	size_t H(100),k(15),part(1),kgraph(30),k2(11),threshold(1);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(0);
 	double minjacc(10);
 	int readNumber(0);
-	string fileName("/Applications/PBMOG/Build/Products/Debug/raw_pacbio_c_elegans.fasta");
+	string fileName("/local/malfoyishere/yeast-pacbio.fa");
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-	readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, false, false, false);
+	readContigsforstats("/local/malfoyishere/yeast313.unitig", kgraph, false, false, true);
 	for(size_t i(0);i<nCycle;++i){
-		readContigsforstats("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa", kgraph, true, true, false);
+		readContigsforstats("unitigClean.fa", kgraph, true, true, false);
 	}
-	auto Unitigs(loadUnitigs("/Applications/PBMOG/Build/Products/Debug/unitigClean.fa",homo));
+	auto Unitigs(loadUnitigs("unitigClean.fa",homo));
 	graph Graph(Unitigs,kgraph);
 	//	auto filter(filterUnitigs(Unitigs,k,H,part));
 	auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
@@ -258,7 +250,7 @@ int main(){
 	supervisor.MapAll();
 	auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 	cout<<"Read aligned in "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
-	
+
 	return 0;
-	
+
 }

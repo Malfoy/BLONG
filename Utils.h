@@ -19,8 +19,6 @@
 #include <functional>
 #include <unordered_set>
 #include <set>
-#include <sparsehash/dense_hash_map>
-#include <sparsehash/dense_hash_set>
 #include <chrono>
 #include <iostream>
 #include <fstream>
@@ -30,6 +28,7 @@
 #include <cctype>
 #include <atomic>
 #include <random>
+#include <mutex>
 
 
 //~ #define unordered_map sparse_hash_map
@@ -41,7 +40,6 @@
 
 
 using namespace std;
-using namespace google;
 
 int countFASTA(const string& seqFile,size_t sizeMin);
 minimizer seq2int(const string& seq);

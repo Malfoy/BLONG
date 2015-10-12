@@ -1,5 +1,4 @@
 # PBMOG
 TODO
-Output paths
-Check path with NW
-Expanded kmers
+Bug Compactions
+Better input with getopt
