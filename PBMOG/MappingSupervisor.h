@@ -43,10 +43,10 @@ public:
 
 
 
-	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>& Ivect,size_t IreadNumber){
+	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>& Ivect,uint32_t IreadNumber){
 		readNumber=IreadNumber;
 		number2position=Ivect;
-		nuc=5;
+		nuc=4;
 		mapPartAllowed=false;
 		errorInKmers=true;
 		checking=false;
@@ -81,7 +81,7 @@ public:
 	void MapPart();
 	string getRead(rNumber pos);
 	bool mapUnitig(const string& unitig, const rPosition n, int& position, unordered_set<minimizer>& genomicKmers, string& read);
-	void findCandidate(const string& unitig, unordered_map<rNumber,size_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min);
+	void findCandidate(const string& unitig, unordered_map<rNumber,uint32_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min);
 	void MapAll();
 	bool isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
 	bool isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);

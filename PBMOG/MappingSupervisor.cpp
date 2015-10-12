@@ -90,7 +90,7 @@ vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, const str
 
 string MappingSupervisor::getRead(rNumber n){
 	string res,more("");
-	uint64_t pos(number2position[n]);
+	rPosition pos(number2position[n]);
 	mutexReadReads.lock();
 	reads.seekg(pos, ios::beg);
 	getline(reads,res);
@@ -98,17 +98,16 @@ string MappingSupervisor::getRead(rNumber n){
 		getline(reads,more);
 		res+=more;
 	}
-	if(reads.eof()){reads.clear();
-		//		cout<<"clear"<<endl;
-	}
+	if(reads.eof()){reads.clear();}
 	mutexReadReads.unlock();
 	return res;
 }
 
 
-void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumber,size_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min){
+void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumber,uint32_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min){
 	if(unitigs.size()<H){
 		unordered_set<minimizer> minSet;
+		vector<rNumber> readsNumbers;
 		minimizer kmerS=seq2intStranded(unitig.substr(0,k));
 		minimizer kmerRC=seq2intStranded(reversecomplement(unitig.substr(0,k)));
 		minimizer seq(min(kmerRC,kmerS));
@@ -116,16 +115,12 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 			if(minSet.unordered_set::count(seq)==0){
 				minSet.insert(seq);
 				if(min2Reads.unordered_map::count(seq)!=0){
-					//				if(!min2reads2[seq].empty()){
-					vector<rNumber> readsPos(min2Reads[seq]);
-					for(size_t j(0);j<readsPos.size();++j){
-						//						mutexReadUsed.lock();
-						if(readsPos[i]!=0){
-							//							mutexReadUsed.unlock();
-							Candidate[readsPos[j]]++;
-							read2Min[readsPos[j]].insert(seq);
+					readsNumbers=min2Reads[seq];
+					for(size_t j(0);j<readsNumbers.size();++j){
+						if(number2position[readsNumbers[j]]!=0){
+							++Candidate[readsNumbers[j]];
+							read2Min[readsNumbers[j]].insert(seq);
 						}else{
-							//							mutexReadUsed.unlock();
 						}
 					}
 				}
@@ -140,20 +135,17 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 		}
 	}else{
 		vector<minimizer> sketch(minHashpart(H,k,unitig,part));
+		vector<rNumber> readsNumbers;
+		removeDuplicate(sketch);
 		//For each minimizer of the unitig
 		for(size_t i(0);i<sketch.size();++i){
-			minimizer seq=sketch[i];
+			minimizer seq(sketch[i]);
 			if(min2Reads.unordered_map::count(seq)!=0){
-				//			if(!min2reads2[seq].empty()){
-				vector<rNumber> readsPos=min2Reads[seq];
-				for(size_t j(0);j<readsPos.size();++j){
-					//					mutexReadUsed.lock();
-					if(readsPos[j]!=0){
-						//						mutexReadUsed.unlock();
-						Candidate[readsPos[j]]++;
-						read2Min[readsPos[j]].insert(seq);
-					}else{
-						//						mutexReadUsed.unlock();
+				readsNumbers=min2Reads[seq];
+				for(size_t j(0);j<readsNumbers.size();++j){
+					if(number2position[readsNumbers[j]]!=0){
+						++Candidate[readsNumbers[j]];
+						read2Min[readsNumbers[j]].insert(seq);
 					}
 				}
 			}
@@ -646,7 +638,7 @@ string MappingSupervisor::recoverPath(vector<uNumber>& numberBegin, vector<uNumb
 
 void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 	//pas besoin de map here !
-	unordered_map<rNumber,size_t> Candidate;
+	unordered_map<rNumber,uint32_t> Candidate;
 	unordered_map<rNumber,unordered_set<minimizer>> read2min;
 	findCandidate(unitig,Candidate,read2min);
 	if(Candidate.empty()){return;}
@@ -665,12 +657,9 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 		if(it->second>=multi){
 			rNumber readnumber(it->first);
 			candidateNumber++;
-			//			mutexReadUsed.lock();
 			if(number2position[readnumber]==0){
-				//				mutexReadUsed.unlock();
 				continue;
 			}
-			//			mutexReadUsed.unlock();
 			read=getRead(readnumber);
 			int position,positionUnitig,position1, position2;
 			bool stranded;
@@ -698,14 +687,12 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 						//							auto pathKmers(allKmerMapStranded(k2,unitig,nuc));
 						//							double score(jaccardStrandedErrors(k2,read,pathKmers,nuc));
 						//							globalscore=globalscore+score;
-						//							mutexEraseReads.lock();
 						//							if(readused.count(readPosition==0)){
 						//								outFile<<">"<<++pathNumber<<endl<<path<<endl;
 						//								readused.insert(readPosition);
 						//								readInUnitig++;
 						//								regionmapped+=read.size();
 						//							}
-						//							mutexEraseReads.unlock();
 						//						}else{
 						//							fail++;
 						//						}
@@ -718,21 +705,14 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 							//							double score(jaccardStrandedErrors(k2,read,pathKmers,nuc));
 							//							globalscore=globalscore+score;
 							pathlength+=numberBegin.size()+numberEnd.size()+1;
-							//							mutexReadUsed.lock();
 							//							if(readused.count(readPosition)==0){
 							//								readused.insert(readPosition);
-							//								mutexReadUsed.unlock();
 							mutexEraseReads.lock();
 							number2position[readnumber]=0;
 							outFile<<">"<<++pathNumber<<endl<<path<<endl;
 							mutexEraseReads.unlock();
-							//								mutexEraseReads.unlock();
-							//								mutexReadUsed.unlock();
 							++aligneOnPathSucess;
 							regionmapped+=read.size();
-							//							}else{
-							//								mutexReadUsed.unlock();
-							//							}
 
 						}else{fail++;}
 					}
@@ -825,7 +805,7 @@ string MappingSupervisor::getPathEnd(vector<uNumber>& numbers){
 			path=compactionEnd(reversecomplement(path), unitig, kgraph);
 			if(path.empty()){
 				cout<<"!"<<path<<"!"<<unitig<<endl;
-				cin.get();
+//				cin.get();
 			}
 		}else{
 			path=inter;
@@ -870,7 +850,6 @@ void MappingSupervisor::MapAll(){
 	}
 
 	for(auto &t : threads){t.join();}
-
 
 	cout<<bigUnitig<<endl;
 	cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig+1)<<endl;

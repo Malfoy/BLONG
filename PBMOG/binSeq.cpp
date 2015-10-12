@@ -90,7 +90,7 @@ string reversecomplementnadine (const string &s){
 
 void printUC(unsigned char a){
 	for (int i = 0; i < 8; i++) {
-		printf("%d", !!((a << i) & 0x80));
+		printf("%d", ((a << i) & 0x80));
 	}
 	printf("\n");
 

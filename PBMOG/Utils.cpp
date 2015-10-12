@@ -181,6 +181,10 @@ unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
 }
 
 
+void removeDuplicate(vector<minimizer>& vec){
+	sort( vec.begin(), vec.end() );
+	vec.erase( unique( vec.begin(), vec.end() ), vec.end() );
+}
 
 
 double scoreFromAlignment(const string& seq1,const string& seq2){

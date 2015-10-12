@@ -85,6 +85,7 @@ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multim
 void printMinimizer(minimizer min,size_t k);
 bool isCorrect(const string& seq,const string& ref);
 double scoreFromAlignment(const string& seq1,const string& seq2);
+void removeDuplicate(vector<minimizer>& vec);
 
 
 #endif /* defined(__PBMOG__Utils__) */

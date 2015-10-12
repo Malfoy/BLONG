@@ -70,11 +70,6 @@ unordered_set<minimizer> filterUnitigs(const vector<string>& unitigs, size_t k, 
 }
 
 
-void removeDuplicate(vector<minimizer>& vec){
-	sort( vec.begin(), vec.end() );
-	vec.erase( unique( vec.begin(), vec.end() ), vec.end() );
-}
-
 
 void indexSeqAux(const vector<string>& seqs, size_t H, size_t k, size_t part,  const unordered_set<minimizer>& filter, unordered_map<minimizer,vector<rPosition>>* index, uint32_t L, size_t R){
 	for (uint32_t i(L); i<R; ++i){
@@ -156,12 +151,11 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 	vector<minimizer> sketch;
 	string seq,more;
 	rPosition position;
-	while (!global.eof()) {
+	while (!global.eof()){
 		bool take(true);
 		myMutex2.lock();
 		getline(global, seq);
 		position=global.tellg();
-		++*readNumber;
 		getline(global, seq);
 		while(global.peek()!='>' and !global.eof()){
 			getline(global,more);
@@ -175,7 +169,7 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 //				break;
 //			}
 //		}
-		if (take) {
+		if (take){
 			if(seq.size()<=(uint)H){
 				sketch=allHash(k,seq);
 			}else{
@@ -184,12 +178,14 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 			removeDuplicate(sketch);
 
 			myMutex.lock();
+			(*readNumber)++;
 			number2position->push_back(position);
-			++nindexfasta;
+			rNumber n((uint32_t)number2position->size()-1);
 			for(uint32_t j(0);j<sketch.size();++j){
-				(*index)[sketch[j]].push_back(nindexfasta);
+				(*index)[sketch[j]].push_back(n);
 			}
 			myMutex.unlock();
+//			if(n>10000){return;}
 		}
 	}
 //	cout<<n<<" reads"<<endl;
@@ -231,11 +227,11 @@ vector<rPosition>* indexSeq3( vector<string>* seqs, size_t H, size_t k, size_t p
 
 
 int main(){
-	size_t H(100),k(15),part(1),kgraph(30),k2(11),threshold(3);
+	size_t H(100),k(15),part(1),kgraph(30),k2(11),threshold(2);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(0);
-	double minjacc(20);
+	double minjacc(10);
 	int readNumber(0);
 	string fileName("/Applications/PBMOG/Build/Products/Debug/raw_pacbio_c_elegans.fasta");
 	cout<<"minjacc : "<<minjacc<<endl;
