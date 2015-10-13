@@ -74,48 +74,52 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 	vector<minimizer> sketch;
 	string seq,more;
 	rPosition position;
-	int count(0);
-	while (!myifstreamglobal.eof()){
-		bool take(true);
+	while(true){
 		myMutex2.lock();
-		getline(myifstreamglobal, seq);
-		position=myifstreamglobal.tellg();
-		getline(myifstreamglobal, seq);
-		while(myifstreamglobal.peek()!='>' and !myifstreamglobal.eof()){
-			getline(myifstreamglobal,more);
-			seq+=more;
-		}
-		myMutex2.unlock();
-//		cout<<seq<<endgetl;
-//		for (size_t i(0); i<seq.size(); ++i){
-//			if(seq[i]!='A' and seq[i]!='C' and seq[i]!='G' and seq[i]!='T'){
-//				take=false;
-//				break;
-//			}
-//		}
-		if (++count>0){
-			if(seq.size()<=(uint)H){
-				//~ sketch=allHash(k,seq);
-				continue;
-			}else{
-				sketch=minHashpart(H, k, seq, part);
+		if(!myifstreamglobal.eof()){
+			getline(myifstreamglobal, seq);
+			position=myifstreamglobal.tellg();
+			getline(myifstreamglobal, seq);
+			while(myifstreamglobal.peek()!='>' and !myifstreamglobal.eof()){
+				getline(myifstreamglobal,more);
+				seq+=more;
 			}
-			removeDuplicate(sketch);
-			myMutex.lock();
-			number2position->push_back(position);
-			rNumber n((uint32_t)number2position->size()-1);
-			for(uint32_t j(0);j<sketch.size();++j){
-				(*index)[sketch[j]].push_back(n);
+			myMutex2.unlock();
+	//		cout<<seq<<endgetl;
+	//		for (size_t i(0); i<seq.size(); ++i){
+	//			if(seq[i]!='A' and seq[i]!='C' and seq[i]!='G' and seq[i]!='T'){
+	//				take=false;
+	//				break;
+	//			}
+	//		}
+			if (rand()%1000==0){
+			//~ if (true){
+				if(seq.size()<=(uint)H){
+					//~ sketch=allHash(k,seq);
+					continue;
+				}else{
+					sketch=minHashpart(H, k, seq, part);
+				}
+				removeDuplicate(sketch);
+				myMutex.lock();
+				number2position->push_back(position);
+				rNumber n((uint32_t)number2position->size()-1);
+				for(uint32_t j(0);j<sketch.size();++j){
+					(*index)[sketch[j]].push_back(n);
+				}
+				myMutex.unlock();
+				//~ if(n>100){return;}
 			}
-			myMutex.unlock();
-			//~ if(n>1000){return;}
+		}else{
+			myMutex2.unlock();
+			break;
 		}
 	}
 }
 
 
 unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t H, size_t k, size_t part,vector<rPosition>& number2position){
-	size_t nbThreads(1);
+	size_t nbThreads(8);
 	vector<thread> threads;
 	unordered_map<minimizer,vector<rNumber>> index;
 	myifstreamglobal.open(seqs);
@@ -125,6 +129,7 @@ unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t
 	}
 
 	for(auto &t : threads){t.join();}
+	cout<< number2position.size()<<" reads"<<endl;
 	return index;
 }
 
@@ -449,35 +454,38 @@ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multim
 	return double(100*inter/(seq.size()-k+1));;
 }
 
+hash<uint32_t> hash32;
+
 
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
 	vector<uint32_t> sketch(H);
 	vector<minimizer> sketchs(H);
-	uint64_t hashValue;
-	hash<uint32_t> hash;
+	uint32_t hashValue;
 
 	minimizer kmerS(seq2intStranded(seq.substr(0,k)));
 	minimizer kmerRC(seq2intStranded(reversecomplement(seq.substr(0,k))));
 	minimizer kmer(min(kmerS,kmerRC));
-	hashValue=hash(kmer);
+	hashValue=hash32(kmer);
 	//~ hashValue=xorshift64(kmer);
 	for(size_t j(0); j<H; ++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
-		hashValue=hash(hashValue);
+		hashValue=hash32(hashValue);
+		//~ hashValue=xorshift64(hashValue);
 	}
 	for(size_t i(1); i+k<seq.size(); ++i){
 		updateMinimizer(kmerS, seq[i+k], k);
 		updateMinimizerRC(kmerRC, seq[i+k], k);
 		kmer=(min(kmerS,kmerRC));
 		//~ hashValue=xorshift64(kmer);
-		hashValue=hash(kmer);
+		hashValue=hash32(kmer);
 		for(size_t j(0); j<H; ++j){
 			if(hashValue<sketch[j]){
 				sketch[j]=hashValue;
 				sketchs[j]=kmer;
 			}
-			hashValue=hash(hashValue);
+			hashValue=hash32(hashValue);
+			//~ hashValue=xorshift64(hashValue);
 		}
 	}
 	previous.insert(previous.end(),sketchs.begin(),sketchs.end());

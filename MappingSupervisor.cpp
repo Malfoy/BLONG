@@ -101,7 +101,7 @@ string MappingSupervisor::getRead(rNumber n){
 
 
 void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumber,uint32_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min){
-	if(unitigs.size()<H){
+	if(unitig.size()<H){
 		unordered_set<minimizer> minSet;
 		vector<rNumber> readsNumbers;
 		minimizer kmerS=seq2intStranded(unitig.substr(0,k));
@@ -137,9 +137,10 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 		for(size_t i(0);i<sketch.size();++i){
 			minimizer seq(sketch[i]);
 			if(min2Reads.unordered_map::count(seq)!=0){
-				readsNumbers=min2Reads[seq];
+				readsNumbers=min2Reads.at(seq);
 				for(size_t j(0);j<readsNumbers.size();++j){
 					if(number2position[readsNumbers[j]]!=0){
+						//~ candidateNumber++;
 						++Candidate[readsNumbers[j]];
 						read2Min[readsNumbers[j]].insert(seq);
 					}
@@ -310,7 +311,7 @@ bool MappingSupervisor::preMapUnitig(const string& unitig, string& read,const un
 }
 
 
-bool MappingSupervisor::mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, vector<path>& ListFathers, vector<path>& ListSons, string& beg, string& end){
+bool MappingSupervisor::mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, const vector<path>& ListFathers, const vector<path>& ListSons, string& beg, string& end){
 	bool mappedLeft(false),mappedRight(false);
 	if(position+kgraph<offset){
 		mappedLeft=true;
@@ -466,7 +467,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 			read=getRead(readnumber);
 			int position,positionUnitig,position1, position2;
 			bool stranded;
-			if(preMapUnitig(unitig, read, genomicKmers, position, read2min[it->first], positionUnitig, stranded,position1,position2)){
+			if(preMapUnitig(unitig, read, genomicKmers, position, read2min[readnumber], positionUnitig, stranded,position1,position2)){
 				if(!done){
 					done=true;
 					unitigsPreMapped++;
@@ -481,7 +482,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 					}
 					seq1=seq2="";
 					if(numberEnd.empty() and numberBegin.empty()){
-						break;
+						continue;
 					}else{
 						if(checking){
 							nw(path, read, seq1, seq2, false);
@@ -500,6 +501,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 							}
 						}else{fail++;}
 					}
+					//~ continue;
 				}
 			}
 		}
@@ -564,7 +566,7 @@ void MappingSupervisor::MapPart(){
 }
 
 
-string MappingSupervisor::getPathEnd(vector<uNumber>& numbers){
+string MappingSupervisor::getPathEnd(const vector<uNumber>& numbers){
 	if(numbers.empty()){
 		return "";
 	}
@@ -586,7 +588,7 @@ string MappingSupervisor::getPathEnd(vector<uNumber>& numbers){
 }
 
 
-string MappingSupervisor::getPathBegin(vector<uNumber>& numbers){
+string MappingSupervisor::getPathBegin(const vector<uNumber>& numbers){
 	if(numbers.empty()){
 		return "";
 	}
