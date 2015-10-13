@@ -74,6 +74,7 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 	vector<minimizer> sketch;
 	string seq,more;
 	rPosition position;
+	int count(0);
 	while (!myifstreamglobal.eof()){
 		bool take(true);
 		myMutex2.lock();
@@ -92,14 +93,14 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 //				break;
 //			}
 //		}
-		if (take){
+		if (++count>0){
 			if(seq.size()<=(uint)H){
-				sketch=allHash(k,seq);
+				//~ sketch=allHash(k,seq);
+				continue;
 			}else{
 				sketch=minHashpart(H, k, seq, part);
 			}
 			removeDuplicate(sketch);
-
 			myMutex.lock();
 			number2position->push_back(position);
 			rNumber n((uint32_t)number2position->size()-1);
@@ -107,15 +108,14 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 				(*index)[sketch[j]].push_back(n);
 			}
 			myMutex.unlock();
-
-			if(n>1000){return;}
+			//~ if(n>1000){return;}
 		}
 	}
 }
 
 
 unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t H, size_t k, size_t part,vector<rPosition>& number2position){
-	size_t nbThreads(8);
+	size_t nbThreads(1);
 	vector<thread> threads;
 	unordered_map<minimizer,vector<rNumber>> index;
 	myifstreamglobal.open(seqs);
@@ -451,33 +451,33 @@ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multim
 
 
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
-	vector<uint64_t> sketch(H);
+	vector<uint32_t> sketch(H);
 	vector<minimizer> sketchs(H);
 	uint64_t hashValue;
-	//	hash<uint32_t> hash;
+	hash<uint32_t> hash;
 
 	minimizer kmerS(seq2intStranded(seq.substr(0,k)));
 	minimizer kmerRC(seq2intStranded(reversecomplement(seq.substr(0,k))));
 	minimizer kmer(min(kmerS,kmerRC));
-	//	hashValue=hash(kmer);
-	hashValue=xorshift64(kmer);
+	hashValue=hash(kmer);
+	//~ hashValue=xorshift64(kmer);
 	for(size_t j(0); j<H; ++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
-		hashValue=xorshift64(hashValue);
+		hashValue=hash(hashValue);
 	}
 	for(size_t i(1); i+k<seq.size(); ++i){
 		updateMinimizer(kmerS, seq[i+k], k);
 		updateMinimizerRC(kmerRC, seq[i+k], k);
 		kmer=(min(kmerS,kmerRC));
-		hashValue=xorshift64(kmer);
-		//		hashValue=hash(kmer);
+		//~ hashValue=xorshift64(kmer);
+		hashValue=hash(kmer);
 		for(size_t j(0); j<H; ++j){
 			if(hashValue<sketch[j]){
 				sketch[j]=hashValue;
 				sketchs[j]=kmer;
 			}
-			hashValue=xorshift64(hashValue);
+			hashValue=hash(hashValue);
 		}
 	}
 	previous.insert(previous.end(),sketchs.begin(),sketchs.end());
@@ -1012,50 +1012,42 @@ vector<string> loadUnitigs(const string& unitigFile,bool homo){
 
 
 
-void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous, const unordered_set<minimizer>& filter){
-	vector<uint64_t> sketch(H);
-	vector<minimizer> sketchs(H);
-	uint64_t hashValue;;
+//~ void minHash3(size_t H, size_t k,const string& seq, vector<minimizer>& previous, const unordered_set<minimizer>& filter){
+	//~ vector<uint32_t> sketch(H);
+	//~ vector<minimizer> sketchs(H);
+	//~ uint64_t hashValue;;
 	//~ hash<uint32_t> hash;
-
-	minimizer kmerS=seq2intStranded(seq.substr(0,k));
-	minimizer kmerRC=seq2intStranded(reversecomplement(seq.substr(0,k)));
-	minimizer kmer(min(kmerS,kmerRC));
-	hashValue=xorshift64(kmer);
+//~
+	//~ minimizer kmerS=seq2intStranded(seq.substr(0,k));
+	//~ minimizer kmerRC=seq2intStranded(reversecomplement(seq.substr(0,k)));
+	//~ minimizer kmer(min(kmerS,kmerRC));
+	//~ hashValue=xorshift64(kmer);
 	//~ hashValue=hash(kmer);
-	for(size_t j(0);j<H;++j){
-		sketch[j]=hashValue;
-		sketchs[j]=kmer;
-		hashValue=xorshift64(hashValue);
-	}
-
-	for(size_t i(1);i+k<seq.size();++i){
-		updateMinimizerRC(kmerRC, seq[i+k], k);
-		updateMinimizer(kmerS, seq[i+k], k);
-		kmer=min(kmerRC,kmerS);
-
-		if(filter.unordered_set::count(kmer)!=0){
-			hashValue=xorshift64(kmer);
+	//~ for(size_t j(0);j<H;++j){
+		//~ sketch[j]=hashValue;
+		//~ sketchs[j]=kmer;
+		//~ hashValue=xorshift64(hashValue);
+	//~ }
+//~
+	//~ for(size_t i(1);i+k<seq.size();++i){
+		//~ updateMinimizerRC(kmerRC, seq[i+k], k);
+		//~ updateMinimizer(kmerS, seq[i+k], k);
+		//~ kmer=min(kmerRC,kmerS);
+//~
+		//~ if(filter.unordered_set::count(kmer)!=0){
+			//~ hashValue=xorshift64(kmer);
 			//~ hashValue=hash(kmer);
-			for(size_t j(0);j<H;++j){
-				if(hashValue<sketch[j]){
-					sketch[j]=hashValue;
-					sketchs[j]=kmer;
-				}
-				hashValue=xorshift64(hashValue);
-			}
-		}
-	}
-	previous.insert(previous.end(),sketchs.begin(),sketchs.end());
-}
-
-
-uint64_t xorshift(uint64_t x) {
-	x ^= x >> 12; // a
-	x ^= x << 25; // b
-	x ^= x >> 27; // c
-	return x * UINT64_C(2685821657736338717);
-}
+			//~ for(size_t j(0);j<H;++j){
+				//~ if(hashValue<sketch[j]){
+					//~ sketch[j]=hashValue;
+					//~ sketchs[j]=kmer;
+				//~ }
+				//~ hashValue=xorshift64(hashValue);
+			//~ }
+		//~ }
+	//~ }
+	//~ previous.insert(previous.end(),sketchs.begin(),sketchs.end());
+//~ }
 
 
 
@@ -1064,15 +1056,17 @@ uint64_t xorshift(uint64_t x) {
 
 
 
-vector<minimizer> minHashpart2(size_t H, size_t k,const string& seq, size_t part, const unordered_set<minimizer>& filter){
-	vector<minimizer> result;
-	size_t size(seq.size()/part);
-	for(size_t i(0);i<part;++i){
+
+
+//~ vector<minimizer> minHashpart2(size_t H, size_t k,const string& seq, size_t part, const unordered_set<minimizer>& filter){
+	//~ vector<minimizer> result;
+	//~ size_t size(seq.size()/part);
+	//~ for(size_t i(0);i<part;++i){
 		//~ minHash3(H/part,k,seq.substr(i*size,size+16),result,filter);
-		minHash3(H/part,k,seq.substr(i*size,size),result,filter);
-	}
-	return result;
-}
-
+		//~ minHash3(H/part,k,seq.substr(i*size,size),result,filter);
+	//~ }
+	//~ return result;
+//~ }
+//~
 
 
