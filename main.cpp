@@ -21,16 +21,16 @@ using namespace std;
 
 
 int main(){
-	size_t H(100),k(15),part(10),kgraph(30),k2(11),threshold(1);
+	size_t H(100),k(15),part(10),kgraph(30),k2(11),threshold(2);
 	bool homo(false);
 	srand((int)time(NULL));
-	size_t nCycle(10);
+	size_t nCycle(0);
 	double minjacc(10);
 	string fileName("/local/malfoyishere/yeast-pacbio.fa");
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-	readContigsforstats("/local/malfoyishere/yeast313.unitig", kgraph, false, false, true);
+	readContigsforstats("unitigClean.fa", kgraph, false, false, false);
 	//~ readContigsforstats("unitigClean.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("unitigClean.fa", kgraph, true, true, false);

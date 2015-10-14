@@ -92,13 +92,13 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 	//				break;
 	//			}
 	//		}
-			if (rand()%1000==0){
+			if (rand()%1==0){
 			//~ if (true){
 				if(seq.size()<=(uint)H){
 					//~ sketch=allHash(k,seq);
 					continue;
 				}else{
-					sketch=minHashpart(H, k, seq, part);
+					sketch=minHashpart(H, k,homocompression (seq), part);
 				}
 				removeDuplicate(sketch);
 				myMutex.lock();
@@ -213,16 +213,33 @@ string getRepresent (const string& str){
 
 char nuc2int(char c){
 	switch(c){
-		case 'a': return 0;
-		case 'c': return 1;
-		case 'g': return 2;
-		case 't': return 3;
+		//~ case 'a': return 0;
+		//~ case 'c': return 1;
+		//~ case 'g': return 2;
+		//~ case 't': return 3;
 		case 'A': return 0;
 		case 'C': return 1;
 		case 'G': return 2;
 		case 'T': return 3;
 	}
-	cout<<"fuck"<<endl;
+	cout<<"oups"<<endl;
+	cout<<c<<endl;
+	cin.get();
+	return 0;
+}
+
+char nuc2intlc(char c){
+	switch(c){
+		case 'a': return 0;
+		case 'c': return 1;
+		case 'g': return 2;
+		case 't': return 3;
+		//~ case 'A': return 0;
+		//~ case 'C': return 1;
+		//~ case 'G': return 2;
+		//~ case 'T': return 3;
+	}
+	cout<<"oups"<<endl;
 	cout<<c<<endl;
 	cin.get();
 	return 0;
@@ -256,6 +273,33 @@ uint64_t xorshift64(uint64_t x) {
 }
 
 
+//~ uint32_t xorshift32(uint32_t seed) {
+	//~ seed ^= seed << 13;
+	//~ seed ^= seed >> 17;
+	//~ seed ^= seed << 5;
+	//~ return seed;
+//~ }
+
+uint32_t xorshift32( uint32_t a){
+    a = (a ^ 61) ^ (a >> 16);
+    a = a + (a << 3);
+    a = a ^ (a >> 4);
+    a = a * 0x27d4eb2d;
+    a = a ^ (a >> 15);
+    return a;
+}
+//~
+//~
+//~ uint32_t xorshift32( uint32_t a){
+    //~ a = (a+0x7ed55d16) + (a<<12);
+    //~ a = (a^0xc761c23c) ^ (a>>19);
+    //~ a = (a+0x165667b1) + (a<<5);
+    //~ a = (a+0xd3a2646c) ^ (a<<9);
+    //~ a = (a+0xfd7046c5) + (a<<3);
+    //~ a = (a^0xb55a4f09) ^ (a>>16);
+    //~ return a;
+//~ }
+
 vector<minimizer> allHash(size_t k,const string& seq){
 	vector<minimizer> sketch;
 	minimizer kmerS(seq2intStranded((seq.substr(0,k))));
@@ -276,14 +320,34 @@ vector<minimizer> allHash(size_t k,const string& seq){
 	return sketch;
 }
 
-
-unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
+unordered_set<minimizer> allKmersetu(size_t k,const string& seq){
 	unordered_set<minimizer> sketch;
-	for(size_t i(0);i+k<=seq.size();++i){
-		sketch.insert(seq2int(seq.substr(i,k)));
-	}
+	minimizer kmerS(seq2intStranded((seq.substr(0,k))));
+	minimizer kmerRC(seq2intStranded((reversecomplement(seq.substr(0,k)))));
+	minimizer kmer(min(kmerRC,kmerS));
+	size_t i(0);
+	do{
+		sketch.insert(kmer);
+		if(i+k<seq.size()){
+			updateMinimizer(kmerS, seq[i+k], k);
+			updateMinimizerRC(kmerRC, seq[i+k], k);
+			kmer=min(kmerRC,kmerS);
+		}else{
+			return sketch;
+		}
+		++i;
+	}while(true);
 	return sketch;
 }
+
+
+//~ unordered_set <minimizer> allKmerSet(size_t k,const string& seq){
+	//~ unordered_set<minimizer> sketch;
+	//~ for(size_t i(0);i+k<=seq.size();++i){
+		//~ sketch.insert(seq2int(seq.substr(i,k)));
+	//~ }
+	//~ return sketch;
+//~ }
 
 
 void removeDuplicate(vector<minimizer>& vec){
@@ -458,34 +522,41 @@ hash<uint32_t> hash32;
 
 
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
-	vector<uint32_t> sketch(H);
 	vector<minimizer> sketchs(H);
+	vector<uint32_t> sketch(H);
 	uint32_t hashValue;
-
 	minimizer kmerS(seq2intStranded(seq.substr(0,k)));
 	minimizer kmerRC(seq2intStranded(reversecomplement(seq.substr(0,k))));
 	minimizer kmer(min(kmerS,kmerRC));
-	hashValue=hash32(kmer);
+	//~ hashValue=hash32(kmer);
 	//~ hashValue=xorshift64(kmer);
+	hashValue=xorshift32(kmer);
 	for(size_t j(0); j<H; ++j){
 		sketch[j]=hashValue;
 		sketchs[j]=kmer;
-		hashValue=hash32(hashValue);
+		//~ hashValue=hash32(hashValue);
 		//~ hashValue=xorshift64(hashValue);
+		hashValue=xorshift32(hashValue);
 	}
 	for(size_t i(1); i+k<seq.size(); ++i){
+		 //~ kmerS=(seq2intStranded(seq.substr(i,k)));
+		 //~ kmerRC=(seq2intStranded(reversecomplement(seq.substr(i,k))));
+		 //~ kmer=(min(kmerS,kmerRC));
 		updateMinimizer(kmerS, seq[i+k], k);
 		updateMinimizerRC(kmerRC, seq[i+k], k);
 		kmer=(min(kmerS,kmerRC));
+
 		//~ hashValue=xorshift64(kmer);
-		hashValue=hash32(kmer);
+		//~ hashValue=hash32(kmer);
+		hashValue=xorshift32(kmer);
 		for(size_t j(0); j<H; ++j){
 			if(hashValue<sketch[j]){
 				sketch[j]=hashValue;
 				sketchs[j]=kmer;
 			}
-			hashValue=hash32(hashValue);
+			//~ hashValue=hash32(hashValue);
 			//~ hashValue=xorshift64(hashValue);
+			hashValue=xorshift32(hashValue);
 		}
 	}
 	previous.insert(previous.end(),sketchs.begin(),sketchs.end());
@@ -516,12 +587,12 @@ minimizer seq2intStranded(const string& seq){
 
 
 vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part){
-	vector<minimizer> result;
 	size_t size(seq.size()/part);
-	for(size_t i(0);i<part;++i){
-		minHash2(H/part,k,seq.substr(i*size,size+k),result);
-	}
-	return result;
+		vector<minimizer> result;
+		for(size_t i(0);i<part;++i){
+			minHash2(H/part,k,seq.substr(i*size,size+k),result);
+		}
+		return result;
 }
 
 
@@ -852,7 +923,6 @@ vector<string> loadFASTQ(const string& unitigFile,bool homo,size_t sizeMin,char 
 			if(homo){
 				res.push_back(homocompression(line));
 			}else{
-				//				res.push_back(randomString(10000));
 				if(n%frac==0){
 					res.push_back(line);
 					rn++;
@@ -887,7 +957,6 @@ vector<string> loadFASTA(const string& unitigFile,bool homo,size_t sizeMin, size
 			if(homo){
 				res.push_back(homocompression(line));
 			}else{
-				//				res.push_back(randomString(10000));
 				if(n%frac==0){
 					res.push_back(line);
 				}

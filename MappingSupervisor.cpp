@@ -137,7 +137,7 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 		for(size_t i(0);i<sketch.size();++i){
 			minimizer seq(sketch[i]);
 			if(min2Reads.unordered_map::count(seq)!=0){
-				readsNumbers=min2Reads.at(seq);
+				readsNumbers=min2Reads[seq];
 				for(size_t j(0);j<readsNumbers.size();++j){
 					if(number2position[readsNumbers[j]]!=0){
 						//~ candidateNumber++;
@@ -444,7 +444,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 	unordered_map<rNumber,uint32_t> Candidate;
 	//map de set ?
 	unordered_map<rNumber,unordered_set<minimizer>> read2min;
-	findCandidate(unitig,Candidate,read2min);
+	findCandidate(homocompression (unitig),Candidate,read2min);
 	if(Candidate.empty()){return;}
 	bool done(false);
 	vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
@@ -453,6 +453,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 		island++;
 		return;
 	}
+	unordered_set<minimizer> kmerunitig(allKmersetu(k,unitig));
 	unordered_multimap<string,string> genomicKmers(allKmerMapStranded(k2,unitig,nuc));
 	string read,beg,end,path,seq1,seq2;
 	vector<uNumber> numberBegin,numberEnd;
@@ -467,7 +468,8 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 			read=getRead(readnumber);
 			int position,positionUnitig,position1, position2;
 			bool stranded;
-			if(preMapUnitig(unitig, read, genomicKmers, position, read2min[readnumber], positionUnitig, stranded,position1,position2)){
+			//~ if(preMapUnitig(unitig, read, genomicKmers, position, read2min[readnumber], positionUnitig, stranded,position1,position2)){
+			if(preMapUnitig(unitig, read, genomicKmers, position, kmerunitig, positionUnitig, stranded,position1,position2)){
 				if(!done){
 					done=true;
 					unitigsPreMapped++;
