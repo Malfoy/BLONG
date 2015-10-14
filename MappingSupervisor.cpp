@@ -297,15 +297,15 @@ bool MappingSupervisor::preMapUnitig(const string& unitig, string& read,const un
 		stranded=true;
 		return true;
 	}else{
-		read=reversecomplement(read);
-		bool correct2(isCandidateCorrectMap(unitig,read,genomicKmers,position2,setMin,positionUnitig));
-		if(correct2){
-			position=max(position2,0);
-			stranded=false;
-			return true;
-		}else{
-			candidate++;
-		}
+		//~ read=reversecomplement(read);
+		//~ bool correct2(isCandidateCorrectMap(unitig,read,genomicKmers,position2,setMin,positionUnitig));
+		//~ if(correct2){
+			//~ position=max(position2,0);
+			//~ stranded=false;
+			//~ return true;
+		//~ }else{
+			//~ candidate++;
+		//~ }
 	}
 	return false;
 }
@@ -547,7 +547,8 @@ void MappingSupervisor::MapPart(){
 				cout<<endl;
 			}
 
-			if(unitig.size()<offset){
+			//~ if(unitig.size()<offset){
+			if(false){
 				vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
 				for(size_t j(0); j<ListFathers.size(); ++j){
 					path pathFather(ListFathers[j]);

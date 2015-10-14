@@ -47,7 +47,7 @@ public:
 	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>& Ivect,uint32_t IreadNumber){
 		readNumber=IreadNumber;
 		number2position=Ivect;
-		nuc=4;
+		nuc=5;
 		mapPartAllowed=false;
 		errorInKmers=true;
 		checking=false;
@@ -68,10 +68,10 @@ public:
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
 		offset=200;
-		minSizeUnitigs=200;
+		minSizeUnitigs=100;
 		depthMax=10;
 		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=failedCompaction=pathNumber=candidateNumber=pathlength=0;
-		nbThreads=8;
+		nbThreads=4;
 		errorRate=30;
 		indice=0;
 		outFile.open("myout.fa",ofstream::trunc);

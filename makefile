@@ -3,8 +3,8 @@ CFLAGS= -Wall -Ofast -std=c++11 -march=native -pthread -Wextra
 LDFLAGS=-pthread
 
 ifeq ($(gprof),1)
-CFLAGS=-std=c++0x -pg -O4 -march=native
-LDFLAGS=-pg
+CFLAGS= -Wall -Ofast -std=c++11 -march=native -pthread -Wextra -pg
+LDFLAGS=-pg -pthread
 endif
 
 ifeq ($(valgrind),1)

@@ -21,7 +21,7 @@ using namespace std;
 
 
 int main(){
-	size_t H(100),k(15),part(10),kgraph(30),k2(11),threshold(2);
+	size_t H(100),k(15),part(10),kgraph(30),k2(10),threshold(1);
 	bool homo(false);
 	srand((int)time(NULL));
 	size_t nCycle(0);
