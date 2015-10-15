@@ -11,6 +11,8 @@
 using namespace std;
 
 
+
+
 size_t random(size_t max){
 	default_random_engine generator;
 	uniform_int_distribution<size_t> distribution(1,max);
@@ -265,6 +267,16 @@ char int2nuc(char i){
 	}
 }
 
+void printMinimizer(minimizer min,size_t k){
+	string res;
+	for(size_t i(0); i<k; ++i){
+		res+=int2nuc(min%4);
+		min>>=2;
+	}
+	reverse(res.begin(),res.end());
+	cout<<res<<endl;
+}
+
 uint64_t xorshift64(uint64_t x) {
 	x ^= x >> 12; // a
 	x ^= x << 25; // b
@@ -384,15 +396,31 @@ unordered_set <minimizer> allKmerSetStranded(size_t k,const string& seq){
 }
 
 //Very ineficcient, k time too slow plus multimap plus key and value are  string ...
-unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq, char nuc){
-	unordered_multimap<string,string> sketch;
-	string kmer;
-	for(size_t i(0); i+k<=seq.size(); ++i){
-		kmer=(seq.substr(i,k));
-		//~ kmer=getRepresent(seq.substr(i,k));
-		sketch.insert({kmer.substr(0,nuc),kmer.substr(nuc)});
-	}
+//~ unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq, char nuc){
+	//~ unordered_multimap<string,string> sketch;
+	//~ string kmer;
+	//~ for(size_t i(0); i+k<=seq.size(); ++i){
+		//~ kmer=(seq.substr(i,k));
+	//	kmer=getRepresent(seq.substr(i,k));
+		//~ sketch.insert({kmer.substr(0,nuc),kmer.substr(nuc)});
+	//~ }
+//~
+	//~ return sketch;
+//~ }
 
+unordered_multimap<uint32_t,uint32_t> allKmerMapStranded(const char k,const string& seq, const  char nuc){
+	unordered_multimap<uint32_t,uint32_t> sketch;
+	uint32_t seed (seq2intStranded(seq.substr(0,nuc)));
+	uint32_t body (seq2intStranded(seq.substr(0,k-nuc)));
+	for(size_t i(0); ; ++i){
+		sketch.insert({seed,body});
+		if(i+k<seq.size()){
+			updateMinimizer(seed,seq[i+nuc],nuc);
+			updateMinimizer(body,seq[i+k],k-nuc);
+		}else{
+			break;
+		}
+	}
 	return sketch;
 }
 
@@ -482,35 +510,83 @@ bool equalStr(const string& seq1, const string& seq2){
 }
 
 
-bool isCorrect(const string& seq,const string& ref){
-	for(size_t i(0); i<seq.size(); ++i){
-		if(seq[i]!=ref[i]){
-			if(seq[i+1]==ref[i]){
-				return equalStr(seq.substr(i+2),ref.substr(i+1));
+//~ bool isCorrect(const string& seq,const string& ref){
+	//~ for(size_t i(0); i<seq.size(); ++i){
+		//~ if(seq[i]!=ref[i]){
+			//~ if(seq[i+1]==ref[i]){
+				//~ return equalStr(seq.substr(i+2),ref.substr(i+1));
+			//~ }
+			//~ if(seq[i]==ref[i+1]){
+				//~ return equalStr(seq.substr(i+1),ref.substr(i+2));
+			//~ }
+			//~ return (seq.substr(i+1)==ref.substr(i+1));
+		//~ }
+	//~ }
+	//~ return true;
+//~ }
+
+bool isCorrect(uint32_t seq,uint32_t ref, char n){
+
+	for(char i(1); i<=n; ++i){
+		unsigned char s(seq>>(2*(n-i))),r(ref>>(2*(n-i)));
+		seq%=(1<<2*(n-i));
+		ref%=(1<<2*(n-i));
+		if((s)!=r){
+			if(seq>>(2*(n-i-1))==r){
+				return seq%(1<<(2*(n-i-1)))==ref>>2;
 			}
-			if(seq[i]==ref[i+1]){
-				return equalStr(seq.substr(i+1),ref.substr(i+2));
+			if(s==ref>>(2*(n-i-1))){
+				return ref%(1<<(2*(n-i-1)))==seq>>2;
 			}
-			return (seq.substr(i+1)==ref.substr(i+1));
+			return seq==ref;
 		}
 	}
 	return true;
 }
 
 
-double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers, char nuc){
+//~ double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers, char nuc){
+	//~ double inter(0);
+	//~ string kmer;
+	//~ for(size_t i(0); i+k<=seq.size(); ++i){
+		//~ kmer=(seq.substr(i,k));
+		//kmer=getRepresent(seq.substr(i,k));
+		//~ auto range(genomicKmers.equal_range(kmer.substr(0,nuc)));
+		//~ for (auto it(range.first); it!=range.second; it++){
+			//~ if(isCorrect(kmer.substr(nuc),it->second)){
+				//~ inter++;
+				//~ break;
+			//~ }
+		//~ }
+	//~ }
+	//~ return double(100*inter/(seq.size()-k+1));;
+//~ }
+
+double jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc){
 	double inter(0);
-	string kmer;
-	size_t i(0);
-	for(; i+k<=seq.size(); ++i){
-		kmer=(seq.substr(i,k));
-		//~ kmer=getRepresent(seq.substr(i,k));
-		auto range(genomicKmers.equal_range(kmer.substr(0,nuc)));
+	uint32_t seed(seq2intStranded(seq.substr(0,nuc)));
+	uint32_t body(seq2intStranded(seq.substr(nuc,k-nuc)));
+	for(size_t i(0);; ++i){
+		auto range(genomicKmers.equal_range(seed));
 		for (auto it(range.first); it!=range.second; it++){
-			if(isCorrect(kmer.substr(nuc),it->second)){
+			if(isCorrect(body,it->second,k-nuc)){
+				//~ cout<<"success"<<endl;
+				//~ printMinimizer(body,k-nuc);
+				//~ printMinimizer(it->second,k-nuc);
+				//~ cin.get();
 				inter++;
 				break;
 			}
+			//~ cout<<"fail"<<endl;
+				//~ printMinimizer(body,k-nuc);
+				//~ printMinimizer(it->second,k-nuc);
+				//~ cin.get();
+		}
+		if(i+k<seq.size()){
+			updateMinimizer(seed,seq[i+nuc],nuc);
+			updateMinimizer(body,seq[i+k],k-nuc);
+		}else{
+			break;
 		}
 	}
 	return double(100*inter/(seq.size()-k+1));;
@@ -1022,15 +1098,7 @@ string randomString( size_t length )
 	return str;
 }
 
-void printMinimizer(minimizer min,size_t k){
-	string res;
-	for(size_t i(0); i<k; ++i){
-		res+=int2nuc(min%4);
-		min>>=2;
-	}
-	reverse(res.begin(),res.end());
-	cout<<res<<endl;
-}
+
 
 void updateMinimizer(minimizer&	min, char nuc,size_t k){
 	minimizer offset(1<<(2*k));

@@ -26,11 +26,11 @@ int main(){
 	srand((int)time(NULL));
 	size_t nCycle(0);
 	double minjacc(10);
-	string fileName("/local/malfoyishere/yeast-pacbio.fa");
+	string fileName("yeast-pacbiofinal_10x.fa");
 	cout<<"minjacc : "<<minjacc<<endl;
 
 	auto start=chrono::system_clock::now();
-	readContigsforstats("unitigClean.fa", kgraph, false, false, false);
+	readContigsforstats("../yeast313.unitig", kgraph, false, false, true);
 	//~ readContigsforstats("unitigClean.fa", kgraph, false, false, false);
 	for(size_t i(0);i<nCycle;++i){
 		readContigsforstats("unitigClean.fa", kgraph, true, true, false);

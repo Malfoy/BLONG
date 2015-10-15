@@ -67,7 +67,7 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=200;
+		offset=100;
 		minSizeUnitigs=100;
 		depthMax=10;
 		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=failedCompaction=pathNumber=candidateNumber=pathlength=0;
@@ -105,13 +105,13 @@ public:
 
 	void MapFromUnitigsErrors(const string& unitig);
 
-	bool isCandidateCorrectMap(const string& unitig, const string& read, const unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin,int& positionRead);
+bool isCandidateCorrectMap(const string& unitig, const string& read, const unordered_multimap<uint32_t,uint32_t>& genomicKmers,int& position, unordered_set<minimizer>& setMin, int& positionRead);
 
 	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 
-	bool preMapUnitig(const string& unitig, string& read,const unordered_multimap<string,string>& genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
+	bool preMapUnitig(const string& unitig, string& read,const unordered_multimap<uint32_t,uint32_t>& genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
 	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position,const  vector<path>& ListFathers,const  vector<path>& ListSons, string& beg, string& end);
 	string recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,size_t begsize,size_t endsize,size_t readsize,const string& unitig,bool stranded, int position1, int position2);
 

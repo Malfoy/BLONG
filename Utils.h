@@ -78,7 +78,7 @@ void updateMinimizer(minimizer& min, char nuc,size_t k);
 void updateMinimizerRC(minimizer&	min, char nuc,size_t k);
 void updateMinimizerEnd(minimizer&	min, char nuc,size_t k);
 vector<string> kmerCounting(const string& fileName,size_t k);
-unordered_multimap<string,string> allKmerMapStranded(size_t k,const string& seq,char nuc);
+unordered_multimap<uint32_t,uint32_t> allKmerMapStranded(const char k,const string& seq, const  char nuc);
 double jaccardStrandedErrors(size_t k, const string& seq, const unordered_multimap<string, string>& genomicKmers,char nuc);
 void printMinimizer(minimizer min,size_t k);
 bool isCorrect(const string& seq,const string& ref);
@@ -86,6 +86,9 @@ double scoreFromAlignment(const string& seq1,const string& seq2);
 void removeDuplicate(vector<minimizer>& vec);
 unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t H, size_t k, size_t part,vector<rPosition>& number2position);
 unordered_set<minimizer> allKmersetu(size_t k,const string& seq);
+double jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc);
+void printMinimizer(minimizer min,size_t k);
+
 
 
 #endif /* defined(__PBMOG__Utils__) */

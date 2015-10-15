@@ -152,7 +152,7 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 
 
 //Can do way better, much redundancy
-bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string& read, const unordered_multimap<string,string>& genomicKmers,int& position, unordered_set<minimizer>& setMin, int& positionRead){
+bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string& read, const unordered_multimap<uint32_t,uint32_t>& genomicKmers,int& position, unordered_set<minimizer>& setMin, int& positionRead){
 	if(read.empty()){return false;}
 	minimizer minS(seq2intStranded(read.substr(0,k)));
 	minimizer minRC(seq2intStranded(reversecomplement(read.substr(0,k))));
@@ -192,7 +192,6 @@ bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const 
 	path path;
 	string region;
 	unordered_set<minimizer> genomicKmers;
-	unordered_multimap<string,string> genomicKmersErrors;
 	for(size_t ii(0); ii<Paths.size();++ii){
 		path=(Paths[ii]);
 		genomicKmers=allKmerSetStranded(k2,path.str);
@@ -215,7 +214,7 @@ bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const 
 			}
 		}
 		if(found){
-			genomicKmersErrors=(allKmerMapStranded(k2,path.str,nuc));
+			unordered_multimap<uint32_t,uint32_t>genomicKmersErrors=(allKmerMapStranded(k2,path.str,nuc));
 			region=(read.substr(start,path.str.size()));
 			double score(jaccardStrandedErrors(k2,region,genomicKmersErrors,nuc));
 			if(score>maxScore){
@@ -290,7 +289,7 @@ bool MappingSupervisor::alignOnPathsSonsErrorsAll(const vector<path>& Paths, con
 }
 
 
-bool MappingSupervisor::preMapUnitig(const string& unitig, string& read,const unordered_multimap<string,string>& genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2){
+bool MappingSupervisor::preMapUnitig(const string& unitig, string& read,const unordered_multimap<uint32_t,uint32_t>& genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2){
 	bool correct1(isCandidateCorrectMap(unitig,read,genomicKmers,position1,setMin,positionUnitig));
 	if(correct1){
 		position=max(0,position1);
@@ -454,7 +453,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 		return;
 	}
 	unordered_set<minimizer> kmerunitig(allKmersetu(k,unitig));
-	unordered_multimap<string,string> genomicKmers(allKmerMapStranded(k2,unitig,nuc));
+	unordered_multimap<uint32_t,uint32_t> genomicKmers(allKmerMapStranded(k2,unitig,nuc));
 	string read,beg,end,path,seq1,seq2;
 	vector<uNumber> numberBegin,numberEnd;
 	//foreach reads that could map on the unitig (prepremapped)
