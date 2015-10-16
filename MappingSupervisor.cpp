@@ -443,6 +443,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 	unordered_map<rNumber,uint32_t> Candidate;
 	//map de set ?
 	unordered_map<rNumber,unordered_set<minimizer>> read2min;
+	//~ findCandidate( (unitig),Candidate,read2min);
 	findCandidate(homocompression (unitig),Candidate,read2min);
 	if(Candidate.empty()){return;}
 	bool done(false);

@@ -86,7 +86,7 @@ double scoreFromAlignment(const string& seq1,const string& seq2);
 void removeDuplicate(vector<minimizer>& vec);
 unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t H, size_t k, size_t part,vector<rPosition>& number2position);
 unordered_set<minimizer> allKmersetu(size_t k,const string& seq);
-double jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc);
+uint32_t jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc);
 void printMinimizer(minimizer min,size_t k);
 
 

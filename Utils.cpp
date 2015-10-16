@@ -101,8 +101,10 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 					continue;
 				}else{
 					sketch=minHashpart(H, k,homocompression (seq), part);
+					//~ sketch=minHashpart(H, k,(seq), part);
 				}
 				removeDuplicate(sketch);
+				//~ cout<<sketch.size()<<endl;
 				myMutex.lock();
 				number2position->push_back(position);
 				rNumber n((uint32_t)number2position->size()-1);
@@ -562,8 +564,8 @@ bool isCorrect(uint32_t seq,uint32_t ref, char n){
 	//~ return double(100*inter/(seq.size()-k+1));;
 //~ }
 
-double jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc){
-	double inter(0);
+uint32_t jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc){
+	uint32_t inter(0);
 	uint32_t seed(seq2intStranded(seq.substr(0,nuc)));
 	uint32_t body(seq2intStranded(seq.substr(nuc,k-nuc)));
 	for(size_t i(0);; ++i){
@@ -589,7 +591,7 @@ double jaccardStrandedErrors(char k, const string& seq, const unordered_multimap
 			break;
 		}
 	}
-	return double(100*inter/(seq.size()-k+1));;
+	return uint32_t(100*inter/(seq.size()-k+1));;
 }
 
 hash<uint32_t> hash32;
@@ -664,9 +666,13 @@ minimizer seq2intStranded(const string& seq){
 vector<minimizer> minHashpart(size_t H, size_t k,const string& seq, size_t part){
 	size_t size(seq.size()/part);
 	vector<minimizer> result;
+	//~ cout<<seq<<endl;
 	for(size_t i(0);i<part;++i){
+		//~ cout<<seq.substr(i*size,size+k)<<endl;
 		minHash2(H/part,k,seq.substr(i*size,size+k),result);
 	}
+	//~ cout<<result.size();
+	//~ cin.get();
 	return result;
 }
 
