@@ -82,7 +82,7 @@ public:
 	void MapPart();
 	string getRead(rNumber pos);
 	bool mapUnitig(const string& unitig, const rPosition n, int& position, unordered_set<minimizer>& genomicKmers, string& read);
-	void findCandidate(const string& unitig, unordered_map<rNumber,uint32_t>& Candidate, unordered_map<rNumber,unordered_set<minimizer>>& read2Min);
+	void findCandidate(const string& unitig, unordered_map<rNumber,uint32_t>& Candidate);
 	void MapAll();
 	bool isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
 	bool isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
@@ -105,13 +105,12 @@ public:
 
 	void MapFromUnitigsErrors(const string& unitig);
 
-	bool isCandidateCorrectMap(const string& unitig, const string& read, const unordered_multimap<uint32_t,uint32_t>& genomicKmers,int& position, unordered_set<minimizer>& setMin, int& positionRead);
-
+bool isCandidateCorrectMap(const string& unitig, const string& read, vector<uint32_t>* genomicKmers,int& position, unordered_set<minimizer>& setMin, int& positionRead);
 	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
 
-	bool preMapUnitig(const string& unitig, string& read,const unordered_multimap<uint32_t,uint32_t>& genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
+bool preMapUnitig(const string& unitig, string& read,vector<uint32_t>* genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
 	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position,const  vector<path>& ListFathers,const  vector<path>& ListSons, string& beg, string& end);
 	string recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig);
 

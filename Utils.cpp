@@ -76,6 +76,7 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 	vector<minimizer> sketch;
 	string seq,more;
 	rPosition position;
+	//~ int n(0);
 	while(true){
 		myMutex2.lock();
 		if(!myifstreamglobal.eof()){
@@ -112,7 +113,7 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 					(*index)[sketch[j]].push_back(n);
 				}
 				myMutex.unlock();
-				//~ if(n>100){return;}
+				//~ if(n>1000){return;}
 			}
 		}else{
 			myMutex2.unlock();
@@ -343,7 +344,7 @@ unordered_set<minimizer> allKmersetu(size_t k,const string& seq){
 	do{
 		sketch.insert(kmer);
 		if(i+k<seq.size()){
-			updateMinimizer(kmerS, seq[i+k], k);
+			updateMinimizer16(kmerS, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
 			kmer=min(kmerRC,kmerS);
 		}else{
@@ -416,6 +417,23 @@ unordered_multimap<uint32_t,uint32_t> allKmerMapStranded(const char k,const stri
 	uint32_t body (seq2intStranded(seq.substr(0,k-nuc)));
 	for(size_t i(0); ; ++i){
 		sketch.insert({seed,body});
+		if(i+k<seq.size()){
+			updateMinimizer(seed,seq[i+nuc],nuc);
+			updateMinimizer(body,seq[i+k],k-nuc);
+		}else{
+			break;
+		}
+	}
+	return sketch;
+}
+
+
+vector<uint32_t>* allKmerVectStranded(const char k,const string& seq, const  char nuc){
+	vector<uint32_t>* sketch =new vector<uint32_t>[1<<2*nuc];
+	uint32_t seed (seq2intStranded(seq.substr(0,nuc)));
+	uint32_t body (seq2intStranded(seq.substr(0,k-nuc)));
+	for(size_t i(0); ; ++i){
+		sketch[seed].push_back(body);
 		if(i+k<seq.size()){
 			updateMinimizer(seed,seq[i+nuc],nuc);
 			updateMinimizer(body,seq[i+k],k-nuc);
@@ -528,17 +546,16 @@ bool equalStr(const string& seq1, const string& seq2){
 //~ }
 
 bool isCorrect(uint32_t seq,uint32_t ref, char n){
-
-	for(char i(1); i<=n; ++i){
+	for(char i(1); i<n; ++i){
 		unsigned char s(seq>>(2*(n-i))),r(ref>>(2*(n-i)));
 		seq%=(1<<2*(n-i));
 		ref%=(1<<2*(n-i));
 		if((s)!=r){
-			if(seq>>(2*(n-i-1))==r){
-				return seq%(1<<(2*(n-i-1)))==ref>>2;
+			if((seq>>(2*(n-i-1)))==r){
+				return (seq%(1<<(2*(n-i-1))))==(ref>>2);
 			}
 			if(s==ref>>(2*(n-i-1))){
-				return ref%(1<<(2*(n-i-1)))==seq>>2;
+				return (ref%(1<<(2*(n-i-1))))==(seq>>2);
 			}
 			return seq==ref;
 		}
@@ -564,14 +581,13 @@ bool isCorrect(uint32_t seq,uint32_t ref, char n){
 	//~ return double(100*inter/(seq.size()-k+1));;
 //~ }
 
-uint32_t jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc){
+uint32_t jaccardStrandedErrors(char k, const string& seq, vector<uint32_t>* genomicKmers, char nuc){
 	uint32_t inter(0);
 	uint32_t seed(seq2intStranded(seq.substr(0,nuc)));
 	uint32_t body(seq2intStranded(seq.substr(nuc,k-nuc)));
 	for(size_t i(0);; ++i){
-		auto range(genomicKmers.equal_range(seed));
-		for (auto it(range.first); it!=range.second; it++){
-			if(isCorrect(body,it->second,k-nuc)){
+		for (size_t j(0); j<genomicKmers[seed].size();++j){
+			if(isCorrect(body,genomicKmers[seed][j],k-nuc)){
 				//~ cout<<"success"<<endl;
 				//~ printMinimizer(body,k-nuc);
 				//~ printMinimizer(it->second,k-nuc);
@@ -591,7 +607,10 @@ uint32_t jaccardStrandedErrors(char k, const string& seq, const unordered_multim
 			break;
 		}
 	}
-	return uint32_t(100*inter/(seq.size()-k+1));;
+	if(seq.size()-k+1==0){
+		cout<<"wtf"<<endl;
+	}
+	return uint32_t((100*inter)/(seq.size()-k+1));;
 }
 
 hash<uint32_t> hash32;
@@ -601,6 +620,7 @@ hash<uint64_t> hash64;
 void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous){
 	vector<minimizer> sketchs(H);
 	vector<uint64_t> sketch(H);
+	//~ vector<uint32_t> sketch(H);
 	uint32_t hashValue;
 	minimizer kmerS(seq2intStranded(seq.substr(0,k)));
 	minimizer kmerRC(seq2intStranded(reversecomplement(seq.substr(0,k))));
@@ -619,7 +639,7 @@ void minHash2(size_t H, size_t k, const string& seq, vector<minimizer>& previous
 		 //~ kmerS=(seq2intStranded(seq.substr(i,k)));
 		 //~ kmerRC=(seq2intStranded(reversecomplement(seq.substr(i,k))));
 		 //~ kmer=(min(kmerS,kmerRC));
-		updateMinimizer(kmerS, seq[i+k], k);
+		updateMinimizer16(kmerS, seq[i+k], k);
 		updateMinimizerRC(kmerRC, seq[i+k], k);
 		kmer=(min(kmerS,kmerRC));
 
@@ -936,7 +956,7 @@ int positionInSeq(const string& seq, minimizer min, size_t k){
 		}
 
 		if(i+k<seq.size()){
-			updateMinimizer(kmer, seq[i+k], k);
+			updateMinimizer16(kmer, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
 		}else{
 			return -1;
@@ -1107,11 +1127,37 @@ string randomString( size_t length )
 
 
 void updateMinimizer(minimizer&	min, char nuc,size_t k){
-	minimizer offset(1<<(2*k));
-	min<<=2;
-	min+=nuc2int(nuc);
-	min%=offset;
+	//~ if(k==16){
+		//~ cout<<"wtf"<<endl;
+		//~ exit(0);
+		//~ min<<=2;
+		//~ min+=nuc2int(nuc);
+	//~ }else{
+		//~ minimizer offset();
+		min<<=2;
+		min+=nuc2int(nuc);
+		min%=(1<<(2*k));
+	//~ }
 }
+
+void updateMinimizer16(minimizer&	min, char nuc,size_t k){
+	//~ if(k==16){
+		min<<=2;
+		min+=nuc2int(nuc);
+		min%=(1<<(2*k));
+		//~ minimizer offset(1<<(2*k));
+		//~ min<<=2;
+		//~ min+=nuc2int(nuc);
+		//~ min%=offset;
+	//~ }
+}
+
+//~ void updateMinimizer16(minimizer&	min, char nuc,size_t k){
+	//~ minimizer offset(1<<(2*k));
+	//~ min<<=2;
+	//~ min+=nuc2int(nuc);
+	//~ min%=offset;
+//~ }
 
 void updateMinimizerEnd(minimizer&	min, char nuc,size_t k){
 	min>>=2;

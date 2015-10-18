@@ -88,6 +88,9 @@ unordered_map<minimizer,vector<rNumber>> indexSeqDisk(const string& seqs, size_t
 unordered_set<minimizer> allKmersetu(size_t k,const string& seq);
 uint32_t jaccardStrandedErrors(char k, const string& seq, const unordered_multimap<uint32_t, uint32_t>& genomicKmers, char nuc);
 void printMinimizer(minimizer min,size_t k);
+vector<uint32_t>* allKmerVectStranded(const char k,const string& seq, const  char nuc);
+uint32_t jaccardStrandedErrors(char k, const string& seq, vector<uint32_t>* genomicKmers, char nuc);
+void updateMinimizer16(minimizer&	min, char nuc,size_t k);
 
 
 
