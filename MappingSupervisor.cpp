@@ -343,7 +343,7 @@ bool MappingSupervisor::mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>
 
 
 
-string MappingSupervisor::recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,size_t begsize,size_t endsize,size_t readsize,const string& unitig,bool stranded, int position1, int position2){
+string MappingSupervisor::recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig){
 	string pathBegin(getPathBegin(numberBegin));
 	//	pathBegin=pathBegin.substr(0,begsize);
 	if(pathBegin.empty() and numberBegin.size()!=0){
@@ -477,7 +477,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 				numberBegin=numberEnd={};
 				beg=end="";
 				if(mapOnGraph(numberBegin, numberEnd, unitig, read, position, ListFathers, ListSons,beg,end)){
-					path=(recoverPath(numberBegin, numberEnd, beg.size(), end.size(), read.size(), unitig, stranded, position1, position2));
+					path=(recoverPath(numberBegin, numberEnd, unitig));
 					if(path.empty()){
 						cout<<read<<endl;
 						break;
