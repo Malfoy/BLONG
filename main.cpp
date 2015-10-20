@@ -28,7 +28,7 @@ int main(int argc, char ** argv){
 	size_t H(100),k(15),part(2),kgraph(30),k2(10),threshold(2),nCycle(0),minjacc(10),thread(1),minSizeUnitig(100),offset(100),depth(10);
 	string readName(""),unitigName(""),outFile("out.fa");
 	int c;
-	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m:o:t:s:f:d")) != -1){
+	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m:o:t:s:f:d:")) != -1){
 		switch(c){
 			case 'r':
 				readName=optarg;
@@ -75,7 +75,7 @@ int main(int argc, char ** argv){
 		}
 	}
 
-	if(!unitigName.empty() and !readName.empty()){
+	if(!unitigName.empty() and !readName.empty()){	
 		cout<<"rReadFile:"<<readName<<"UnitigFile:"<<unitigName<<"cycleNumber:"<<nCycle<<"H:"<<H<<"K:"<<k<<"unitigSize:"<<minSizeUnitig<<"minjacc:"<<minjacc<<"offset:"<<offset<<"smallk:"<<k2<<"depthmax:"<<depth<<endl;
 		srand((int)time(NULL));
 		auto start=chrono::system_clock::now();

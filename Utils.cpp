@@ -95,7 +95,7 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 	//				break;
 	//			}
 	//		}
-			if (rand()%1==0){
+			if (rand()%1000==0){
 			 //if (true){
 				if(seq.size()<=(uint)H){
 					//~ sketch=allHash(k,seq);

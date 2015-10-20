@@ -58,7 +58,7 @@ void MappingSupervisor::MapPart(){
 		}
 		if(unitig.size()>=minSizeUnitigs){
 			++bigUnitig;
-			if(bigUnitig%1000==0){
+			if(false){
 				cout<<bigUnitig<<endl;
 				cout<<"Unitigs mapped "<<unitigsPreMapped<<" Percent unitigs mapped : "<<(100*unitigsPreMapped)/(bigUnitig+1)<<endl;
 				cout<<"Read pre-mapped : "<<readMapped<<" Percent read pre-mapped : "<<(100*readMapped)/(readNumber)<<endl;
