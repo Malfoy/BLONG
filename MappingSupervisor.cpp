@@ -153,7 +153,12 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 							if(number2position[readnumber]!=0){
 								pathlength+=numberBegin.size()+numberEnd.size()+1;
 								number2position[readnumber]=0;
-								outFile<<">"<<++pathNumber<<endl<<path<<endl;
+								if(!first){
+									outFile<<">"<<++pathNumber<<endl<<path<<endl;
+								}else{
+									outFile<<">"<<"H:"<<H<<"K:"<<k<<"unitigSize:"<<minSizeUnitigs<<"minjacc:"<<minJacc<<"offset:"<<offset<<"smalk:"<<k2<<"depthmax:"<<depthMax<<" "<<++pathNumber<<endl<<path<<endl;
+									first=false;
+								}
 								mutexEraseReads.unlock();
 								++aligneOnPathSucess;
 								regionmapped+=read.size();

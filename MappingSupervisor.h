@@ -35,7 +35,7 @@ public:
 	size_t k,multi,H,part,k2,kgraph;
 	char depthMax,nuc;
 	double minJacc;
-	bool mapPartAllowed,errorInKmers,checking;
+	bool mapPartAllowed,errorInKmers,checking,first;
 	double errorRate;
 	atomic<double> globalscore;
 	graph G;
@@ -44,7 +44,7 @@ public:
 
 
 
-	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>& Ivect,uint32_t IreadNumber){
+	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>& Ivect,uint32_t IreadNumber,size_t Ithread,const string& Ioutput, size_t Ioffset,size_t Iminsizeunitig,size_t Idepth){
 		readNumber=IreadNumber;
 		number2position=Ivect;
 		nuc=5;
@@ -67,14 +67,15 @@ public:
 		readMapped=0;
 		aligneOnPathSucess=0;
 		unitigsPreMapped=0;
-		offset=100;
-		minSizeUnitigs=100;
-		depthMax=10;
+		offset=Ioffset;
+		minSizeUnitigs=Iminsizeunitig;
+		depthMax=Idepth;
 		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=failedCompaction=pathNumber=candidateNumber=pathlength=0;
-		nbThreads=4;
+		nbThreads=Ithread;
 		errorRate=30;
 		indice=0;
-		outFile.open("myout.fa",ofstream::trunc);
+		first=true;
+		outFile.open(Ioutput,ofstream::trunc);
 	}
 
 

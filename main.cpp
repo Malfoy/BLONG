@@ -25,10 +25,10 @@ using namespace std;
 
 
 int main(int argc, char ** argv){
-	size_t H(100),k(15),part(2),kgraph(30),k2(10),threshold(2),nCycle(0),minjacc(10);
+	size_t H(100),k(15),part(2),kgraph(30),k2(10),threshold(2),nCycle(0),minjacc(10),thread(1),minSizeUnitig(100),offset(100),depth(10);
 	string readName(""),unitigName(""),outFile("out.fa");
 	int c;
-	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m:o")) != -1){
+	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m:o:t:s:f:d")) != -1){
 		switch(c){
 			case 'r':
 				readName=optarg;
@@ -51,19 +51,32 @@ int main(int argc, char ** argv){
 			case 'p':
 				part=stoi(optarg);
 				break;
-			case 't' :
+			case 'n' :
 				threshold=stoi(optarg);
 				break;
 			case 'k' :
 				k2=stoi(optarg);
 				break;
+			case 't' :
+				thread=stoi(optarg);
+				break;
 			case 'm' :
 				minjacc=stoi(optarg);
+				break;
+			case 's' :
+				minSizeUnitig=stoi(optarg);
+				break;
+			case 'f' :
+				offset=stoi(optarg);
+				break;
+			case 'd' :
+				depth=stoi(optarg);
 				break;
 		}
 	}
 
 	if(!unitigName.empty() and !readName.empty()){
+		cout<<"rReadFile:"<<readName<<"UnitigFile:"<<unitigName<<"cycleNumber:"<<nCycle<<"H:"<<H<<"K:"<<k<<"unitigSize:"<<minSizeUnitig<<"minjacc:"<<minjacc<<"offset:"<<offset<<"smallk:"<<k2<<"depthmax:"<<depth<<endl;
 		srand((int)time(NULL));
 		auto start=chrono::system_clock::now();
 		readContigsforstats(unitigName, kgraph, false, false, true);
@@ -81,12 +94,33 @@ int main(int argc, char ** argv){
 		auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 		cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
-		MappingSupervisor supervisor(Unitigs, index, k,readName, threshold, H, part, k2, minjacc, Graph, kgraph,number2position,number2position.size());
+		MappingSupervisor supervisor(Unitigs, index, k,readName, threshold, H, part, k2, minjacc, Graph, kgraph,number2position,number2position.size(),thread,outFile,offset,minSizeUnitig,depth);
 		supervisor.MapAll();
 		auto end3=chrono::system_clock::now();waitedFor=end3-end2;
 		cout<<"Read aligned in "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 	}else{
-		cout<<"provide read and unitig file ..."<<endl;
+		cout<<"Provide at least read and unitig file ..."<<endl;
+		cout<<"Option list: "<<endl<<endl;
+
+		cout<<"I/O:"<<endl;
+		cout<<"-r Read file"<<endl;
+		cout<<"-u Unitig file"<<endl;
+		cout<<"-o Out file (out.fa)"<<endl;
+		cout<<"-c Number of unitig cleaning operation (0)"<<endl<<endl;
+
+		cout<<"Anchoring:"<<endl;
+		cout<<"-H Number minimizer used for anchoring, higher is more sensitive but more expensive (100)"<<endl;
+		cout<<"-K Size of  minimizer used for anchoring (15)"<<endl<<endl;
+		cout<<"-s Minimum size for a  unitig to be used as an anchor (100)"<<endl;
+
+		cout<<"Matching:"<<endl;
+		cout<<"-m Percentage of accepted kmer required for matching (20)"<<endl;
+		cout<<"-k Size of kmer used for matching (10)"<<endl;
+		cout<<"-f Size of the windows used for the choice of the path (100)"<<endl;
+		cout<<"-d Maximal depth in the DFS search (10)"<<endl<<endl;
+
+		cout<<"Performances:"<<endl;
+		cout<<"-t Number of thread used (1)"<<endl;
 	}
 
 	return 0;
