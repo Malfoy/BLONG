@@ -26,16 +26,18 @@ using namespace std;
 
 int main(int argc, char ** argv){
 	size_t H(100),k(15),part(2),kgraph(30),k2(10),threshold(2),nCycle(0),minjacc(10);
-	string readName("");
-	string unitigName("");
+	string readName(""),unitigName(""),outFile("out.fa");
 	int c;
-	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m")) != -1){
+	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m:o")) != -1){
 		switch(c){
 			case 'r':
 				readName=optarg;
 				break;
 			case 'u':
 				unitigName=optarg;
+				break;
+			case 'o':
+				outFile=optarg;
 				break;
 			case 'c':
 				nCycle=stoi(optarg);
