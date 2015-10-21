@@ -95,8 +95,8 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 	//				break;
 	//			}
 	//		}
-			if (rand()%1000==0){
-			 //if (true){
+			//if (rand()%1000==0){
+			 if (true){
 				if(seq.size()<=(uint)H){
 					//~ sketch=allHash(k,seq);
 					continue;
@@ -113,7 +113,7 @@ void indexFasta(size_t H, size_t k, size_t part, unordered_map<minimizer,vector<
 					(*index)[sketch[j]].push_back(n);
 				}
 				myMutex.unlock();
-				//~ if(n>1000){return;}
+				// if(n>1000){return;}
 			}
 		}else{
 			myMutex2.unlock();

@@ -156,7 +156,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 								if(!first){
 									outFile<<">"<<++pathNumber<<endl<<path<<endl;
 								}else{
-									outFile<<">"<<"H:"<<H<<"K:"<<k<<"unitigSize:"<<minSizeUnitigs<<"minjacc:"<<minJacc<<"offset:"<<offset<<"smalk:"<<k2<<"depthmax:"<<depthMax<<" "<<++pathNumber<<endl<<path<<endl;
+									outFile<<">"<<"H:"<<H<<"K:"<<k<<"unitigSize:"<<minSizeUnitigs<<"minjacc:"<<minJacc<<"offset:"<<offset<<"smalk:"<<k2<<"depthmax:"<<depthMax<<" "<<++pathNumber<<path<<endl;
 									first=false;
 								}
 								mutexEraseReads.unlock();

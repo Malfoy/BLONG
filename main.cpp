@@ -79,7 +79,7 @@ int main(int argc, char ** argv){
 		cout<<"rReadFile:"<<readName<<"UnitigFile:"<<unitigName<<"cycleNumber:"<<nCycle<<"H:"<<H<<"K:"<<k<<"unitigSize:"<<minSizeUnitig<<"minjacc:"<<minjacc<<"offset:"<<offset<<"smallk:"<<k2<<"depthmax:"<<depth<<endl;
 		srand((int)time(NULL));
 		auto start=chrono::system_clock::now();
-		readContigsforstats(unitigName, kgraph, false, false, true);
+		readContigsforstats(unitigName, kgraph, false, false, false);
 		for(size_t i(0);i<nCycle;++i){
 			readContigsforstats("unitigClean.fa", kgraph, true, true, false);
 		}
@@ -111,7 +111,9 @@ int main(int argc, char ** argv){
 		cout<<"Anchoring:"<<endl;
 		cout<<"-H Number minimizer used for anchoring, higher is more sensitive but more expensive (100)"<<endl;
 		cout<<"-K Size of  minimizer used for anchoring (15)"<<endl<<endl;
+		cout<<"-n Minimum number of minimizer shared to be candidate (2)"<<endl;
 		cout<<"-s Minimum size for a  unitig to be used as an anchor (100)"<<endl;
+		
 
 		cout<<"Matching:"<<endl;
 		cout<<"-m Percentage of accepted kmer required for matching (20)"<<endl;
