@@ -75,7 +75,7 @@ int main(int argc, char ** argv){
 		}
 	}
 
-	if(!unitigName.empty() and !readName.empty()){	
+	if(!unitigName.empty() and !readName.empty()){
 		cout<<"rReadFile:"<<readName<<"UnitigFile:"<<unitigName<<"cycleNumber:"<<nCycle<<"H:"<<H<<"K:"<<k<<"unitigSize:"<<minSizeUnitig<<"minjacc:"<<minjacc<<"offset:"<<offset<<"smallk:"<<k2<<"depthmax:"<<depth<<endl;
 		srand((int)time(NULL));
 		auto start=chrono::system_clock::now();
@@ -110,10 +110,10 @@ int main(int argc, char ** argv){
 
 		cout<<"Anchoring:"<<endl;
 		cout<<"-H Number minimizer used for anchoring, higher is more sensitive but more expensive (100)"<<endl;
-		cout<<"-K Size of  minimizer used for anchoring (15)"<<endl<<endl;
+		cout<<"-K Size of  minimizer used for anchoring (15)"<<endl;
 		cout<<"-n Minimum number of minimizer shared to be candidate (2)"<<endl;
-		cout<<"-s Minimum size for a  unitig to be used as an anchor (100)"<<endl;
-		
+		cout<<"-s Minimum size for a  unitig to be used as an anchor (100)"<<endl<<endl;;
+
 
 		cout<<"Matching:"<<endl;
 		cout<<"-m Percentage of accepted kmer required for matching (20)"<<endl;
