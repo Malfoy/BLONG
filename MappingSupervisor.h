@@ -27,20 +27,17 @@ class MappingSupervisor{
 public:
 	ofstream outFile;
 	ifstream reads;
-	size_t offset,minSizeUnitigs,nbThreads;
 	vector<string> unitigs;
 	unordered_map<minimizer, vector<rNumber>> min2Reads;
 	vector<rPosition> number2position;
 	uint32_t readNumber;
-	size_t k,multi,H,part,k2,kgraph;
-	char depthMax,nuc;
-	double minJacc;
+	unsigned int k,multi,H,part,k2,kgraph,depthMax,nuc,offset,minSizeUnitigs,nbThreads,minJacc;
 	bool mapPartAllowed,errorInKmers,checking,first;
 	double errorRate;
 	atomic<double> globalscore;
 	graph G;
 	mutex mutexReadReads,mutexEraseReads,mutexunitig,mutexReadUsed;
-	atomic<size_t> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig,deepper,failedCompaction,pathNumber,candidateNumber,pathlength;
+	atomic<unsigned int> readMapped,aligneOnPathSucess,unitigsPreMapped,bigUnitig,island,regionmapped,leftmap,rightmap,leftmapFail,rightmapFail,candidate,fail,indice,readInUnitig,deepper,failedCompaction,pathNumber,candidateNumber,pathlength;
 
 
 
