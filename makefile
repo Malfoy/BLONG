@@ -1,5 +1,6 @@
-CC=g++
-CFLAGS= -Wall -Ofast -std=c++11 -march=native -pthread -Wextra
+# CC=g++
+CC=/usr/bin/g++
+CFLAGS= -Wall -Ofast -std=c++11 -march=native -pthread -Wextra -flto
 LDFLAGS=-pthread
 
 ifeq ($(gprof),1)
@@ -18,20 +19,17 @@ all: $(EXEC)
 
 Utils.o: Utils.cpp Utils.h
 	$(CC) -o $@ -c $< $(CFLAGS)
-
-nw.o: nw.cpp nw.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
+	
 graph.o: graph.cpp graph.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-MappingSupervisor.o: MappingSupervisor.cpp MappingSupervisor.h Utils.h nw.h
+MappingSupervisor.o: MappingSupervisor.cpp MappingSupervisor.h Utils.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 main.o: main.cpp MappingSupervisor.h Utils.h graph.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-blong: main.o MappingSupervisor.o Utils.o graph.o nw.o
+blong: main.o MappingSupervisor.o Utils.o graph.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
@@ -41,4 +39,3 @@ clean:
 	rm -rf $(EXEC)
 
 rebuild: clean $(EXEC)
-

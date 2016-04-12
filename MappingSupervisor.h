@@ -28,6 +28,7 @@ public:
 	ofstream outFile;
 	ifstream reads;
 	vector<string> unitigs;
+	unordered_set<uint> readNumberrecruited;
 	unordered_map<minimizer, vector<rNumber>> min2Reads;
 	vector<rPosition> number2position;
 	uint32_t readNumber;
@@ -41,10 +42,11 @@ public:
 
 
 
-	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, size_t Ik, const string& IreadsFile, size_t Imulti, size_t IH, size_t Ipart, size_t Ik2, double IminJacc,graph& graphe,size_t Ikgraph,vector<rPosition>& Ivect,uint32_t IreadNumber,size_t Ithread,const string& Ioutput, size_t Ioffset,size_t Iminsizeunitig,size_t Idepth){
+	MappingSupervisor(const vector<string>& Iunitigs, unordered_map<minimizer, vector<rNumber>>& Iindex, uint  Ik, const string& IreadsFile, uint  Imulti, uint  IH, uint  Ipart, uint  Ik2, double IminJacc,graph& graphe,uint  Ikgraph,vector<rPosition>& Ivect,uint32_t IreadNumber,uint  Ithread,const string& Ioutput, uint  Ioffset,uint  Iminsizeunitig,uint  Idepth){
 		readNumber=IreadNumber;
 		number2position=Ivect;
 		nuc=5;
+		readNumberrecruited={};
 		mapPartAllowed=false;
 		errorInKmers=true;
 		checking=false;
@@ -69,12 +71,11 @@ public:
 		depthMax=Idepth;
 		globalscore=bigUnitig=regionmapped=deepper=fail=candidate=leftmap=rightmap=leftmapFail=rightmapFail=readInUnitig=failedCompaction=pathNumber=candidateNumber=pathlength=0;
 		nbThreads=Ithread;
-		errorRate=30;
+		errorRate=10;
 		indice=0;
 		first=true;
 		outFile.open(Ioutput,ofstream::trunc);
 	}
-
 
 
 	void MapPart();
@@ -84,35 +85,35 @@ public:
 	void MapAll();
 	bool isCandidateCorrect(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
 	bool isCandidateCorrect2(const string& unitig, const string& read, unordered_set<minimizer>& genomicKmers,int& position, unordered_set<minimizer>& setmin);
-	vector<path> listPath(size_t lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
+	vector<path> listPath(uint  lengthRequired, uNumber ind, set<uNumber> usedUnitigs);
 
-	bool alignOnPath(const path& path, const string& read, size_t position,set<uNumber>& usedUnitigs);
+	bool alignOnPath(const path& path, const string& read, uint  position,set<uNumber>& usedUnitigs);
 
-	vector<path> listPathSons(size_t lengthRequired, const string& substr,int depth);
-	vector<path> listPathFathers(size_t lengthRequired, const string& substr, int depth);
+	vector<path> listPathSons(uint  lengthRequired, const string& substr,uint depth);
+	vector<path> listPathFathers(uint  lengthRequired, const string& substr, uint depth);
 
-	bool alignOnPathSons(const path& path, const string& read, size_t position,vector<uNumber>& n);
-	bool alignOnPathSonsErrors(const path& path, const string& read, size_t position,vector<uNumber>& n);
-	bool alignOnPathFathers(const path& path, const string& read, size_t position,vector<uNumber>& n);
+	bool alignOnPathSons(const path& path, const string& read, uint  position,vector<uNumber>& n);
+	bool alignOnPathSonsErrors(const path& path, const string& read, uint  position,vector<uNumber>& n);
+	bool alignOnPathFathers(const path& path, const string& read, uint  position,vector<uNumber>& n);
 
-	bool alignOnPathSons2(const path& path, const string& read, size_t position,vector<uNumber>&);
-	bool alignOnPathFathers2(const path& path, const string& read, size_t position,vector<uNumber>&);
+	bool alignOnPathSons2(const path& path, const string& read, uint  position,vector<uNumber>&);
+	bool alignOnPathFathers2(const path& path, const string& read, uint  position,vector<uNumber>&);
 
 	string getPathEnd(const vector<uNumber>& numbers);
 	string getPathBegin(const vector<uNumber>& numbers);
 
 	void MapFromUnitigsErrors(const string& unitig);
 
-bool isCandidateCorrectMap(const string& unitig, const string& read, vector<uint32_t>* genomicKmers,int& position, unordered_set<minimizer>& setMin, int& positionRead);
-	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, size_t position,vector<uNumber>& numbers);
-	bool alignOnPathsSons(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
-	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers);
+	bool isCandidateCorrectMap(const string& unitig, const string& read, vector<uint32_t>* genomicKmers,int& position, unordered_set<minimizer>& setMin, int& positionRead);
+	bool alignOnPathsSonsErrors(const vector<path>& path, const string& read, uint  position,vector<uNumber>& numbers);
+	bool alignOnPathsSons(const vector<path>& Paths, const string& read, uint  position,vector<uNumber>& numbers);
+	bool alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, uint  position,vector<uNumber>& numbers);
 
-bool preMapUnitig(const string& unitig, string& read,vector<uint32_t>* genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2);
+	bool preMapUnitig(const string& unitig, string& read,vector<uint32_t>* genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1);
 	bool mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position,const  vector<path>& ListFathers,const  vector<path>& ListSons, string& beg, string& end);
 	string recoverPath(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig);
 
-	unordered_set<minimizer> allKmerset(size_t k,const string& seq);
+	unordered_set<minimizer> allKmerset(uint  k,const string& seq);
 
 };
 

@@ -25,7 +25,7 @@ using namespace std;
 
 
 int main(int argc, char ** argv){
-	size_t H(100),k(15),part(2),kgraph(30),k2(10),threshold(2),nCycle(0),minjacc(10),thread(1),minSizeUnitig(100),offset(100),depth(10);
+	uint  H(100),k(15),part(1),kgraph(62),k2(10),threshold(2),nCycle(0),minjacc(10),thread(1),minSizeUnitig(100),offset(100),depth(10);
 	string readName(""),unitigName(""),outFile("out.fa");
 	int c;
 	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m:o:t:s:f:d:")) != -1){
@@ -80,17 +80,19 @@ int main(int argc, char ** argv){
 		srand((int)time(NULL));
 		auto start=chrono::system_clock::now();
 		readContigsforstats(unitigName, kgraph, false, false, false);
-		for(size_t i(0);i<nCycle;++i){
-			readContigsforstats("unitigClean.fa", kgraph, true, true, false);
+		for(uint  i(0);i<nCycle;++i){
+			readContigsforstats("data/unitigClean.fa", kgraph, true, true, false);
 		}
-		auto Unitigs(loadUnitigs("unitigClean.fa",false));
+		cout<<"contigsread"<<endl;
+		auto Unitigs(loadUnitigs("data/unitigClean.fa",false));
 		graph Graph(Unitigs,kgraph);
-		//	auto filter(filterUnitigs(Unitigs,k,H,part));
+		auto filter(filterUnitigs(Unitigs,k,H,part));
+
 		auto end1=chrono::system_clock::now();auto waitedFor=end1-start;
 		cout<<"Unitig loaded "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 
 		vector<rPosition> number2position;
-		auto index(indexSeqDisk(readName,H,k,part,number2position));
+		auto index(indexSeqDisk(readName,H,k,part,number2position,filter));
 		auto end2=chrono::system_clock::now();waitedFor=end2-end1;
 		cout<<"Reads indexed "<<(chrono::duration_cast<chrono::seconds>(waitedFor).count())<<" seconds"<<endl<<endl;
 

@@ -9,14 +9,13 @@
 
 #include "MappingSupervisor.h"
 #include "Utils.h"
-#include "nw.h"
 #include <math.h>
 
 
 void MappingSupervisor::MapAll(){
 	vector<thread> threads;
 
-	for(size_t i(0); i<nbThreads; ++i) {
+	for(uint  i(0); i<nbThreads; ++i) {
 		threads.push_back(thread(&MappingSupervisor::MapPart, this));
 	}
 
@@ -32,14 +31,13 @@ void MappingSupervisor::MapAll(){
 	cout<<leftmap<<" left map "<< rightmap<<" right map"<<endl;
 	cout<<leftmapFail<<" left failt "<<rightmapFail<<" right fail"<<endl;
 	cout<<readInUnitig<<" reads in unitig"<<endl;
-	if(fail+aligneOnPathSucess!=0){
-		cout<<"%sucess of the shared kmer heuristic : "<<(100*aligneOnPathSucess)/(fail+aligneOnPathSucess+1)<<endl;;
-	}
+	if(fail+aligneOnPathSucess!=0){cout<<"%sucess of the shared kmer heuristic : "<<(100*aligneOnPathSucess)/(fail+aligneOnPathSucess+1)<<endl;}
 	cout<<"mean score : "<<globalscore/(aligneOnPathSucess+1)<<endl;
 	cout<<"fail from depth : "<<deepper<<endl;
 	cout<<"failed compaction(bug) : "<<failedCompaction<<endl;
 	cout<<"mean number of candidate: "<<candidateNumber/(bigUnitig+1)<<" "<<candidateNumber<<endl;
 	cout<<"mean number of pathlent: "<<pathlength/(aligneOnPathSucess+1)<<endl;
+	cout<<readNumberrecruited.size()<<endl;
 	cout<<endl;
 }
 
@@ -83,13 +81,13 @@ void MappingSupervisor::MapPart(){
 			//~ if(unitig.size()<offset){
 			if(false){
 				vector<path> ListFathers(listPathFathers(offset, unitig.substr(0,kgraph),0));
-				for(size_t j(0); j<ListFathers.size(); ++j){
+				for(uint  j(0); j<ListFathers.size(); ++j){
 					path pathFather(ListFathers[j]);
 					string newUnitig(compactionBegin(unitig, pathFather.str, kgraph));
 					MapFromUnitigsErrors(newUnitig);
 				}
 				vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
-				for(size_t j(0); j<ListSons.size(); ++j){
+				for(uint  j(0); j<ListSons.size(); ++j){
 					path pathSon(ListSons[j]);
 					string newUnitig(compactionEnd(unitig, pathSon.str, kgraph));
 					MapFromUnitigsErrors(newUnitig);
@@ -104,7 +102,7 @@ void MappingSupervisor::MapPart(){
 
 void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 	unordered_map<rNumber,uint32_t> Candidate;
-	findCandidate(homocompression (unitig),Candidate);
+	findCandidate( (unitig),Candidate);
 	if(Candidate.empty()){return;}
 	bool done(false);
 	vector<path> ListSons(listPathSons(offset, unitig.substr(unitig.size()-kgraph,kgraph),0));
@@ -126,13 +124,14 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 				continue;
 			}
 			read=getRead(readnumber);
-			int position,positionUnitig,position1, position2;
+			int position,positionUnitig,position1;
 			bool stranded;
-			if(preMapUnitig(unitig, read, genomicSmallmers, position, largemerUnitig, positionUnitig, stranded,position1,position2)){
+			if(preMapUnitig(unitig, read, genomicSmallmers, position, largemerUnitig, positionUnitig, stranded,position1)){
 				if(!done){
 					done=true;
 					unitigsPreMapped++;
 				}
+				// readNumberrecruited.insert(readnumber);
 				numberBegin=numberEnd={};
 				beg=end="";
 				if(mapOnGraph(numberBegin, numberEnd, unitig, read, position, ListFathers, ListSons,beg,end)){
@@ -143,11 +142,10 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 					}
 					seq1=seq2="";
 					if(numberEnd.empty() and numberBegin.empty()){
+						++aligneOnPathSucess;
+						number2position[readnumber]=0;
 						continue;
 					}else{
-						if(checking){
-							nw(path, read, seq1, seq2, false);
-						}
 						if(!checking or scoreFromAlignment(seq1,seq2)<=errorRate){
 							mutexEraseReads.lock();
 							if(number2position[readnumber]!=0){
@@ -176,18 +174,18 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 
 
 void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumber,uint32_t>& Candidate){
-	if(unitig.size()<H){
+	if(true){
 		unordered_set<minimizer> minSet;
 		vector<rNumber> readsNumbers;
 		minimizer kmerS=seq2intStranded(unitig.substr(0,k));
 		minimizer kmerRC=seq2intStranded(reversecomplement(unitig.substr(0,k)));
 		minimizer seq(min(kmerRC,kmerS));
-		for(size_t i(0);;++i){
+		for(uint  i(0);;++i){
 			if(minSet.unordered_set::count(seq)==0){
 				minSet.insert(seq);
 				if(min2Reads.unordered_map::count(seq)!=0){
 					readsNumbers=min2Reads[seq];
-					for(size_t j(0);j<readsNumbers.size();++j){
+					for(uint  j(0);j<readsNumbers.size();++j){
 						if(number2position[readsNumbers[j]]!=0){
 							++Candidate[readsNumbers[j]];
 							//~ read2Min[readsNumbers[j]].insert(seq);
@@ -196,7 +194,7 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 				}
 			}
 			if(i+k<unitig.size()){
-				updateMinimizer16(kmerS, unitig[i+k], k);
+				updateMinimizer(kmerS, unitig[i+k], k);
 				updateMinimizerRC(kmerRC, unitig[i+k], k);
 				seq=(min(kmerRC,kmerS));
 			}else{
@@ -208,11 +206,11 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 		vector<rNumber> readsNumbers;
 		removeDuplicate(sketch);
 		//For each minimizer of the unitig
-		for(size_t i(0);i<sketch.size();++i){
+		for(uint  i(0);i<sketch.size();++i){
 			minimizer seq(sketch[i]);
 			if(min2Reads.unordered_map::count(seq)!=0){
 				readsNumbers=min2Reads[seq];
-				for(size_t j(0);j<readsNumbers.size();++j){
+				for(uint  j(0);j<readsNumbers.size();++j){
 					if(number2position[readsNumbers[j]]!=0){
 						//~ candidateNumber++;
 						++Candidate[readsNumbers[j]];
@@ -226,12 +224,15 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 
 
 
-vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, const string& substr, int depth){
+vector<path> MappingSupervisor::listPathSons(uint  lengthRequired, const string& substr, uint depth){
 	if(depth>depthMax){deepper++;return {};}
 	vector<path> paths,recurPaths;
 	vector<uNumber> Sons(G.getBegin(substr));
+	if(Sons.size()>2){
+		++depth;
+	}
 	string son,newson,sonAndCo;
-	for (size_t i(0); i<Sons.size(); ++i){
+	for (uint  i(0); i<Sons.size(); ++i){
 		son=(unitigs[Sons[i]]);
 		newson=(compactionEnd(substr, son, kgraph));
 
@@ -241,7 +242,7 @@ vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, const string
 			paths.push_back(path{newson,{Sons[i]}});
 		}else{
 			recurPaths=(listPathSons(lengthRequired-son.size()+kgraph, newson.substr(newson.size()-kgraph), depth+1));
-			for (size_t j(0); j<recurPaths.size(); ++j){
+			for (uint  j(0); j<recurPaths.size(); ++j){
 				sonAndCo=(compactionEnd(newson,recurPaths[j].str, kgraph));
 				if(sonAndCo.size()>=lengthRequired){ //DEBUG
 					recurPaths[j].numbers.push_back(Sons[i]);
@@ -263,12 +264,15 @@ vector<path> MappingSupervisor::listPathSons(size_t lengthRequired, const string
 
 
 
-vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, const string& substr, int depth){
-	if(depth>depthMax){return {};}
+vector<path> MappingSupervisor::listPathFathers(uint  lengthRequired, const string& substr, uint depth){
+	if(depth>depthMax){deepper++;return {};}
 	vector<path> paths,pathsRecur;
 	vector<uNumber> Fathers(G.getEnd(substr));
 	string fatherandco,father,newfather;
-	for (size_t i(0); i<Fathers.size(); ++i){
+	if(Fathers.size()>2){
+		++depth;
+	}
+	for (uint  i(0); i<Fathers.size(); ++i){
 		father=(unitigs[Fathers[i]]);
 		newfather=(compactionBegin(substr, father, kgraph));
 		if(newfather.empty()){
@@ -280,7 +284,7 @@ vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, const str
 			paths.push_back(path{newfather,{Fathers[i]}});
 		}else{
 			pathsRecur=(listPathFathers(lengthRequired-father.size()+kgraph,newfather.substr(0,kgraph), depth+1));
-			for (size_t j(0); j<pathsRecur.size(); ++j){
+			for (uint  j(0); j<pathsRecur.size(); ++j){
 				fatherandco=(compactionBegin(newfather,pathsRecur[j].str,kgraph));
 				if(fatherandco.size()>=lengthRequired){
 					pathsRecur[j].numbers.push_back(Fathers[i]);
@@ -297,25 +301,53 @@ vector<path> MappingSupervisor::listPathFathers(size_t lengthRequired, const str
 }
 
 
-bool MappingSupervisor::preMapUnitig(const string& unitig, string& read,vector<uint32_t>* genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1, int& position2){
+bool MappingSupervisor::preMapUnitig(const string& unitig, string& read,vector<uint32_t>* genomicKmers,int& position,unordered_set<minimizer>& setMin, int& positionUnitig, bool& stranded, int& position1){
 	bool correct1(isCandidateCorrectMap(unitig,read,genomicKmers,position1,setMin,positionUnitig));
 	if(correct1){
 		position=max(0,position1);
 		stranded=true;
 		return true;
-	}else{
-		//~ read=reversecomplement(read);
-		//~ bool correct2(isCandidateCorrectMap(unitig,read,genomicKmers,position2,setMin,positionUnitig));
-		//~ if(correct2){
-			//~ position=max(position2,0);
-			//~ stranded=false;
-			//~ return true;
-		//~ }else{
-			//~ candidate++;
-		//~ }
 	}
 	return false;
 }
+
+
+//Can do way better, much redundancy
+// bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string& read, vector<uint32_t>* genomicSmallmers,int& position, unordered_set<minimizer>& setLargemer, int& positionRead){
+// 	if(read.empty()){return false;}
+// 	minimizer minS(seq2intStranded(read.substr(0,k)));
+// 	minimizer minRC(seq2intStranded(reversecomplement(read.substr(0,k))));
+// 	minimizer mini(min(minS,minRC));
+// 	string region;
+// 	double best(0);
+// 	bool res(false);
+//
+// 	for(int i(0);;++i){
+// 		if(setLargemer.unordered_set::count(mini)!=0){
+// 			int posInSeq(positionInSeq(unitig, mini, k));
+// 			if(posInSeq>=0){
+// 				int pos(i-posInSeq);
+// 				region=(pos>=0 ? read.substr(pos,unitig.size()): read.substr(0,unitig.size()+pos));
+// 				double score=jaccardStrandedErrors(k2,region,genomicSmallmers,nuc);
+// 				if(score>=minJacc and score>best){
+// 					best=score;
+// 					readMapped++;
+// 					position=(pos);
+// 					positionRead=pos;
+// 					res=true;
+// 				}
+// 			}
+// 		}
+// 		if(i+k<read.size()){
+// 			updateMinimizer(minS, read[i+k], k);
+// 			updateMinimizerRC(minRC, read[i+k], k);
+// 			mini=min(minS,minRC);
+// 		}else{
+// 			return res;
+// 		}
+// 	}
+// 	return res;
+// }
 
 
 //Can do way better, much redundancy
@@ -341,7 +373,7 @@ bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string
 			}
 		}
 		if(i+k<read.size()){
-			updateMinimizer16(minS, read[i+k], k);
+			updateMinimizer(minS, read[i+k], k);
 			updateMinimizerRC(minRC, read[i+k], k);
 			mini=min(minS,minRC);
 		}else{
@@ -380,17 +412,22 @@ bool MappingSupervisor::mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>
 			rightmapFail++;
 		}
 	}
+
+	// if(not (mappedLeft and mappedRight)){
+	// 	cout<<"go"<<endl;
+	// 	cout<<beg<<endl<<end<<endl;
+	// }
 	return mappedLeft and mappedRight;
 }
 
 
-bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers){
+bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const string& read, uint  position,vector<uNumber>& numbers){
 	double maxScore(0);
-	size_t maxIndice(0);
+	uint  maxIndice(0);
 	int maxStart(0);
 	path path;
 	string region;
-	for(size_t ii(0); ii<Paths.size();++ii){
+	for(uint  ii(0); ii<Paths.size();++ii){
 		path=(Paths[ii]);
 		vector<uint32_t>* genomicKmers(allKmerVectStranded(k2,path.str,nuc));
 		uint32_t seed(seq2intStranded(read.substr(position,nuc)));
@@ -400,7 +437,7 @@ bool MappingSupervisor::alignOnPathsSonsErrors(const vector<path>& Paths, const 
 		bool found(false);
 
 		for(uint i(0); i<path.str.size();++i){
-			for (size_t j(0); j<genomicKmers[seed].size();++j){
+			for (uint  j(0); j<genomicKmers[seed].size();++j){
 				if(body==genomicKmers[seed][j]){
 					start=max(((int)i+(int)position-(int)positionInSeqStranded(path.str, kmer, k2)),0);
 					if (start+(int)(path.str.size())-kgraph>position) {
@@ -467,8 +504,8 @@ string MappingSupervisor::getRead(rNumber n){
 }
 
 
-//~ bool MappingSupervisor::alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, size_t position,vector<uNumber>& numbers){
-	//~ for(size_t ii(0); ii<Paths.size();++ii){
+//~ bool MappingSupervisor::alignOnPathsSonsErrorsAll(const vector<path>& Paths, const string& read, uint  position,vector<uNumber>& numbers){
+	//~ for(uint  ii(0); ii<Paths.size();++ii){
 		//~ path path(Paths[ii]);
 		//~ unordered_set<minimizer> genomicKmers=allKmerSetStranded(k2,path.str);
 		//~ minimizer kmer(seq2intStranded(read.substr(position,k2)));
@@ -493,7 +530,7 @@ string MappingSupervisor::getRead(rNumber n){
 			//~ string region(read.substr(start,path.str.size()));
 			//~ double score(jaccardStrandedErrors(k2,region,genomicKmersErrors,nuc));
 			//~ if(score>minJacc){
-				//~ size_t size(numbers.size());
+				//~ uint  size(numbers.size());
 				//~ for(int i((int)path.numbers.size()-1);i>=0;--i){
 					//~ numbers.push_back(path.numbers[i]);
 				//~ }
@@ -612,7 +649,7 @@ string MappingSupervisor::getPathEnd(const vector<uNumber>& numbers){
 	}
 
 	string path(unitigs[numbers[0]]),unitig,inter;
-	for(size_t i(1); i<numbers.size(); ++i){
+	for(uint  i(1); i<numbers.size(); ++i){
 		unitig=(unitigs[numbers[i]]);
 		inter=compactionEnd(path, unitig, kgraph);
 		if(inter.empty()){
@@ -635,7 +672,7 @@ string MappingSupervisor::getPathBegin(const vector<uNumber>& numbers){
 	//	reverse(numbers.begin(), numbers.end());
 	string path(unitigs[numbers[0]]),unitig,inter;
 
-	for(size_t i(1); i<numbers.size(); ++i){
+	for(uint  i(1); i<numbers.size(); ++i){
 		unitig=(unitigs[numbers[i]]);
 		inter=compactionBegin(path, unitig, kgraph);
 		if(inter.empty()){

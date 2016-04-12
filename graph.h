@@ -15,7 +15,7 @@
 
 class graph{
 public:
-	size_t k;
+	uint  k;
 	unordered_map <string,vector<uNumber>> right;
 	unordered_map <string,vector<uNumber>> left;
 
@@ -74,7 +74,7 @@ public:
 	}
 
 
-	graph(size_t kgraph){
+	graph(uint  kgraph){
 //		right.set_empty_key("0");
 //		left.set_empty_key("0");
 		k=kgraph;
@@ -83,7 +83,7 @@ public:
 	graph(){
 	};
 
-	graph(const vector<string>& unitigs,size_t kgraph){
+	graph(const vector<string>& unitigs,uint  kgraph){
 //		right.set_empty_key("0");
 //		left.set_empty_key("0");
 		k=kgraph;
