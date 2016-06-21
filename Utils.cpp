@@ -87,12 +87,19 @@ void indexFasta(uint  H, uint  k, uint  part, unordered_map<minimizer,vector<rNu
 			myMutex2.unlock();
 			if (true){
 				if(seq.size()<=(uint)H){
+					//~ cout<<k<<endl;
 					sketch=allHash(k,seq);
 					// continue;
 				}else{
 					sketch={};
 					minHash3(H, k, seq,sketch,*filter);
 				}
+				//~ for(uint i(0);i<sketch.size();++i){
+					//~ if(filter->count(sketch[i])==0){
+						//~ cout<<"argh"<<endl;
+						//~ cout<<"kmer in read not in unitigs ..."<<endl;
+					//~ }
+				//~ }
 				removeDuplicate(sketch);
 				myMutex.lock();
 				number2position->push_back(position);
@@ -305,14 +312,24 @@ vector<minimizer> allHash(uint  k,const string& seq){
 	minimizer kmerS(seq2intStranded((seq.substr(0,k))));
 	minimizer kmerRC(seq2intStranded((reversecomplement(seq.substr(0,k)))));
 	minimizer kmer(min(kmerRC,kmerS));
-	uint  i(0);
+	uint 
+	i(0);
 	do{
 		sketch.push_back(kmer);
+		//~ cout<<"i:"<<i<<endl;
+		//~ cout<<"skectch:"<<sketch.size()<<endl;;
 		if(i+k<seq.size()){
 			updateMinimizer(kmerS, seq[i+k], k);
 			updateMinimizerRC(kmerRC, seq[i+k], k);
 			kmer=min(kmerRC,kmerS);
+			//~ ++i;
+			//~ kmerS=(seq2intStranded((seq.substr(i+1,k))));
+			//~ kmerRC=(seq2intStranded((reversecomplement(seq.substr(i+1,k)))));
+			//~ kmer=(min(kmerRC,kmerS));
 		}else{
+			//~ cout<<seq.size()<<" ";
+			//~ cout<<sketch.size()<<endl;
+			//~ cin.get();
 			return sketch;
 		}
 		++i;

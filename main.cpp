@@ -25,7 +25,7 @@ using namespace std;
 
 
 int main(int argc, char ** argv){
-	uint  H(100),k(15),part(1),kgraph(62),k2(10),threshold(2),nCycle(0),minjacc(10),thread(1),minSizeUnitig(100),offset(100),depth(10);
+	uint  H(100),k(15),part(1),kgraph(30),k2(10),threshold(2),nCycle(0),minjacc(10),thread(1),minSizeUnitig(100),offset(100),depth(10);
 	string readName(""),unitigName(""),outFile("out.fa");
 	int c;
 	while ((c = getopt (argc, argv, "r:u:c:H:K:p:t:k:m:o:t:s:f:d:")) != -1){
@@ -81,10 +81,10 @@ int main(int argc, char ** argv){
 		auto start=chrono::system_clock::now();
 		readContigsforstats(unitigName, kgraph, false, false, false);
 		for(uint  i(0);i<nCycle;++i){
-			readContigsforstats("data/unitigClean.fa", kgraph, true, true, false);
+			readContigsforstats("unitigClean.fa", kgraph, true, true, false);
 		}
 		cout<<"contigsread"<<endl;
-		auto Unitigs(loadUnitigs("data/unitigClean.fa",false));
+		auto Unitigs(loadUnitigs("unitigClean.fa",false));
 		graph Graph(Unitigs,kgraph);
 		auto filter(filterUnitigs(Unitigs,k,H,part));
 

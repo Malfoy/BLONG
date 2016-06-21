@@ -101,6 +101,7 @@ void MappingSupervisor::MapPart(){
 
 
 void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
+	//~ cout<<"go"<<endl;
 	unordered_map<rNumber,uint32_t> Candidate;
 	findCandidate( (unitig),Candidate);
 	if(Candidate.empty()){return;}
@@ -118,6 +119,7 @@ void MappingSupervisor::MapFromUnitigsErrors(const string& unitig){
 	//foreach reads that could map on the unitig (prepremapped)
 	for(auto it=Candidate.begin(); it!=Candidate.end(); ++it){
 		if(it->second>=multi){
+			//~ cout<<"read"<<endl;
 			rNumber readnumber(it->first);
 			++candidateNumber;
 			if(number2position[readnumber]==0){
@@ -177,6 +179,7 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 	if(true){
 		unordered_set<minimizer> minSet;
 		vector<rNumber> readsNumbers;
+		//~ cout<<k<<endl;
 		minimizer kmerS=seq2intStranded(unitig.substr(0,k));
 		minimizer kmerRC=seq2intStranded(reversecomplement(unitig.substr(0,k)));
 		minimizer seq(min(kmerRC,kmerS));
@@ -191,6 +194,11 @@ void MappingSupervisor::findCandidate(const string& unitig, unordered_map<rNumbe
 							//~ read2Min[readsNumbers[j]].insert(seq);
 						}
 					}
+				}else{
+					//~ cout<<"kmer in unitig not in read"<<endl;
+					//~ cout<<unitig.substr(i,k)<<endl;;
+					//~ cout<<reversecomplement(unitig.substr(i,k))<<endl;
+					//~ cin.get();
 				}
 			}
 			if(i+k<unitig.size()){
@@ -308,6 +316,12 @@ bool MappingSupervisor::preMapUnitig(const string& unitig, string& read,vector<u
 		stranded=true;
 		return true;
 	}
+	bool correct2(isCandidateCorrectMap(unitig,reversecomplement(read),genomicKmers,position1,setMin,positionUnitig));
+	if(correct2){
+		position=max(0,position1);
+		stranded=true;
+		return true;
+	}
 	return false;
 }
 
@@ -371,6 +385,17 @@ bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string
 					return true;
 				}
 			}
+			 //~ posInSeq=(positionInSeq(reversecomplement(unitig), mini, k));
+			//~ if(posInSeq>=0){
+				//~ int pos(i-posInSeq);
+				//~ region=(pos>=0 ? read.substr(pos,unitig.size()): read.substr(0,unitig.size()+pos));
+				//~ if(jaccardStrandedErrors(k2,region,genomicSmallmers,nuc)>=minJacc){
+					//~ readMapped++;
+					//~ position=(pos);
+					//~ positionRead=pos;
+					//~ return true;
+				//~ }
+			//~ }
 		}
 		if(i+k<read.size()){
 			updateMinimizer(minS, read[i+k], k);
@@ -385,6 +410,7 @@ bool MappingSupervisor::isCandidateCorrectMap(const string& unitig, const string
 
 
 bool MappingSupervisor::mapOnGraph(vector<uNumber>& numberBegin, vector<uNumber>& numberEnd,const string& unitig, const string& read, int position, const vector<path>& ListFathers, const vector<path>& ListSons, string& beg, string& end){
+	//~ cout<<"mapongraph"<<endl;
 	bool mappedLeft(false),mappedRight(false);
 	if(position+kgraph<offset){
 		mappedLeft=true;
